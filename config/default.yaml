@@ -1,0 +1,9 @@
+dataset: how2sign
+sequence_length: 30
+feature_dim: 1662  # example for MediaPipe holistic flattened landmarks
+num_classes: 1000  # placeholder; depends on dataset
+lstm_hidden: 256
+lstm_layers: 2
+batch_size: 16
+learning_rate: 0.0003
+epochs: 30

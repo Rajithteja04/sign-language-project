@@ -17,16 +17,39 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-2. Run the web app (placeholder pipeline):
+2. Train LSTM on extracted How2Sign keypoints:
+
+```powershell
+python -m training.train_lstm --dataset-root datasets --max-samples 3000 --epochs 10
+```
+
+This saves:
+- `artifacts/lstm_best.pt`
+- `artifacts/label_to_id.json`
+- `artifacts/lstm_meta.json`
+
+3. Build NLP training pairs (for Transformer fine-tuning):
+
+```powershell
+python -m training.train_nlp --dataset-root datasets --max-samples 5000 --out artifacts/nlp_pairs.tsv
+```
+
+4. Run realtime inference (camera + MediaPipe + LSTM + Transformer correction):
+
+```powershell
+python -m inference.realtime --weights artifacts/lstm_best.pt --labels artifacts/label_to_id.json --meta artifacts/lstm_meta.json
+```
+
+Optional Transformer model:
+
+```powershell
+python -m inference.realtime --nlp-model grammarly/coedit-large
+```
+
+5. Run the web app:
 
 ```powershell
 python -m app.app
-```
-
-3. Run realtime inference (camera + landmarks + dummy decoder):
-
-```powershell
-python -m inference.realtime --dataset how2sign
 ```
 
 ## Dataset Strategy
@@ -49,4 +72,11 @@ We start with **How2Sign** and keep a dataset adapter interface so we can switch
 
 ## Notes
 
-This is a scaffold. The scripts include TODOs to connect real datasets, trained weights, and evaluation.
+- The How2Sign adapter is wired to:
+  - `datasets/how2sign_{train,val,test}.csv`
+  - `datasets/{train,val,test}_2D_keypoints/openpose_output/json/...`
+- Runtime extraction stays on MediaPipe Holistic.
+- Training and runtime keypoints are now unified to one canonical format:
+  - topology/order: `pose25 + face70 + left hand21 + right hand21`
+  - vector shape: `411 = (25+70+21+21)*3`
+  - normalization: center by neck, scale by shoulder distance (bbox fallback)

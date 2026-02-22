@@ -17,10 +17,31 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-2. Train LSTM on extracted How2Sign keypoints:
+2. Configure dataset path per laptop (do not commit absolute paths):
+
+Option A: environment variable
 
 ```powershell
-python -m training.train_lstm --dataset-root datasets --max-samples 3000 --epochs 10
+$env:HOW2SIGN_ROOT="C:\Users\rajit\Datasets\How2Sign"
+```
+
+Option B: local config file
+
+```powershell
+Copy-Item config\local.example.yaml config\local.yaml
+# edit config\local.yaml with your machine path
+```
+
+3. Train LSTM on extracted How2Sign keypoints:
+
+```powershell
+python -m training.train_lstm --max-samples 3000 --epochs 10
+```
+
+Optional dataset validation (recommended before training):
+
+```powershell
+python -m scripts.validate_how2sign --dataset-root "C:\Users\rajit\Datasets\How2Sign"
 ```
 
 This saves:
@@ -28,13 +49,13 @@ This saves:
 - `artifacts/label_to_id.json`
 - `artifacts/lstm_meta.json`
 
-3. Build NLP training pairs (for Transformer fine-tuning):
+4. Build NLP training pairs (for Transformer fine-tuning):
 
 ```powershell
-python -m training.train_nlp --dataset-root datasets --max-samples 5000 --out artifacts/nlp_pairs.tsv
+python -m training.train_nlp --max-samples 5000 --out artifacts/nlp_pairs.tsv
 ```
 
-4. Run realtime inference (camera + MediaPipe + LSTM + Transformer correction):
+5. Run realtime inference (camera + MediaPipe + LSTM + Transformer correction):
 
 ```powershell
 python -m inference.realtime --weights artifacts/lstm_best.pt --labels artifacts/label_to_id.json --meta artifacts/lstm_meta.json
@@ -46,7 +67,7 @@ Optional Transformer model:
 python -m inference.realtime --nlp-model grammarly/coedit-large
 ```
 
-5. Run the web app:
+6. Run the web app:
 
 ```powershell
 python -m app.app
@@ -72,9 +93,18 @@ We start with **How2Sign** and keep a dataset adapter interface so we can switch
 
 ## Notes
 
-- The How2Sign adapter is wired to:
-  - `datasets/how2sign_{train,val,test}.csv`
-  - `datasets/{train,val,test}_2D_keypoints/openpose_output/json/...`
+- Path precedence for training scripts:
+  - `--dataset-root` CLI argument (highest)
+  - `HOW2SIGN_ROOT` environment variable
+  - `config/local.yaml`
+  - `config/default.yaml` `dataset_root` (lowest)
+- The How2Sign adapter supports both layouts:
+  - Flat:
+    - `<dataset_root>/how2sign_{train,val,test}.csv`
+    - `<dataset_root>/{train,val,test}_2D_keypoints/openpose_output/json/...`
+  - Sentence-level:
+    - `<dataset_root>/sentence_level/{train,val,test}/text/en/raw_text/how2sign_{train,val,test}.csv`
+    - `<dataset_root>/sentence_level/{train,val,test}/rgb_front/features/openpose_output/json/...`
 - Runtime extraction stays on MediaPipe Holistic.
 - Training and runtime keypoints are now unified to one canonical format:
   - topology/order: `pose25 + face70 + left hand21 + right hand21`

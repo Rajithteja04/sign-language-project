@@ -1,0 +1,48 @@
+{
+  "dataset_root": "C:\\Users\\rajit\\Datasets\\How2Sign",
+  "min_frames": 4,
+  "splits": [
+    {
+      "split": "train",
+      "csv_path": "C:\\Users\\rajit\\Datasets\\How2Sign\\sentence_level\\train\\text\\en\\raw_text\\how2sign_train.csv",
+      "keypoint_root": "C:\\Users\\rajit\\Datasets\\How2Sign\\sentence_level\\train\\rgb_front\\features\\openpose_output\\json",
+      "rows_total": 31165,
+      "rows_missing_sentence_name": 0,
+      "rows_missing_sentence_text": 0,
+      "rows_missing_seq_dir": 118,
+      "rows_insufficient_frames": 26,
+      "rows_valid": 31021,
+      "frames_total_valid": 5052557,
+      "avg_frames_per_valid_row": 162.88,
+      "manifest_path": "artifacts\\manifests\\train_manifest.tsv"
+    },
+    {
+      "split": "val",
+      "csv_path": "C:\\Users\\rajit\\Datasets\\How2Sign\\sentence_level\\val\\text\\en\\raw_text\\how2sign_val.csv",
+      "keypoint_root": "C:\\Users\\rajit\\Datasets\\How2Sign\\sentence_level\\val\\rgb_front\\features\\openpose_output\\json",
+      "rows_total": 1741,
+      "rows_missing_sentence_name": 0,
+      "rows_missing_sentence_text": 0,
+      "rows_missing_seq_dir": 2,
+      "rows_insufficient_frames": 2,
+      "rows_valid": 1737,
+      "frames_total_valid": 275227,
+      "avg_frames_per_valid_row": 158.45,
+      "manifest_path": "artifacts\\manifests\\val_manifest.tsv"
+    },
+    {
+      "split": "test",
+      "csv_path": "C:\\Users\\rajit\\Datasets\\How2Sign\\sentence_level\\test\\text\\en\\raw_text\\how2sign_test.csv",
+      "keypoint_root": "C:\\Users\\rajit\\Datasets\\How2Sign\\sentence_level\\test\\rgb_front\\features\\openpose_output\\json",
+      "rows_total": 2357,
+      "rows_missing_sentence_name": 0,
+      "rows_missing_sentence_text": 0,
+      "rows_missing_seq_dir": 14,
+      "rows_insufficient_frames": 2,
+      "rows_valid": 2341,
+      "frames_total_valid": 381408,
+      "avg_frames_per_valid_row": 162.93,
+      "manifest_path": "artifacts\\manifests\\test_manifest.tsv"
+    }
+  ]
+}

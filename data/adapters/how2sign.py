@@ -71,14 +71,31 @@ def _iter_rows(csv_path: Path) -> Iterable[dict]:
             yield row
 
 
-def _load_split(split: str, cfg: How2SignConfig) -> list[SequenceExample]:
-    csv_path = cfg.root / f"how2sign_{split}.csv"
-    base_json = cfg.root / f"{split}_2D_keypoints" / "openpose_output" / "json"
+def _resolve_split_paths(root: Path, split: str) -> tuple[Path, Path]:
+    # Layout A (legacy flat):
+    #   <root>/how2sign_<split>.csv
+    #   <root>/<split>_2D_keypoints/openpose_output/json
+    flat_csv = root / f"how2sign_{split}.csv"
+    flat_json = root / f"{split}_2D_keypoints" / "openpose_output" / "json"
+    if flat_csv.exists() and flat_json.exists():
+        return flat_csv, flat_json
 
-    if not csv_path.exists():
-        raise FileNotFoundError(f"Missing split file: {csv_path}")
-    if not base_json.exists():
-        raise FileNotFoundError(f"Missing keypoint folder: {base_json}")
+    # Layout B (How2Sign downloader sentence-level):
+    #   <root>/sentence_level/<split>/text/en/raw_text/how2sign_<split>.csv
+    #   <root>/sentence_level/<split>/rgb_front/features/openpose_output/json
+    sentence_csv = root / "sentence_level" / split / "text" / "en" / "raw_text" / f"how2sign_{split}.csv"
+    sentence_json = root / "sentence_level" / split / "rgb_front" / "features" / "openpose_output" / "json"
+    if sentence_csv.exists() and sentence_json.exists():
+        return sentence_csv, sentence_json
+
+    raise FileNotFoundError(
+        "Could not resolve How2Sign split layout. "
+        f"Tried: {flat_csv} + {flat_json} and {sentence_csv} + {sentence_json}"
+    )
+
+
+def _load_split(split: str, cfg: How2SignConfig) -> list[SequenceExample]:
+    csv_path, base_json = _resolve_split_paths(cfg.root, split)
 
     examples: list[SequenceExample] = []
     for row in _iter_rows(csv_path):

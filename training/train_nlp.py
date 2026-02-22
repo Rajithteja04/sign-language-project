@@ -1,9 +1,11 @@
 import argparse
 import csv
+import os
 import random
 from pathlib import Path
 
 from data.adapters.how2sign import load_how2sign
+from utils.io import load_config
 
 
 def _degrade_text(text: str) -> str:
@@ -21,12 +23,22 @@ def _degrade_text(text: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset-root", default="datasets")
+    parser.add_argument("--config", default="config/default.yaml")
+    parser.add_argument("--local-config", default="config/local.yaml")
+    parser.add_argument("--dataset-root", default=None)
     parser.add_argument("--max-samples", type=int, default=5000)
     parser.add_argument("--out", default="artifacts/nlp_pairs.tsv")
     args = parser.parse_args()
 
-    split = load_how2sign(args.dataset_root, max_samples_per_split=args.max_samples).train
+    cfg = load_config(args.config, args.local_config)
+    dataset_root = (
+        args.dataset_root
+        or os.getenv("HOW2SIGN_ROOT")
+        or cfg.get("dataset_root", "datasets")
+    )
+    print(f"Using dataset root: {dataset_root}")
+
+    split = load_how2sign(dataset_root, max_samples_per_split=args.max_samples).train
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 

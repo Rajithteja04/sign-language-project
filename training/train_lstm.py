@@ -1,4 +1,5 @@
 import argparse
+import os
 import torch
 import torch.nn as nn
 from pathlib import Path
@@ -9,7 +10,7 @@ import numpy as np
 
 from data.adapters.how2sign import load_how2sign
 from models.lstm import LSTMClassifier
-from utils.io import load_yaml
+from utils.io import load_config
 
 
 class SequenceDataset(Dataset):
@@ -87,26 +88,38 @@ def _evaluate(model, loader, criterion, device):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config/default.yaml")
+    parser.add_argument("--local-config", default="config/local.yaml")
     parser.add_argument("--dataset-root", default=None)
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--max-samples", type=int, default=None)
+    parser.add_argument("--top-k", type=int, default=None)
     args = parser.parse_args()
 
-    cfg = load_yaml(args.config)
-    root = cfg.get("dataset_root", "datasets")
+    cfg = load_config(args.config, args.local_config)
+    root = (
+        args.dataset_root
+        or os.getenv("HOW2SIGN_ROOT")
+        or cfg.get("dataset_root", "datasets")
+    )
     seq_len = int(cfg.get("sequence_length", 30))
     top_k = int(cfg.get("top_k_classes", 200))
     max_samples = cfg.get("max_samples_per_split", 3000)
     out_dir = Path(cfg.get("artifacts_dir", "artifacts"))
-    if args.dataset_root is not None:
-        root = args.dataset_root
     if args.max_samples is not None:
         max_samples = args.max_samples
     if args.epochs is not None:
         cfg["epochs"] = args.epochs
+    if args.top_k is not None:
+        top_k = args.top_k
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    print(f"Using dataset root: {root}")
+    print("Loading How2Sign splits (this can take time on large keypoint sets)...")
     splits = load_how2sign(root=root, max_samples_per_split=max_samples)
+    print(
+        f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)} "
+        f"(max_samples_per_split={max_samples})"
+    )
     label_to_id = _build_label_map(splits.train, top_k=top_k)
     if not label_to_id:
         raise RuntimeError("No labels found in training split.")
@@ -114,12 +127,17 @@ def main():
     train_examples = _filter_by_label(splits.train, label_to_id)
     val_examples = _filter_by_label(splits.val, label_to_id)
     num_classes = len(label_to_id)
+    print(
+        f"After class filtering: train={len(train_examples)} val={len(val_examples)} "
+        f"num_classes={num_classes} top_k={top_k}"
+    )
 
     if not train_examples:
         raise RuntimeError("No train examples left after class filtering.")
 
     train_ds = SequenceDataset(train_examples, label_to_id, seq_len)
     val_ds = SequenceDataset(val_examples, label_to_id, seq_len)
+    print(f"Dataset tensors: seq_len={seq_len} train_size={len(train_ds)} val_size={len(val_ds)}")
 
     train_loader = DataLoader(train_ds, batch_size=cfg["batch_size"], shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=cfg["batch_size"], shuffle=False)

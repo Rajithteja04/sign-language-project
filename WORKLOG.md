@@ -334,3 +334,36 @@ Now entering model-quality phase (baseline training, evaluation, iterative impro
    - Next:
      - Run scaled baseline:
        - `python -m training.train_lstm --dataset-root "D:\DATASETS\How2Sign" --max-samples 1000 --epochs 3 --top-k 50 --split-mode pooled --min-class-count 2`
+ - Sub-run R9 real-mode web demo validation (2026-02-24):
+   - Owner: Rajit + Codex
+   - Objective:
+     - Validate end-to-end Flask + SocketIO demo in real inference mode using the latest trained baseline artifacts.
+   - Implementation:
+     - Updated `config/default.yaml`:
+       - Set `use_mock_inference: false`.
+       - Confirmed artifact paths:
+         - `artifacts/lstm_best.pt`
+         - `artifacts/label_to_id.json`
+         - `artifacts/lstm_meta.json`
+     - Fixed web client Socket.IO integration:
+       - Updated `app/templates/index.html` to load Socket.IO client from CDN (`https://cdn.socket.io/4.7.5/socket.io.min.js`).
+     - Installed runtime dependencies in Python 3.11 environment and launched app:
+       - `python -m app.app`
+   - Validation:
+     - Localhost demo:
+       - `http://127.0.0.1:5000/` showed:
+         - `Connected. mode=real`
+         - live prediction text updates
+         - live confidence + timestamp updates
+     - LAN demo:
+       - `http://192.168.0.107:5000/` showed:
+         - active Socket.IO connection
+         - same real-mode prediction stream
+     - Server logs confirmed successful Socket.IO handshake:
+       - `GET/POST /socket.io ... 200`
+   - Result:
+     - Realtime web demo is operational in real inference mode on both localhost and LAN.
+     - Integration milestone achieved without waiting for larger (`max-samples 1000`) training runs.
+   - Status: Done
+   - Next:
+     - Improve model quality (confidence/accuracy) via larger staged training runs (`500 -> 700 -> 1000`) and evaluation reporting.

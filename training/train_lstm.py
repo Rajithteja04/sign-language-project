@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from pathlib import Path
 import json
+import random
 from torch.utils.data import DataLoader, Dataset
 from collections import Counter
 import numpy as np
@@ -42,8 +43,67 @@ def _build_label_map(train_examples, top_k: int):
     return label_to_id
 
 
+def _build_overlap_label_map(train_examples, val_examples, top_k: int):
+    train_counts = Counter(ex.label for ex in train_examples)
+    val_counts = Counter(ex.label for ex in val_examples)
+
+    overlap_labels = [label for label in train_counts if label in val_counts]
+    overlap_labels.sort(key=lambda label: (-train_counts[label], -val_counts[label], label))
+    keep = overlap_labels[:top_k]
+    return {label: i for i, label in enumerate(keep)}
+
+
 def _filter_by_label(examples, label_to_id):
     return [ex for ex in examples if ex.label in label_to_id]
+
+
+def _pooled_split_by_label(examples, top_k: int, min_class_count: int, seed: int):
+    rng = random.Random(seed)
+    by_label = {}
+    for ex in examples:
+        by_label.setdefault(ex.label, []).append(ex)
+
+    counts = Counter({label: len(items) for label, items in by_label.items()})
+    keep_labels = [label for label, count in counts.most_common() if count >= min_class_count][:top_k]
+
+    train_examples = []
+    val_examples = []
+    test_examples = []
+
+    for label in keep_labels:
+        items = list(by_label[label])
+        rng.shuffle(items)
+        n = len(items)
+
+        if n == 2:
+            train_examples.extend(items[:1])
+            val_examples.extend(items[1:2])
+            continue
+
+        val_n = max(1, int(round(n * 0.15)))
+        test_n = max(1, int(round(n * 0.15)))
+        train_n = n - val_n - test_n
+
+        if train_n < 1:
+            train_n = 1
+            if val_n > test_n and val_n > 1:
+                val_n -= 1
+            elif test_n > 1:
+                test_n -= 1
+            elif val_n > 1:
+                val_n -= 1
+            else:
+                test_n = 0
+
+        train_examples.extend(items[:train_n])
+        val_examples.extend(items[train_n : train_n + val_n])
+        test_examples.extend(items[train_n + val_n : train_n + val_n + test_n])
+
+    rng.shuffle(train_examples)
+    rng.shuffle(val_examples)
+    rng.shuffle(test_examples)
+
+    return keep_labels, train_examples, val_examples, test_examples
 
 
 def _run_epoch(model, loader, optimizer, criterion, device):
@@ -93,13 +153,16 @@ def main():
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument("--split-mode", choices=["official", "pooled"], default="pooled")
+    parser.add_argument("--min-class-count", type=int, default=2)
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     cfg = load_config(args.config, args.local_config)
     root = (
         args.dataset_root
         or os.getenv("HOW2SIGN_ROOT")
-        or cfg.get("dataset_root", "datasets")
+        or cfg.get("dataset_root", "D:/DATASETS/How2Sign")
     )
     seq_len = int(cfg.get("sequence_length", 30))
     top_k = int(cfg.get("top_k_classes", 200))
@@ -120,12 +183,39 @@ def main():
         f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)} "
         f"(max_samples_per_split={max_samples})"
     )
-    label_to_id = _build_label_map(splits.train, top_k=top_k)
-    if not label_to_id:
-        raise RuntimeError("No labels found in training split.")
+    if args.split_mode == "pooled":
+        pooled = list(splits.train) + list(splits.val) + list(splits.test)
+        keep_labels, train_examples, val_examples, test_examples = _pooled_split_by_label(
+            pooled,
+            top_k=top_k,
+            min_class_count=args.min_class_count,
+            seed=args.seed,
+        )
+        print(
+            f"Pooled split mode: pool_size={len(pooled)} kept_labels={len(keep_labels)} "
+            f"min_class_count={args.min_class_count} seed={args.seed}"
+        )
+        print(
+            f"Pooled split sizes: train={len(train_examples)} val={len(val_examples)} test={len(test_examples)}"
+        )
+    else:
+        train_examples = list(splits.train)
+        val_examples = list(splits.val)
 
-    train_examples = _filter_by_label(splits.train, label_to_id)
-    val_examples = _filter_by_label(splits.val, label_to_id)
+    train_label_count = len({ex.label for ex in train_examples})
+    val_label_count = len({ex.label for ex in val_examples})
+    overlap_label_count = len({ex.label for ex in train_examples} & {ex.label for ex in val_examples})
+    print(f"Label coverage: train_labels={train_label_count} val_labels={val_label_count} overlap={overlap_label_count}")
+
+    label_to_id = _build_overlap_label_map(train_examples, val_examples, top_k=top_k)
+    if not label_to_id:
+        raise RuntimeError(
+            "No train/val overlapping labels found after loading splits. "
+            "Increase --max-samples or verify dataset quality/manifests."
+        )
+
+    train_examples = _filter_by_label(train_examples, label_to_id)
+    val_examples = _filter_by_label(val_examples, label_to_id)
     num_classes = len(label_to_id)
     print(
         f"After class filtering: train={len(train_examples)} val={len(val_examples)} "
@@ -134,6 +224,11 @@ def main():
 
     if not train_examples:
         raise RuntimeError("No train examples left after class filtering.")
+    if not val_examples:
+        raise RuntimeError(
+            "No validation examples left after class filtering. "
+            "Increase --max-samples or lower --top-k to improve overlap."
+        )
 
     train_ds = SequenceDataset(train_examples, label_to_id, seq_len)
     val_ds = SequenceDataset(val_examples, label_to_id, seq_len)
@@ -181,3 +276,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

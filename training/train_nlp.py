@@ -34,7 +34,7 @@ def main():
     dataset_root = (
         args.dataset_root
         or os.getenv("HOW2SIGN_ROOT")
-        or cfg.get("dataset_root", "datasets")
+        or cfg.get("dataset_root", "D:/DATASETS/How2Sign")
     )
     print(f"Using dataset root: {dataset_root}")
 
@@ -57,3 +57,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

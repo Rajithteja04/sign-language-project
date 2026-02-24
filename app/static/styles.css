@@ -5,14 +5,29 @@ body {
   margin: 0;
   padding: 2rem;
 }
+
 main {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
+
+#status {
+  margin-bottom: 0.75rem;
+  color: #93c5fd;
+}
+
 #output {
   margin-top: 1rem;
   font-size: 1.5rem;
   background: #1e293b;
   padding: 1rem;
   border-radius: 8px;
+  min-height: 3rem;
+}
+
+#meta {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.4rem;
+  color: #cbd5e1;
 }

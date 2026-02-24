@@ -211,3 +211,126 @@ Now entering model-quality phase (baseline training, evaluation, iterative impro
      - Implement evaluation-friendly sampling strategy:
        - build train/val from a shared candidate pool with guaranteed class overlap, or
        - add minimum val coverage check and auto-widen sample pool.
+ - Sub-run R3 code update (2026-02-23):
+   - Owner: Codex
+   - Objective:
+     - Enforce evaluation-safe class selection so validation metrics cannot silently collapse to zero.
+   - Implementation:
+     - Updated `training/train_lstm.py`:
+       - Added overlap label map builder using intersection of train/val labels.
+       - Added label coverage logging (`train_labels`, `val_labels`, `overlap`).
+       - Added hard fail when no overlapping labels are found.
+       - Added hard fail when filtered validation split becomes empty.
+   - Result:
+     - Training now fails fast with actionable errors instead of reporting zeroed validation metrics.
+     - Baseline runs must satisfy train/val label overlap before epoch training proceeds.
+   - Status: Done
+   - Next:
+     - Re-run baseline with wider sample window to ensure overlap:
+       - `python -m training.train_lstm --max-samples 1000 --epochs 3 --top-k 50`
+ - Sub-run R4 code update (2026-02-23):
+   - Owner: Codex
+   - Objective:
+     - Replace brittle official-split sampling for baseline classification with overlap-safe pooled splitting.
+   - Implementation:
+     - Updated `training/train_lstm.py` with pooled split support:
+       - Added CLI args:
+         - `--split-mode {official,pooled}` (default: `pooled`)
+         - `--min-class-count` (default: `2`)
+         - `--seed` (default: `42`)
+       - Added label-wise pooled splitter that:
+         - merges train/val/test into one pool,
+         - keeps labels with frequency >= `min_class_count`,
+         - performs per-label train/val/test allocation with guaranteed train+val presence.
+       - Kept overlap filtering and fail-fast checks after split generation.
+   - Result:
+     - Baseline training now uses a reproducible class-overlapping split by default, avoiding near-zero effective train/val sets caused by sentence-level split disjointness.
+   - Status: Done
+   - Next:
+     - Run new pooled baseline:
+       - `python -m training.train_lstm --max-samples 1000 --epochs 3 --top-k 50 --split-mode pooled --min-class-count 2`
+ - Sub-run R5 dataset-path compatibility fix (2026-02-23):
+   - Owner: Codex
+   - Objective:
+     - Resolve `FileNotFoundError` when dataset root uses a different folder nesting/layout than strict expected paths.
+   - Problem:
+     - Baseline run failed while resolving split files under:
+       - `C:\Users\rajit\Datasets\How2Sign`
+     - Existing resolver only supported two exact layouts.
+   - Implementation:
+     - Updated `data/adapters/how2sign.py`:
+       - Added candidate-root detection (`root` + one-level child directories).
+       - Added flexible sentence-level variant discovery under `sentence_level/<split>/...`.
+       - Added CSV candidate picker with preference order:
+         - exact `how2sign_<split>.csv`
+         - name containing `how2sign` + split
+         - name containing split.
+     - Updated `scripts/validate_how2sign.py` with same resolver logic to keep validation/training path handling consistent.
+   - Result:
+     - Loader and validator now handle more real-world How2Sign directory variants without manual code edits.
+   - Status: Done
+   - Next:
+     - Re-run pooled baseline command on target machine and capture output metrics.
+ - Sub-run R6 recursive path resolver hardening (2026-02-24):
+   - Owner: Codex
+   - Objective:
+     - Handle additional non-standard How2Sign extracted trees where split files are nested deeper than one level.
+   - Implementation:
+     - Updated `data/adapters/how2sign.py`:
+       - Added fully recursive fallback search for:
+         - split CSV files (`**/*.csv`, split-aware),
+         - keypoint roots (`**/openpose_output/json`).
+       - Added split-token scoring to choose the best CSV+JSON pair for each split.
+     - Updated `scripts/validate_how2sign.py` with the same recursive fallback + scoring logic.
+   - Result:
+     - Resolver now supports strict layouts, one-level nested roots, sentence-level variants, and deep recursive layouts under dataset root.
+   - Status: Done
+   - Next:
+     - Re-run baseline command with explicit dataset root and capture first resolver logs/output.
+ - Sub-run R7 web realtime integration (2026-02-24):
+   - Owner: Codex
+   - Objective:
+     - Implement web-app realtime pipeline that works before final model training completes.
+   - Implementation:
+     - Updated `app/app.py`:
+       - Added SocketIO background capture/emission loop.
+       - Added runtime modes: mock inference (default) and real inference.
+       - Added automatic fallback to mock mode when artifacts are missing or model load fails.
+       - Added API routes: `/health`, `/status`, `/predict`.
+       - Added runtime config/env support (`camera_index`, `emit_interval_ms`, model artifact paths, `use_mock_inference`).
+     - Updated `app/templates/index.html`:
+       - Added SocketIO client script and live metadata fields.
+     - Updated `app/static/app.js`:
+       - Added socket connection handling and live `status` + `prediction` event rendering.
+     - Updated `app/static/styles.css`:
+       - Added styling for live status and prediction metadata.
+     - Updated `config/default.yaml`:
+       - Added realtime settings defaults (`use_mock_inference: true`).
+   - Result:
+     - Web UI can now show live streamed predictions in mock mode immediately.
+     - Realtime plumbing is ready to switch to actual model inference after stable multi-class artifacts are produced.
+   - Status: Done
+   - Next:
+     - Complete baseline training run (`max-samples 1000`) and then set `use_mock_inference: false` to validate real inference path.
+ - Sub-run R8 pooled baseline success on relocated dataset root (2026-02-24):
+   - Owner: Rajit + Codex
+   - Objective:
+     - Validate stable LSTM baseline training after moving dataset to `D:\DATASETS\How2Sign`.
+   - Command:
+     - `python -m training.train_lstm --dataset-root "D:\DATASETS\How2Sign" --max-samples 300 --epochs 1 --top-k 50 --split-mode pooled --min-class-count 2`
+   - Output:
+     - `Loaded splits: train=300 val=300 test=300 (max_samples_per_split=300)`
+     - `Pooled split mode: pool_size=900 kept_labels=32 min_class_count=2 seed=42`
+     - `Pooled split sizes: train=32 val=32 test=1`
+     - `Label coverage: train_labels=32 val_labels=32 overlap=32`
+     - `After class filtering: train=32 val=32 num_classes=32 top_k=50`
+     - `Dataset tensors: seq_len=30 train_size=32 val_size=32`
+     - `Epoch 001 | train_loss=3.4775 train_acc=0.0000 | val_loss=3.4622 val_acc=0.0312`
+     - `Saved best model to: artifacts\lstm_best.pt`
+   - Result:
+     - End-to-end training run completed successfully with non-empty overlapping train/val classes.
+     - Artifacts updated (`lstm_best.pt`, `label_to_id.json`, `lstm_meta.json`).
+   - Status: Done
+   - Next:
+     - Run scaled baseline:
+       - `python -m training.train_lstm --dataset-root "D:\DATASETS\How2Sign" --max-samples 1000 --epochs 3 --top-k 50 --split-mode pooled --min-class-count 2`

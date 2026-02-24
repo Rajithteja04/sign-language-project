@@ -39,7 +39,7 @@ def extract_tar(tar_path: Path, dest: Path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default="How2Sign")
+    parser.add_argument("--root", default="D:/DATASETS/How2Sign")
     parser.add_argument("--keypoints", action="store_true")
     parser.add_argument("--translations", action="store_true")
     args = parser.parse_args()
@@ -73,3 +73,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

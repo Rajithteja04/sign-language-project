@@ -9,9 +9,16 @@
 <body>
   <main>
     <h1>Real-Time Sign-to-Text Translation</h1>
-    <div id="status">Waiting for stream?</div>
-    <div id="output">(text will appear here)</div>
+    <div id="status">Connecting...</div>
+    <div id="output">(waiting for predictions)</div>
+    <div id="meta">
+      <span id="mode">mode: unknown</span>
+      <span id="confidence">confidence: 0.0000</span>
+      <span id="timestamp">timestamp: -</span>
+    </div>
   </main>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

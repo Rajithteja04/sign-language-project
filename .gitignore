@@ -3,7 +3,7 @@ How2Sign/
 datasets/
 
 # Local config (machine-specific paths)
-config/local.yaml
+config/local.example.yaml
 
 # Python cache and env
 __pycache__/

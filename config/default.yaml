@@ -1,5 +1,5 @@
 dataset: how2sign
-dataset_root: D:/DATASETS/How2Sign
+dataset_root: C:/Users/rajit/Datasets/How2Sign
 sequence_length: 30
 feature_dim: 411   # OpenPose-like canonical vector: (25+70+21+21)*3
 lstm_hidden: 256

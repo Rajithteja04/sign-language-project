@@ -334,3 +334,62 @@ Now entering model-quality phase (baseline training, evaluation, iterative impro
    - Next:
      - Run scaled baseline:
        - `python -m training.train_lstm --dataset-root "D:\DATASETS\How2Sign" --max-samples 1000 --epochs 3 --top-k 50 --split-mode pooled --min-class-count 2`
+ - Sub-run R9 scaled pooled baseline on local dataset root (2026-02-24):
+   - Owner: Rajit
+   - Objective:
+     - Run first meaningful scaled baseline with non-empty overlapping train/val classes.
+   - Command:
+     - `python -m training.train_lstm --max-samples 1000 --epochs 3 --top-k 50 --split-mode pooled --min-class-count 2`
+     - `HOW2SIGN_ROOT=C:\Users\rajit\Datasets\How2Sign`
+   - Output:
+     - `Loaded splits: train=1000 val=1000 test=1000 (max_samples_per_split=1000)`
+     - `Pooled split mode: pool_size=3000 kept_labels=50 min_class_count=2 seed=42`
+     - `Pooled split sizes: train=69 val=51 test=13`
+     - `Label coverage: train_labels=50 val_labels=50 overlap=50`
+     - `After class filtering: train=69 val=51 num_classes=50 top_k=50`
+     - `Dataset tensors: seq_len=30 train_size=69 val_size=51`
+     - `Epoch 001 | train_loss=3.9085 train_acc=0.0870 | val_loss=3.8935 val_acc=0.0392`
+     - `Epoch 002 | train_loss=3.8453 train_acc=0.1594 | val_loss=3.8714 val_acc=0.0588`
+     - `Epoch 003 | train_loss=3.7739 train_acc=0.1884 | val_loss=3.8531 val_acc=0.0588`
+     - `Saved best model to: artifacts/lstm_best.pt`
+   - Result:
+     - End-to-end scaled baseline completed successfully.
+     - Previous `val=0` issue is resolved for pooled training mode.
+     - Baseline validation is above random chance for 50 classes, but still low and needs further improvement.
+   - Status: Done
+   - Next:
+     - Increase data and epochs for stronger baseline:
+       - `python -m training.train_lstm --max-samples 2000 --epochs 5 --top-k 50 --split-mode pooled --min-class-count 2`
+ - Sub-run R9 real-mode web demo validation (2026-02-24):
+   - Owner: Rajit + Codex
+   - Objective:
+     - Validate end-to-end Flask + SocketIO demo in real inference mode using the latest trained baseline artifacts.
+   - Implementation:
+     - Updated `config/default.yaml`:
+       - Set `use_mock_inference: false`.
+       - Confirmed artifact paths:
+         - `artifacts/lstm_best.pt`
+         - `artifacts/label_to_id.json`
+         - `artifacts/lstm_meta.json`
+     - Fixed web client Socket.IO integration:
+       - Updated `app/templates/index.html` to load Socket.IO client from CDN (`https://cdn.socket.io/4.7.5/socket.io.min.js`).
+     - Installed runtime dependencies in Python 3.11 environment and launched app:
+       - `python -m app.app`
+   - Validation:
+     - Localhost demo:
+       - `http://127.0.0.1:5000/` showed:
+         - `Connected. mode=real`
+         - live prediction text updates
+         - live confidence + timestamp updates
+     - LAN demo:
+       - `http://192.168.0.107:5000/` showed:
+         - active Socket.IO connection
+         - same real-mode prediction stream
+     - Server logs confirmed successful Socket.IO handshake:
+       - `GET/POST /socket.io ... 200`
+   - Result:
+     - Realtime web demo is operational in real inference mode on both localhost and LAN.
+     - Integration milestone achieved without waiting for larger (`max-samples 1000`) training runs.
+   - Status: Done
+   - Next:
+     - Improve model quality (confidence/accuracy) via larger staged training runs (`500 -> 700 -> 1000`) and evaluation reporting.

@@ -14,9 +14,9 @@ artifacts_dir: artifacts
 # Realtime app settings
 camera_index: 0
 emit_interval_ms: 1000
-use_mock_inference: true
-min_pred_confidence: 0.30
-stability_frames: 3
+use_mock_inference: false
+min_pred_confidence: 0.15
+stability_frames: 2
 lstm_weights_path: artifacts/lstm_best.pt
 labels_path: artifacts/label_to_id.json
 meta_path: artifacts/lstm_meta.json

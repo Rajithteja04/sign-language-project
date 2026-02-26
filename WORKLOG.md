@@ -582,3 +582,24 @@ $env:LSTM_META="artifacts/lstm_meta_topk20_e12.json"
 $env:MIN_PRED_CONFIDENCE="0.15"
 $env:STABILITY_FRAMES="2"
 python -m app.app
+
+
+ - Sub-run R16 cached baseline (2000 samples, top-k=20) (2026-02-26):
+   - Owner: Rajit
+   - Objective:
+     - Improve baseline accuracy using 2000-sample cache.
+   - Command:
+     - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_2000.pt --epochs 20 --top-k 20 --split-mode pooled --min-class-count 2`
+   - Output:
+     - `Loaded cached splits: train=2000 val=1737 test=2000`
+     - `Pooled split sizes: train=57 val=22 test=22`
+     - `After class filtering: train=57 val=22 num_classes=20`
+     - Best val accuracy: `0.2727` (epochs 13-19)
+     - Final epoch: `train_acc=0.4386`, `val_loss=2.8142`, `val_acc=0.1818`
+   - Result:
+     - New best baseline achieved: `val_acc=0.2727` with `top_k=20`, `epochs=20`.
+     - Artifacts updated: `artifacts/lstm_best.pt`, `artifacts/label_to_id.json`, `artifacts/lstm_meta.json`.
+   - Status: Done
+   - Next:
+     - Freeze new best artifacts with versioned filenames.
+     - Re-run realtime validation with updated model and tuned thresholds.

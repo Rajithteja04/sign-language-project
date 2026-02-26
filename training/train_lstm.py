@@ -10,6 +10,7 @@ from collections import Counter
 import numpy as np
 
 from data.adapters.how2sign import load_how2sign
+from data.formats import DatasetSplit, SequenceExample
 from models.lstm import LSTMClassifier
 from utils.io import load_config
 
@@ -145,6 +146,90 @@ def _evaluate(model, loader, criterion, device):
     return total_loss / max(total, 1), total_correct / max(total, 1)
 
 
+def _to_examples(items):
+    examples = []
+    for item in items:
+        features = [np.asarray(frame, dtype=np.float32) for frame in item["features"]]
+        examples.append(SequenceExample(features=features, label=item["label"]))
+    return examples
+
+
+def _load_chunked_split(cache_dir: Path, split_name: str):
+    part_files = sorted(cache_dir.glob(f"{split_name}.part*.pt"))
+    legacy_file = cache_dir / f"{split_name}.pt"
+    if not part_files and legacy_file.exists():
+        part_files = [legacy_file]
+    if not part_files:
+        raise RuntimeError(f"No cache parts found for split '{split_name}' in: {cache_dir}")
+
+    items = []
+    for part_file in part_files:
+        part_items = torch.load(part_file, map_location="cpu", weights_only=False)
+        items.extend(part_items)
+    return _to_examples(items)
+
+
+def _resolve_chunked_cache_dir(cache_path: Path, payload: dict):
+    cache_dir_field = payload.get("cache_dir") if isinstance(payload, dict) else None
+    if cache_dir_field:
+        raw = Path(cache_dir_field)
+        candidates = []
+        if raw.is_absolute():
+            candidates.append(raw)
+        else:
+            # Support cache_dir saved relative to the project CWD.
+            candidates.append(raw)
+            # Fallback for legacy resolver assumptions.
+            candidates.append((cache_path.parent / raw).resolve())
+            # Common case: index and cache dir in same parent.
+            candidates.append((cache_path.parent / raw.name).resolve())
+
+        for candidate in candidates:
+            if candidate.exists() and candidate.is_dir():
+                return candidate
+
+    if cache_path.suffix:
+        candidate = cache_path.with_suffix("")
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
+def _load_splits_from_cache(cache_path: Path) -> DatasetSplit:
+    if cache_path.is_dir():
+        cache_dir = cache_path
+        return DatasetSplit(
+            train=_load_chunked_split(cache_dir, "train"),
+            val=_load_chunked_split(cache_dir, "val"),
+            test=_load_chunked_split(cache_dir, "test"),
+        )
+
+    # Cache files are local project artifacts that contain serialized python objects.
+    payload = torch.load(cache_path, map_location="cpu", weights_only=False)
+
+    # Backward-compatible single-file cache format.
+    if isinstance(payload, dict) and "splits" in payload:
+        splits = payload["splits"]
+        return DatasetSplit(
+            train=_to_examples(splits["train"]),
+            val=_to_examples(splits["val"]),
+            test=_to_examples(splits["test"]),
+        )
+
+    # New chunked cache index format.
+    if isinstance(payload, dict) and payload.get("format") == "how2sign_cache_chunked_v1":
+        cache_dir = _resolve_chunked_cache_dir(cache_path, payload)
+        if cache_dir is None or not cache_dir.exists():
+            raise RuntimeError(f"Chunked cache directory not found for index: {cache_path}")
+        return DatasetSplit(
+            train=_load_chunked_split(cache_dir, "train"),
+            val=_load_chunked_split(cache_dir, "val"),
+            test=_load_chunked_split(cache_dir, "test"),
+        )
+
+    raise RuntimeError(f"Invalid cache file format: {cache_path}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config/default.yaml")
@@ -156,6 +241,7 @@ def main():
     parser.add_argument("--split-mode", choices=["official", "pooled"], default="pooled")
     parser.add_argument("--min-class-count", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--cache-path", default=None)
     args = parser.parse_args()
 
     cfg = load_config(args.config, args.local_config)
@@ -177,12 +263,25 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Using dataset root: {root}")
-    print("Loading How2Sign splits (this can take time on large keypoint sets)...")
-    splits = load_how2sign(root=root, max_samples_per_split=max_samples)
-    print(
-        f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)} "
-        f"(max_samples_per_split={max_samples})"
-    )
+    if args.cache_path:
+        cache_path = Path(args.cache_path)
+        if not cache_path.exists():
+            raise FileNotFoundError(
+                f"Cache file not found: {cache_path}. "
+                "Build cache first with: python -m scripts.build_how2sign_cache"
+            )
+        print(f"Loading cached splits from: {cache_path}")
+        splits = _load_splits_from_cache(cache_path)
+        print(
+            f"Loaded cached splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)}"
+        )
+    else:
+        print("Loading How2Sign splits (this can take time on large keypoint sets)...")
+        splits = load_how2sign(root=root, max_samples_per_split=max_samples)
+        print(
+            f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)} "
+            f"(max_samples_per_split={max_samples})"
+        )
     if args.split_mode == "pooled":
         pooled = list(splits.train) + list(splits.val) + list(splits.test)
         keep_labels, train_examples, val_examples, test_examples = _pooled_split_by_label(

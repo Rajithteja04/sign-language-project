@@ -393,3 +393,96 @@ Now entering model-quality phase (baseline training, evaluation, iterative impro
    - Status: Done
    - Next:
      - Improve model quality (confidence/accuracy) via larger staged training runs (`500 -> 700 -> 1000`) and evaluation reporting.
+ - Sub-run R10 cache pipeline implementation (2026-02-25):
+   - Owner: Codex
+   - Objective:
+     - Reduce repeated training runtime by avoiding JSON parsing on every run.
+   - Implementation:
+     - Added cache builder:
+       - `scripts/build_how2sign_cache.py`
+       - Loads How2Sign once and saves serialized split data to `.pt`.
+     - Updated training to support cache input:
+       - `training/train_lstm.py`
+       - Added `--cache-path` argument.
+       - When provided, trainer loads cached splits directly and skips dataset JSON parsing.
+     - Updated docs:
+       - `README.md` with cache build/train commands.
+       - `scripts/README.md` with cache build command.
+   - Expected result:
+     - Same model input/features as current pipeline, significantly faster repeated runs.
+   - Status: Done
+   - Next:
+     - Build cache and run first cached training benchmark:
+       - `python -m scripts.build_how2sign_cache --dataset-root "C:\Users\rajit\Datasets\How2Sign" --max-samples 1000 --out artifacts/cache/how2sign_cache_1000.pt`
+       - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_1000.pt --epochs 3 --top-k 50 --split-mode pooled --min-class-count 2`
+ - Sub-run R10 cache benchmark validation (2026-02-25):
+   - Owner: Codex
+   - Objective:
+     - Verify cache build and cache-based training path works end-to-end.
+   - Commands:
+     - `python -m scripts.build_how2sign_cache --max-samples 200 --out artifacts/cache/how2sign_cache_200.pt`
+     - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_200.pt --epochs 1 --top-k 20 --split-mode pooled --min-class-count 2`
+   - Output:
+     - `Loaded cached splits: train=200 val=200 test=200`
+     - `Pooled split sizes: train=20 val=20 test=1`
+     - `After class filtering: train=20 val=20 num_classes=20 top_k=20`
+     - `Epoch 001 | train_loss=3.0054 train_acc=0.0000 | val_loss=2.9898 val_acc=0.1000`
+   - Result:
+     - Cache pipeline is operational.
+     - Cached training starts immediately and avoids expensive JSON parse step for repeat runs.
+   - Status: Done
+   - Next:
+     - Build full cache for target run size (`1000` or `2000`) and continue baseline scaling with `--cache-path`.
+
+
+### A-012 | Chunked Cache Pipeline for 1000+ Samples
+- Date: 2026-02-25
+- Objective: Prevent `MemoryError` during cache generation at higher sample counts.
+- Implementation:
+  - Updated `scripts/build_how2sign_cache.py` to save chunked cache parts per split instead of one huge payload.
+  - Added cache options:
+    - `--part-size` (default: `250`)
+    - `--dtype` (`float16` default, supports `float32`)
+  - Added backward-compatible cache index `.pt` file that points to chunk directory.
+  - Updated `training/train_lstm.py` cache loader to support:
+    - legacy single-file cache,
+    - new chunked cache index file,
+    - direct chunked cache directory.
+- Result:
+  - Cache generation is now memory-safe for larger sample sizes on low/medium RAM systems.
+- Status: Done
+- Next:
+  - Rebuild cache and train from cache:
+    - `python -m scripts.build_how2sign_cache --max-samples 1000 --out artifacts/cache/how2sign_cache_1000.pt`
+    - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_1000.pt --epochs 5 --top-k 50 --split-mode pooled --min-class-count 2`
+
+
+ - Sub-run R11 cached baseline comparison (2026-02-25):
+   - Owner: Rajit
+   - Objective:
+     - Compare class-budget settings on cached splits and select strongest baseline.
+   - Shared setup:
+     - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_1000.pt --split-mode pooled --min-class-count 2`
+   - Run A (`--epochs 5 --top-k 50`):
+     - `Loaded cached splits: train=1000 val=1000 test=1000`
+     - `Pooled split sizes: train=69 val=51 test=13`
+     - `After class filtering: train=69 val=51 num_classes=50`
+     - Best val accuracy: `0.0588`
+   - Run B (`--epochs 12 --top-k 30`):
+     - `Pooled split sizes: train=49 val=31 test=13`
+     - `After class filtering: train=49 val=31 num_classes=30`
+     - Best val accuracy: `0.1290`
+   - Run C (`--epochs 12 --top-k 20`):
+     - `Pooled split sizes: train=39 val=21 test=13`
+     - `After class filtering: train=39 val=21 num_classes=20`
+     - Best val accuracy: `0.1905`
+     - Final epoch: `train_acc=0.4359`, `val_loss=2.5611`, `val_acc=0.1905`
+   - Result:
+     - Best cached baseline selected: `top_k=20`, `epochs=12` (val_acc `0.1905`).
+     - Frozen baseline artifacts created:
+       - `artifacts/lstm_best_topk20_e12.pt`
+       - `artifacts/label_to_id_topk20_e12.json`
+       - `artifacts/lstm_meta_topk20_e12.json`
+   - Status: Done
+   - Next:
+     - Run realtime app validation with frozen baseline artifacts and capture demo observations.

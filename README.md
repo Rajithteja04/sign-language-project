@@ -38,6 +38,13 @@ Copy-Item config\local.example.yaml config\local.yaml
 python -m training.train_lstm --max-samples 3000 --epochs 10
 ```
 
+Optional: build and use cache for faster repeated training runs:
+
+```powershell
+python -m scripts.build_how2sign_cache --dataset-root "C:\Users\rajit\Datasets\How2Sign" --max-samples 3000 --out artifacts/cache/how2sign_cache.pt
+python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache.pt --epochs 10 --top-k 50 --split-mode pooled --min-class-count 2
+```
+
 Optional dataset validation (recommended before training):
 
 ```powershell

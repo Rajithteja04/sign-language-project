@@ -9,16 +9,27 @@
 <body>
   <main>
     <h1>Real-Time Sign-to-Text Translation</h1>
-    <div id="status">Connecting...</div>
-    <div id="output">(waiting for predictions)</div>
-    <div id="meta">
-      <span id="mode">mode: unknown</span>
-      <span id="confidence">confidence: 0.0000</span>
-      <span id="timestamp">timestamp: -</span>
-    </div>
+
+    <section class="layout">
+      <div class="card">
+        <h2>Camera Preview</h2>
+        <video id="self-view" autoplay muted playsinline></video>
+        <div id="preview-status">Requesting camera permission...</div>
+      </div>
+
+      <div class="card">
+        <div id="status">Connecting...</div>
+        <div id="output">(waiting for predictions)</div>
+        <div id="meta">
+          <span id="mode">mode: unknown</span>
+          <span id="confidence">confidence: 0.0000</span>
+          <span id="timestamp">timestamp: -</span>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

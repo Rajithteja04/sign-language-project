@@ -486,3 +486,99 @@ Now entering model-quality phase (baseline training, evaluation, iterative impro
    - Status: Done
    - Next:
      - Run realtime app validation with frozen baseline artifacts and capture demo observations.
+
+
+ - Sub-run R12 realtime app smoke validation with frozen baseline (2026-02-26):
+   - Owner: Codex
+   - Objective:
+     - Verify realtime app boots in real mode with frozen top-k20 artifacts.
+   - Runtime overrides used:
+     - `USE_MOCK_INFERENCE=false`
+     - `LSTM_WEIGHTS=artifacts/lstm_best_topk20_e12.pt`
+     - `LSTM_LABELS=artifacts/label_to_id_topk20_e12.json`
+     - `LSTM_META=artifacts/lstm_meta_topk20_e12.json`
+   - Smoke checks:
+     - `GET /health` -> `{"ok": true}`
+     - `GET /status` -> `mode=real`, `model_loaded=true`, `status=Realtime pipeline started.`
+     - `GET /predict` -> `COLLECTING_FRAMES` payload observed (camera stream active, sequence warm-up pending).
+   - Result:
+     - Realtime server path is healthy with frozen baseline artifacts.
+     - Model load and prediction API path validated.
+   - Status: Done
+   - Next:
+     - Manual webcam gesture validation (10 attempts) and log correctness + confidence spread.
+
+
+ - Sub-run R13 web camera self-preview integration (2026-02-26):
+   - Owner: Codex
+   - Objective:
+     - Let users see themselves in web app mode while predictions stream.
+   - Implementation:
+     - Updated `app/templates/index.html` with a `video#self-view` preview panel.
+     - Updated `app/static/app.js` to initialize browser camera preview using `getUserMedia()`.
+     - Added preview status messages and cleanup on page unload.
+     - Updated `app/static/styles.css` with responsive two-panel layout.
+   - Result:
+     - Browser now shows live self-view alongside prediction output.
+   - Status: Done
+   - Next:
+     - Run manual realtime validation and log 10-attempt behavior with confidence trends.
+
+ - Sub-run R14 realtime output stabilization and confidence gating (2026-02-26):
+   - Owner: Codex
+   - Objective:
+     - Reduce noisy repeated predictions when user is idle or confidence is low.
+   - Implementation:
+     - Updated `app/app.py`:
+       - Added runtime settings:
+         - `min_confidence` (`MIN_PRED_CONFIDENCE` / `min_pred_confidence`, default `0.30`)
+         - `stability_frames` (`STABILITY_FRAMES` / `stability_frames`, default `3`)
+       - Added low-confidence gate:
+         - shows `No confident sign` when confidence is below threshold.
+       - Added temporal stabilization:
+         - requires repeated same label across N frames before showing stable prediction.
+         - shows `Stabilizing gesture...` while warming label stability.
+     - Updated `config/default.yaml` with:
+       - `min_pred_confidence: 0.30`
+       - `stability_frames: 3`
+   - Result:
+     - Realtime output is less sticky/noisy and avoids always forcing a label when confidence is weak.
+   - Status: Done
+   - Next:
+     - Tune thresholds during manual demo validation (e.g., confidence `0.30-0.45`, stability `3-5`).
+
+
+ - Sub-run R15 realtime threshold tuning + sign detection procedure (2026-02-26):
+   - Owner: Rajit + Codex
+   - Objective:
+     - Understand why realtime output stays `No confident sign` and define operating procedure.
+   - Observation:
+     - Confidence increases slightly when hands are visible (`~0.17-0.18`) and drops when moving away.
+     - Waving/`hi` still remains below gate, so output stays `No confident sign`.
+   - Interpretation:
+     - Pipeline is functioning (landmark/motion sensitivity is present), but current model confidence is low for reliable class commitment at default threshold.
+   - Runtime tuning guidance:
+     - Start app with lower gate for demo validation:
+       - `MIN_PRED_CONFIDENCE=0.15`
+       - `STABILITY_FRAMES=2`
+     - If still strict, reduce confidence gate gradually (down to ~`0.12`).
+     - If output becomes noisy, raise gate toward `0.18-0.22`.
+   - Sign detection procedure (current baseline):
+     - Use real mode with frozen artifacts (`topk20_e12`).
+     - Keep upper body + both hands in frame.
+     - Neutral pose ~1 sec before sign.
+     - Perform one clear sign for 2-3 sec.
+     - Pause ~1 sec between signs.
+     - Ensure good front lighting and simple background.
+   - Status: Done
+   - Next:
+     - Manual 10-attempt validation with tuned thresholds and log expected vs predicted labels + confidence.
+
+
+$env:USE_MOCK_INFERENCE="false"
+$env:LSTM_WEIGHTS="artifacts/lstm_best_topk20_e12.pt"
+$env:LSTM_LABELS="artifacts/label_to_id_topk20_e12.json"
+$env:LSTM_META="artifacts/lstm_meta_topk20_e12.json"
+$env:MIN_PRED_CONFIDENCE="0.15"
+$env:STABILITY_FRAMES="2"
+python -m app.app

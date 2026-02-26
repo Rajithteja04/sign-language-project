@@ -51,6 +51,8 @@ def _load_runtime_settings() -> dict:
         "camera_index": int(env_or_cfg("CAMERA_INDEX", "camera_index", 0)),
         "emit_interval_ms": int(env_or_cfg("EMIT_INTERVAL_MS", "emit_interval_ms", 1000)),
         "use_mock_inference": _is_true(env_or_cfg("USE_MOCK_INFERENCE", "use_mock_inference", True)),
+        "min_confidence": float(env_or_cfg("MIN_PRED_CONFIDENCE", "min_pred_confidence", 0.30)),
+        "stability_frames": int(env_or_cfg("STABILITY_FRAMES", "stability_frames", 3)),
         "weights": str(env_or_cfg("LSTM_WEIGHTS", "lstm_weights_path", "artifacts/lstm_best.pt")),
         "labels": str(env_or_cfg("LSTM_LABELS", "labels_path", "artifacts/label_to_id.json")),
         "meta": str(env_or_cfg("LSTM_META", "meta_path", "artifacts/lstm_meta.json")),
@@ -153,6 +155,11 @@ def _capture_loop() -> None:
     seq_len = int(model_bundle["seq_len"]) if model_bundle else 30
     seq_buffer: deque[np.ndarray] = deque(maxlen=seq_len)
     emit_seconds = max(settings["emit_interval_ms"], 200) / 1000.0
+    min_confidence = max(0.0, min(1.0, float(settings.get("min_confidence", 0.30))))
+    stability_frames = max(1, int(settings.get("stability_frames", 3)))
+    candidate_label = None
+    candidate_count = 0
+    stable_label = None
 
     try:
         while True:
@@ -191,8 +198,40 @@ def _capture_loop() -> None:
                         pred_id = int(torch.argmax(probs, dim=1).item())
                         confidence = float(probs[0, pred_id].item())
                     raw_text = model_bundle["id_to_label"].get(pred_id, "UNKNOWN")
-                    corrected = text_corrector.correct(raw_text)
-                    payload = _build_payload(mode="real", text=corrected, confidence=confidence, raw_text=raw_text)
+                    if confidence < min_confidence:
+                        candidate_label = None
+                        candidate_count = 0
+                        payload = _build_payload(
+                            mode="real",
+                            text="No confident sign",
+                            confidence=confidence,
+                            raw_text=raw_text,
+                        )
+                    else:
+                        if raw_text == candidate_label:
+                            candidate_count += 1
+                        else:
+                            candidate_label = raw_text
+                            candidate_count = 1
+
+                        if candidate_count >= stability_frames:
+                            stable_label = raw_text
+
+                        if stable_label is None:
+                            payload = _build_payload(
+                                mode="real",
+                                text="Stabilizing gesture...",
+                                confidence=confidence,
+                                raw_text=raw_text,
+                            )
+                        else:
+                            corrected = text_corrector.correct(stable_label)
+                            payload = _build_payload(
+                                mode="real",
+                                text=corrected,
+                                confidence=confidence,
+                                raw_text=stable_label,
+                            )
 
             with _runtime_lock:
                 _runtime["last_prediction"] = payload

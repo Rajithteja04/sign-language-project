@@ -33,3 +33,6 @@ logs/
 *.log
 
 
+.venv311/
+artifacts/cache/
+*.whl

@@ -107,6 +107,21 @@ def _pooled_split_by_label(examples, top_k: int, min_class_count: int, seed: int
     return keep_labels, train_examples, val_examples, test_examples
 
 
+def _apply_label_map(examples, label_map):
+    if not label_map:
+        return examples
+    remapped = []
+    for ex in examples:
+        new_label = label_map.get(ex.label, ex.label)
+        if new_label is None:
+            continue
+        if new_label != ex.label:
+            remapped.append(SequenceExample(features=ex.features, label=new_label))
+        else:
+            remapped.append(ex)
+    return remapped
+
+
 def _run_epoch(model, loader, optimizer, criterion, device):
     model.train()
     total_loss = 0.0
@@ -242,7 +257,25 @@ def main():
     parser.add_argument("--min-class-count", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--cache-path", default=None)
+    parser.add_argument("--label-list", default=None, help="Path to newline-separated labels to keep")
+    parser.add_argument("--label-map", default=None, help="JSON file mapping original sentences to canonical labels")
     args = parser.parse_args()
+
+    label_whitelist = None
+    if args.label_list:
+        label_list_path = Path(args.label_list)
+        if not label_list_path.exists():
+            raise FileNotFoundError(f'Label list not found: {label_list_path}')
+        label_whitelist = {line.strip() for line in label_list_path.read_text(encoding="utf-8").splitlines() if line.strip()}
+        print(f'Label whitelist loaded: {len(label_whitelist)} labels')
+
+    label_map = None
+    if args.label_map:
+        label_map_path = Path(args.label_map)
+        if not label_map_path.exists():
+            raise FileNotFoundError(f'Label map not found: {label_map_path}')
+        label_map = json.loads(label_map_path.read_text(encoding="utf-8"))
+        print(f'Label map loaded: {len(label_map)} entries')
 
     cfg = load_config(args.config, args.local_config)
     root = (
@@ -282,6 +315,12 @@ def main():
             f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)} "
             f"(max_samples_per_split={max_samples})"
         )
+    if label_map:
+        splits = DatasetSplit(
+            train=_apply_label_map(splits.train, label_map),
+            val=_apply_label_map(splits.val, label_map),
+            test=_apply_label_map(splits.test, label_map),
+        )
     if args.split_mode == "pooled":
         pooled = list(splits.train) + list(splits.val) + list(splits.test)
         keep_labels, train_examples, val_examples, test_examples = _pooled_split_by_label(
@@ -290,6 +329,8 @@ def main():
             min_class_count=args.min_class_count,
             seed=args.seed,
         )
+        print("Pooled train label counts:", Counter(ex.label for ex in train_examples))
+        print("Pooled val label counts:", Counter(ex.label for ex in val_examples))
         print(
             f"Pooled split mode: pool_size={len(pooled)} kept_labels={len(keep_labels)} "
             f"min_class_count={args.min_class_count} seed={args.seed}"
@@ -297,9 +338,22 @@ def main():
         print(
             f"Pooled split sizes: train={len(train_examples)} val={len(val_examples)} test={len(test_examples)}"
         )
+        if label_whitelist:
+            train_examples = [ex for ex in train_examples if ex.label in label_whitelist]
+            val_examples = [ex for ex in val_examples if ex.label in label_whitelist]
+            test_examples = [ex for ex in test_examples if ex.label in label_whitelist]
+            print(
+                f"Applied label whitelist: train={len(train_examples)} val={len(val_examples)} test={len(test_examples)}"
+            )
     else:
         train_examples = list(splits.train)
         val_examples = list(splits.val)
+        if label_whitelist:
+            train_examples = [ex for ex in train_examples if ex.label in label_whitelist]
+            val_examples = [ex for ex in val_examples if ex.label in label_whitelist]
+            print(
+                f"Applied label whitelist: train={len(train_examples)} val={len(val_examples)}"
+            )
 
     train_label_count = len({ex.label for ex in train_examples})
     val_label_count = len({ex.label for ex in val_examples})

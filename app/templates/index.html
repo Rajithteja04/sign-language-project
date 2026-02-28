@@ -9,6 +9,15 @@
 <body>
   <main>
     <h1>Real-Time Sign-to-Text Translation</h1>
+    <section class="controls card">
+      <label for="gesture-mode">Gesture Category</label>
+      <select id="gesture-mode">
+        <option value="word">Word Gesture (WLASL)</option>
+        <option value="sentence">Sentence Gesture (How2Sign)</option>
+      </select>
+      <button id="start-btn" type="button">Start</button>
+      <button id="stop-btn" type="button" disabled>Stop</button>
+    </section>
 
     <section class="layout">
       <div class="card">
@@ -20,8 +29,11 @@
       <div class="card">
         <div id="status">Connecting...</div>
         <div id="output">(waiting for predictions)</div>
+        <div id="words-output">words: -</div>
+        <div id="sentence-output">sentence: -</div>
         <div id="meta">
           <span id="mode">mode: unknown</span>
+          <span id="gesture-mode-meta">gesture_mode: -</span>
           <span id="confidence">confidence: 0.0000</span>
           <span id="timestamp">timestamp: -</span>
         </div>

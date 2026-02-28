@@ -45,6 +45,17 @@ python -m scripts.build_how2sign_cache --dataset-root "C:\Users\rajit\Datasets\H
 python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache.pt --epochs 10 --top-k 50 --split-mode pooled --min-class-count 2
 ```
 
+Recommended recent baseline run (How2Sign):
+
+```powershell
+python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_3000.pt --epochs 25 --top-k 12 --split-mode pooled --min-class-count 3
+```
+
+Frozen artifacts from this run:
+- `artifacts/lstm_best_topk12_e25_cache3000.pt`
+- `artifacts/label_to_id_topk12_e25_cache3000.json`
+- `artifacts/lstm_meta_topk12_e25_cache3000.json`
+
 Optional dataset validation (recommended before training):
 
 ```powershell
@@ -79,6 +90,60 @@ python -m inference.realtime --nlp-model grammarly/coedit-large
 ```powershell
 python -m app.app
 ```
+
+## Web App Flow (Word/Sentence Mode)
+
+The UI now supports:
+- gesture category selector (`word` or `sentence`)
+- self camera preview
+- `Start` / `Stop` recognition buttons
+- live word stream + assembled sentence output
+
+At runtime:
+- `word` mode: stable words are accumulated and sent to NLP for sentence formation.
+- `sentence` mode: sentence prediction is directly passed through NLP correction.
+- Preview remains visible while recognition runs (browser-camera frame streaming to backend).
+
+Mode-specific artifact config keys (in `config/default.yaml`):
+- `word_lstm_weights_path`, `word_labels_path`, `word_meta_path`
+- `sentence_lstm_weights_path`, `sentence_labels_path`, `sentence_meta_path`
+
+Example override to run with frozen How2Sign artifacts:
+
+```powershell
+$env:USE_MOCK_INFERENCE="false"
+$env:SENTENCE_LSTM_WEIGHTS="artifacts/lstm_best_topk12_e25_cache3000.pt"
+$env:SENTENCE_LSTM_LABELS="artifacts/label_to_id_topk12_e25_cache3000.json"
+$env:SENTENCE_LSTM_META="artifacts/lstm_meta_topk12_e25_cache3000.json"
+python -m app.app
+```
+
+## NLP Backend Switch (Transformer / Gemini)
+
+Set NLP backend before launching app.
+
+Local Transformer NLP:
+
+```powershell
+$env:NLP_BACKEND="transformer"
+$env:NLP_MODEL="google/flan-t5-small"
+python -m app.app
+```
+
+Gemini API NLP:
+
+```powershell
+$env:NLP_BACKEND="gemini"
+$env:GEMINI_MODEL="gemini-1.5-flash"
+$env:GEMINI_API_KEY="<your_api_key>"
+python -m app.app
+```
+
+Local config keys:
+- `nlp_backend`
+- `nlp_model`
+- `gemini_model`
+- `gemini_api_key`
 
 ## Dataset Strategy
 

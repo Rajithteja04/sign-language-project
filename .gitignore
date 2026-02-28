@@ -4,6 +4,9 @@ datasets/
 
 # Local config (machine-specific paths)
 config/local.example.yaml
+config/local.yaml
+.env
+.env.*
 
 # Python cache and env
 __pycache__/

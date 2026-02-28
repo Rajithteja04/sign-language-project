@@ -20,5 +20,19 @@ stability_frames: 3
 lstm_weights_path: artifacts/lstm_best.pt
 labels_path: artifacts/label_to_id.json
 meta_path: artifacts/lstm_meta.json
+
+# Mode-specific artifacts
+word_lstm_weights_path: artifacts/lstm_best.pt
+word_labels_path: artifacts/label_to_id.json
+word_meta_path: artifacts/lstm_meta.json
+
+sentence_lstm_weights_path: artifacts/lstm_best.pt
+sentence_labels_path: artifacts/label_to_id.json
+sentence_meta_path: artifacts/lstm_meta.json
+
+word_buffer_size: 12
 nlp_model: null
+nlp_backend: transformer   # transformer | gemini
+gemini_model: gemini-1.5-flash
+gemini_api_key: null
 

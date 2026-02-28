@@ -582,3 +582,115 @@ $env:LSTM_META="artifacts/lstm_meta_topk20_e12.json"
 $env:MIN_PRED_CONFIDENCE="0.15"
 $env:STABILITY_FRAMES="2"
 python -m app.app
+
+
+ - Sub-run R16 How2Sign cache-3000 training comparison (2026-02-28):
+   - Owner: Rajit
+   - Objective:
+     - Improve validation accuracy by increasing cache size and testing lower class budgets.
+   - Setup:
+     - Cache: `artifacts/cache/how2sign_cache_3000.pt`
+   - Run A:
+     - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_3000.pt --epochs 20 --top-k 20 --split-mode pooled --min-class-count 2`
+     - Best val accuracy: `0.2727`
+   - Run B:
+     - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_3000.pt --epochs 25 --top-k 10 --split-mode pooled --min-class-count 3`
+     - Best val accuracy: `0.3333`
+   - Run C:
+     - `python -m training.train_lstm --cache-path artifacts/cache/how2sign_cache_3000.pt --epochs 25 --top-k 12 --split-mode pooled --min-class-count 3`
+     - Best val accuracy: `0.3571`
+   - Result:
+     - Current best How2Sign baseline in this batch is `top_k=12`, `epochs=25`, `min_class_count=3` with `val_acc=0.3571`.
+     - Frozen artifacts:
+       - `artifacts/lstm_best_topk12_e25_cache3000.pt`
+       - `artifacts/label_to_id_topk12_e25_cache3000.json`
+       - `artifacts/lstm_meta_topk12_e25_cache3000.json`
+   - Status: Done
+   - Next:
+     - Use this frozen set for realtime validation.
+
+
+ - Sub-run R17 Dual-mode web flow implementation (2026-02-28):
+   - Owner: Codex + Rajit
+   - Objective:
+     - Implement product flow with selectable `word` and `sentence` gesture modes, explicit `Start/Stop`, and user self-preview.
+   - Implementation:
+     - Updated `app/app.py`:
+       - Added session states: `idle/running/stopped`.
+       - Added gesture mode state: `word/sentence`.
+       - Added APIs:
+         - `POST /session/start` (with selected mode)
+         - `POST /session/stop`
+       - Added mode-aware artifact routing:
+         - `word_lstm_*` paths
+         - `sentence_lstm_*` paths
+       - Added word-buffer aggregation in `word` mode and NLP sentence assembly.
+       - Added sentence pass-through + NLP correction in `sentence` mode.
+       - Added runtime snapshot event (`runtime`) for UI sync.
+     - Updated `app/templates/index.html`:
+       - Added gesture mode selector.
+       - Added `Start` and `Stop` buttons.
+       - Added `words` and `sentence` output fields.
+     - Updated `app/static/app.js`:
+       - Wired start/stop requests.
+       - UI lock/unlock handling while running.
+       - Camera preview pause on start and resume on stop (avoids backend camera conflict).
+     - Updated `app/static/styles.css`:
+       - Added controls layout and output styling.
+     - Updated `config/default.yaml`:
+       - Added mode-specific artifact keys and `word_buffer_size`.
+   - Result:
+     - Web app now supports the planned dual-mode interaction flow.
+   - Status: Done
+   - Next:
+     - Validate both modes with finalized artifacts from 16GB training system.
+
+
+ - Sub-run R18 Always-on preview with browser-frame inference (2026-02-28):
+   - Owner: Codex + Rajit
+   - Objective:
+     - Keep user camera preview visible continuously while recognition is running.
+   - Problem:
+     - Previous architecture used two camera owners:
+       - browser `getUserMedia` preview
+       - backend OpenCV `VideoCapture`
+     - This caused camera conflicts and black preview during recognition.
+   - Implementation:
+     - Reworked realtime path in `app/app.py`:
+       - removed backend camera capture loop,
+       - added SocketIO `browser_frame` event ingestion,
+       - backend now runs feature extraction + inference on frames sent from browser.
+     - Updated `app/static/app.js`:
+       - keeps preview active all the time,
+       - sends JPEG frames to backend at fixed interval (~10 FPS) while session is running.
+   - Result:
+     - Preview stays visible during `Start` and `Stop`.
+     - Recognition now uses browser-provided frames, eliminating dual camera ownership conflict.
+   - Status: Done
+   - Next:
+     - Tune frame send interval/FPS for latency vs stability.
+
+
+ - Sub-run R19 Dual NLP backend switch (Transformer + Gemini) (2026-02-28):
+   - Owner: Codex + Rajit
+   - Objective:
+     - Support both local Transformer NLP and Gemini API NLP with one runtime switch.
+   - Implementation:
+     - Updated `models/transformer.py`:
+       - strengthened prompts for both local and Gemini paths,
+       - added `create_text_corrector(...)` factory.
+     - Updated `app/app.py`:
+       - wired runtime NLP backend selection via config/env.
+       - backend options:
+         - `transformer`
+         - `gemini`
+     - Updated config and git-ignore:
+       - `config/default.yaml` added `nlp_backend`, `gemini_model`, `gemini_api_key`.
+       - `config/local.example.yaml` added local NLP/API examples.
+       - `.gitignore` now ignores `config/local.yaml` and `.env*`.
+   - Run control:
+     - `NLP_BACKEND=transformer` for local NLP.
+     - `NLP_BACKEND=gemini` + `GEMINI_API_KEY` for API NLP.
+   - Status: Done
+   - Next:
+     - Validate latency/quality in both backends and record demo-ready settings.

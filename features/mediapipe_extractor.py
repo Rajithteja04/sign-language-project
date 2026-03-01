@@ -58,3 +58,33 @@ class MediaPipeExtractor:
         if features.shape[0] != FEATURE_DIM:
             raise ValueError(f"Unexpected feature dim: {features.shape[0]} != {FEATURE_DIM}")
         return features
+
+    def extract_with_debug(self, frame_bgr: np.ndarray) -> tuple[np.ndarray, dict]:
+        image = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+        result = self.holistic.process(image)
+
+        pose_count = len(result.pose_landmarks.landmark) if result.pose_landmarks else 0
+        face_count = len(result.face_landmarks.landmark) if result.face_landmarks else 0
+        left_count = len(result.left_hand_landmarks.landmark) if result.left_hand_landmarks else 0
+        right_count = len(result.right_hand_landmarks.landmark) if result.right_hand_landmarks else 0
+
+        pose = self._flatten_landmarks(result.pose_landmarks, self.POSE_COUNT)
+        face = self._flatten_landmarks(result.face_landmarks, self.FACE_COUNT)
+        left = self._flatten_landmarks(result.left_hand_landmarks, self.HAND_COUNT)
+        right = self._flatten_landmarks(result.right_hand_landmarks, self.HAND_COUNT)
+
+        features = np.asarray(pose + face + left + right, dtype=np.float32)
+        if features.shape[0] != FEATURE_DIM:
+            raise ValueError(f"Unexpected feature dim: {features.shape[0]} != {FEATURE_DIM}")
+
+        debug = {
+            "pose_landmarks": pose_count,
+            "face_landmarks": face_count,
+            "left_hand_landmarks": left_count,
+            "right_hand_landmarks": right_count,
+            "total_landmarks": pose_count + face_count + left_count + right_count,
+            "feature_dimension": FEATURE_DIM,
+            "normalization_applied": True,
+            "feature_vector_generated": True,
+        }
+        return features, debug

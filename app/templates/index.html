@@ -21,7 +21,7 @@
     <section class="grid">
       <article class="card">
         <h2>Webcam Feed</h2>
-        <video id="preview" autoplay playsinline muted></video>
+        <img id="preview" alt="Live webcam feed" />
       </article>
 
       <article class="card">
@@ -49,6 +49,21 @@
           <label>Corrected Sentence</label>
           <div id="sentenceText" class="value sentence">-</div>
         </div>
+
+        <details class="debug-panel">
+          <summary>Module I - Spatial Feature Extraction Details</summary>
+          <div class="debug-grid">
+            <div class="debug-row"><span>Frame Count</span><span id="dbgFrameCount">0</span></div>
+            <div class="debug-row"><span>Resolution</span><span id="dbgResolution">-</span></div>
+            <div class="debug-row"><span>Pose Landmarks</span><span id="dbgPose">0</span></div>
+            <div class="debug-row"><span>Face Landmarks</span><span id="dbgFace">0</span></div>
+            <div class="debug-row"><span>Left Hand Landmarks</span><span id="dbgLeft">0</span></div>
+            <div class="debug-row"><span>Right Hand Landmarks</span><span id="dbgRight">0</span></div>
+            <div class="debug-row"><span>Total Landmarks</span><span id="dbgTotal">0</span></div>
+            <div class="debug-row"><span>Feature Vector Dimension</span><span id="dbgDim">411</span></div>
+            <div class="debug-row"><span>Normalization Applied</span><span id="dbgNorm">True</span></div>
+          </div>
+        </details>
         <div id="mockWarning" class="mock-warning hidden">Warning: Predictions are simulated (mock mode).</div>
       </article>
     </section>

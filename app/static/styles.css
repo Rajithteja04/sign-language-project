@@ -82,12 +82,13 @@ h1 {
   gap: 16px;
 }
 
-video {
+#preview {
   width: 100%;
   min-height: 280px;
   background: #020816;
   border: 1px solid #345b92;
   border-radius: 10px;
+  object-fit: cover;
 }
 
 h2 {
@@ -176,6 +177,35 @@ h2 {
 
 .hidden {
   display: none;
+}
+
+.debug-panel {
+  margin-top: 12px;
+  border: 1px solid #2f4d79;
+  border-radius: 10px;
+  background: #162947;
+  padding: 10px 12px;
+}
+
+.debug-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #a8d4ff;
+}
+
+.debug-grid {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.debug-row {
+  display: flex;
+  justify-content: space-between;
+  background: #1d3356;
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid #345783;
 }
 
 @media (max-width: 900px) {

@@ -10,7 +10,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from flask import Flask, jsonify, render_template
+from flask import Flask, Response, jsonify, render_template
 
 from features.mediapipe_extractor import FEATURE_DIM, MediaPipeExtractor
 from models.lstm import LSTMClassifier
@@ -24,7 +24,7 @@ def normalize_openpose_like(x: np.ndarray) -> np.ndarray:
 
 
 class WordRealtimeService:
-    def __init__(self) -> None:
+    def __init__(self, camera_manager) -> None:
         self.lock = threading.Lock()
         self.running = False
         self.thread: threading.Thread | None = None
@@ -47,7 +47,22 @@ class WordRealtimeService:
         self.model = None
         self.id_to_label: dict[int, str] = {}
         self.seq_len = 30
-        self.extractor = None
+        self.extractor = MediaPipeExtractor()
+        self.camera = camera_manager
+        self.frame_counter = 0
+        self.debug_module1 = {
+            "frame_count": 0,
+            "frame_width": 0,
+            "frame_height": 0,
+            "pose_landmarks": 0,
+            "face_landmarks": 0,
+            "left_hand_landmarks": 0,
+            "right_hand_landmarks": 0,
+            "total_landmarks": 0,
+            "feature_dimension": FEATURE_DIM,
+            "normalization_applied": True,
+            "feature_vector_generated": False,
+        }
 
         self._load_artifacts()
 
@@ -86,7 +101,6 @@ class WordRealtimeService:
                 return
 
             self.model = model
-            self.extractor = MediaPipeExtractor()
             self.source_mode = "live"
             self.status = "Model loaded. Ready."
         except Exception as exc:
@@ -143,42 +157,42 @@ class WordRealtimeService:
             gloss = " ".join(self.committed_words)
             self.corrected_sentence = gloss_to_sentence(gloss) if gloss else ""
 
-    def _mock_loop(self) -> None:
-        words = ["HELLO", "I", "GO", "STORE", "THANK", "YOU", "HELP"]
-        while not self.stop_event.is_set():
-            word = random.choice(words)
-            conf = random.uniform(0.45, 0.95)
-            self._accept_prediction(word, conf)
-            with self.lock:
-                self.status = "Running (mock predictions)."
-            time.sleep(1.0)
-
-    def _live_loop(self) -> None:
-        cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            with self.lock:
-                self.status = "Camera open failed. Switched to mock mode."
-                self.source_mode = "mock"
-            self._mock_loop()
-            return
-
+    def _camera_loop(self) -> None:
         buffer: deque[np.ndarray] = deque(maxlen=self.seq_len)
+        mock_words = ["HELLO", "I", "GO", "STORE", "THANK", "YOU", "HELP"]
+        last_mock_emit = 0.0
         while not self.stop_event.is_set():
-            ok, frame = cap.read()
-            if not ok:
+            frame = self.camera.get_frame()
+            if frame is None:
                 with self.lock:
                     self.status = "Camera frame read failed."
                 time.sleep(0.2)
                 continue
 
             try:
-                feat = self.extractor.extract(frame)
+                feat, module1 = self.extractor.extract_with_debug(frame)
                 if feat.shape[0] != FEATURE_DIM:
                     raise ValueError(f"Feature dim mismatch: {feat.shape[0]} != {FEATURE_DIM}")
                 buffer.append(feat)
+                with self.lock:
+                    self.frame_counter += 1
+                    self.debug_module1 = {
+                        "frame_count": self.frame_counter,
+                        "frame_width": int(frame.shape[1]),
+                        "frame_height": int(frame.shape[0]),
+                        "pose_landmarks": int(module1["pose_landmarks"]),
+                        "face_landmarks": int(module1["face_landmarks"]),
+                        "left_hand_landmarks": int(module1["left_hand_landmarks"]),
+                        "right_hand_landmarks": int(module1["right_hand_landmarks"]),
+                        "total_landmarks": int(module1["total_landmarks"]),
+                        "feature_dimension": FEATURE_DIM,
+                        "normalization_applied": True,
+                        "feature_vector_generated": True,
+                    }
             except Exception as exc:
                 with self.lock:
                     self.status = f"Feature extraction failed: {exc}"
+                    self.debug_module1["feature_vector_generated"] = False
                 time.sleep(0.1)
                 continue
 
@@ -187,26 +201,32 @@ class WordRealtimeService:
                     self.status = "Collecting gesture frames..."
                 continue
 
-            seq = np.asarray(buffer, dtype=np.float32)
-            seq = normalize_openpose_like(seq)
-            x = torch.tensor(seq[None, ...], dtype=torch.float32)
-            with torch.no_grad():
-                logits = self.model(x)
-                probs = torch.softmax(logits, dim=1)
-                conf, pred_id = torch.max(probs, dim=1)
-                pred_word = self.id_to_label.get(int(pred_id.item()), "UNKNOWN")
-                confidence = float(conf.item())
-            self._accept_prediction(pred_word, confidence)
-            with self.lock:
-                self.status = "Running (live)."
-
-        cap.release()
+            if self.model is not None:
+                seq = np.asarray(buffer, dtype=np.float32)
+                seq = normalize_openpose_like(seq)
+                x = torch.tensor(seq[None, ...], dtype=torch.float32)
+                with torch.no_grad():
+                    logits = self.model(x)
+                    probs = torch.softmax(logits, dim=1)
+                    conf, pred_id = torch.max(probs, dim=1)
+                    pred_word = self.id_to_label.get(int(pred_id.item()), "UNKNOWN")
+                    confidence = float(conf.item())
+                self._accept_prediction(pred_word, confidence)
+                with self.lock:
+                    self.status = "Running (live)."
+            else:
+                now = time.time()
+                # In mock mode only classification is simulated; extraction/debug stays real.
+                if now - last_mock_emit >= 1.0:
+                    word = random.choice(mock_words)
+                    conf = random.uniform(0.45, 0.95)
+                    self._accept_prediction(word, conf)
+                    last_mock_emit = now
+                with self.lock:
+                    self.status = "Running (mock classification, real extraction)."
 
     def _loop(self) -> None:
-        if self.source_mode == "live":
-            self._live_loop()
-        else:
-            self._mock_loop()
+        self._camera_loop()
 
     def state(self) -> dict:
         with self.lock:
@@ -221,11 +241,59 @@ class WordRealtimeService:
                 "gloss_sequence": " ".join(self.committed_words),
                 "corrected_sentence": self.corrected_sentence,
                 "mode": self.source_mode,
+                "debug_module1": dict(self.debug_module1),
             }
 
 
+class CameraManager:
+    def __init__(self, camera_index: int = 0) -> None:
+        self.camera_index = camera_index
+        self._cap = None
+        self._lock = threading.Lock()
+        self._latest_frame = None
+        self._running = False
+        self._thread: threading.Thread | None = None
+
+    def start(self) -> None:
+        if self._running:
+            return
+        self._cap = cv2.VideoCapture(self.camera_index)
+        if not self._cap.isOpened():
+            self._cap = None
+            return
+        self._running = True
+        self._thread = threading.Thread(target=self._capture_loop, daemon=True)
+        self._thread.start()
+
+    def _capture_loop(self) -> None:
+        while self._running and self._cap is not None:
+            ok, frame = self._cap.read()
+            if not ok:
+                time.sleep(0.03)
+                continue
+            with self._lock:
+                self._latest_frame = frame
+            time.sleep(0.01)
+
+    def get_frame(self):
+        with self._lock:
+            if self._latest_frame is None:
+                return None
+            return self._latest_frame.copy()
+
+    def stop(self) -> None:
+        self._running = False
+        if self._thread is not None:
+            self._thread.join(timeout=1.0)
+        if self._cap is not None:
+            self._cap.release()
+            self._cap = None
+
+
 app = Flask(__name__)
-service = WordRealtimeService()
+camera_manager = CameraManager(camera_index=0)
+camera_manager.start()
+service = WordRealtimeService(camera_manager)
 
 
 @app.route("/")
@@ -254,6 +322,27 @@ def stop():
 def reset():
     service.reset()
     return jsonify({"ok": True, "state": service.state()})
+
+
+def _mjpeg_stream():
+    while True:
+        frame = camera_manager.get_frame()
+        if frame is None:
+            time.sleep(0.05)
+            continue
+        ok, jpg = cv2.imencode(".jpg", frame)
+        if not ok:
+            continue
+        data = jpg.tobytes()
+        yield (
+            b"--frame\r\n"
+            b"Content-Type: image/jpeg\r\n\r\n" + data + b"\r\n"
+        )
+
+
+@app.route("/video_feed")
+def video_feed():
+    return Response(_mjpeg_stream(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,15 @@ const glossChips = document.getElementById("glossChips");
 const sentenceText = document.getElementById("sentenceText");
 const mockWarning = document.getElementById("mockWarning");
 const preview = document.getElementById("preview");
+const dbgFrameCount = document.getElementById("dbgFrameCount");
+const dbgResolution = document.getElementById("dbgResolution");
+const dbgPose = document.getElementById("dbgPose");
+const dbgFace = document.getElementById("dbgFace");
+const dbgLeft = document.getElementById("dbgLeft");
+const dbgRight = document.getElementById("dbgRight");
+const dbgTotal = document.getElementById("dbgTotal");
+const dbgDim = document.getElementById("dbgDim");
+const dbgNorm = document.getElementById("dbgNorm");
 
 async function postJson(url) {
   const response = await fetch(url, { method: "POST" });
@@ -59,6 +68,18 @@ function updateFromState(state) {
   setConfidence(state.confidence || 0);
   renderGlossChips(state.committed_words || []);
   sentenceText.textContent = state.corrected_sentence || "-";
+  const dbg = state.debug_module1 || {};
+  dbgFrameCount.textContent = String(dbg.frame_count ?? 0);
+  const w = dbg.frame_width ?? 0;
+  const h = dbg.frame_height ?? 0;
+  dbgResolution.textContent = w > 0 && h > 0 ? `${w} x ${h}` : "-";
+  dbgPose.textContent = String(dbg.pose_landmarks ?? 0);
+  dbgFace.textContent = String(dbg.face_landmarks ?? 0);
+  dbgLeft.textContent = String(dbg.left_hand_landmarks ?? 0);
+  dbgRight.textContent = String(dbg.right_hand_landmarks ?? 0);
+  dbgTotal.textContent = String(dbg.total_landmarks ?? 0);
+  dbgDim.textContent = String(dbg.feature_dimension ?? 411);
+  dbgNorm.textContent = String(Boolean(dbg.normalization_applied));
   startBtn.disabled = Boolean(state.running);
   stopBtn.disabled = !Boolean(state.running);
 }
@@ -75,16 +96,7 @@ async function pollState() {
 }
 
 async function initPreview() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    statusText.textContent = "Camera API unsupported in this browser.";
-    return;
-  }
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    preview.srcObject = stream;
-  } catch (_err) {
-    statusText.textContent = "Camera preview permission denied or unavailable.";
-  }
+  preview.src = "/video_feed";
 }
 
 startBtn.addEventListener("click", async () => {

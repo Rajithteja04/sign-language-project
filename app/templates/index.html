@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign Language Translation</title>
+  <title>Real-Time Sign Language Word Recognition System</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
   <main class="layout">
-    <h1>Real-Time Sign-to-Text Translation</h1>
+    <h1>Real-Time Sign Language Word Recognition System</h1>
+    <section id="modelBanner" class="banner">Model status: checking...</section>
 
     <section class="toolbar card">
       <button id="startBtn" class="btn primary">Start</button>
@@ -26,13 +27,13 @@
       <article class="card">
         <div class="field">
           <label>Current Word</label>
-          <div id="currentWord" class="value">(waiting)</div>
+          <div id="currentWord" class="value current-word">(waiting)</div>
         </div>
 
         <div class="field">
           <label>Confidence</label>
           <div class="conf-row">
-            <span id="confidenceValue">0.000</span>
+            <span id="confidenceValue">0.00</span>
           </div>
           <div class="progress-wrap">
             <div id="confidenceBar" class="progress-fill low" style="width: 0%"></div>
@@ -48,6 +49,7 @@
           <label>Corrected Sentence</label>
           <div id="sentenceText" class="value sentence">-</div>
         </div>
+        <div id="mockWarning" class="mock-warning hidden">Warning: Predictions are simulated (mock mode).</div>
       </article>
     </section>
   </main>

@@ -19,6 +19,26 @@ h1 {
   background: #10234d;
   border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 8px 20px rgba(3, 12, 30, 0.35);
+}
+
+.banner {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #37548c;
+  background: #162f63;
+  font-weight: 600;
+}
+
+.banner.ok {
+  border-color: #2f8a54;
+  background: #173f2b;
+}
+
+.banner.warn {
+  border-color: #a1792a;
+  background: #4d3a16;
 }
 
 .toolbar {
@@ -92,6 +112,12 @@ h2 {
   min-height: 22px;
 }
 
+.current-word {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
 .sentence {
   min-height: 56px;
 }
@@ -107,7 +133,7 @@ h2 {
 
 .progress-fill {
   height: 100%;
-  transition: width 0.2s ease;
+  transition: width 0.25s ease-in-out;
 }
 
 .progress-fill.low {
@@ -135,10 +161,21 @@ h2 {
   border-radius: 999px;
   padding: 5px 10px;
   font-size: 0.95rem;
+  font-family: Consolas, "Courier New", monospace;
 }
 
 .chip.muted {
   opacity: 0.65;
+}
+
+.mock-warning {
+  margin-top: 8px;
+  color: #ffd28a;
+  font-size: 0.95rem;
+}
+
+.hidden {
+  display: none;
 }
 
 @media (max-width: 900px) {

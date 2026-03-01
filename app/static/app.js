@@ -2,11 +2,13 @@ const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const clearBtn = document.getElementById("clearBtn");
 const statusText = document.getElementById("statusText");
+const modelBanner = document.getElementById("modelBanner");
 const currentWord = document.getElementById("currentWord");
 const confidenceValue = document.getElementById("confidenceValue");
 const confidenceBar = document.getElementById("confidenceBar");
 const glossChips = document.getElementById("glossChips");
 const sentenceText = document.getElementById("sentenceText");
+const mockWarning = document.getElementById("mockWarning");
 const preview = document.getElementById("preview");
 
 async function postJson(url) {
@@ -18,7 +20,7 @@ async function postJson(url) {
 function setConfidence(conf) {
   const c = Number(conf || 0);
   const pct = Math.max(0, Math.min(100, c * 100));
-  confidenceValue.textContent = c.toFixed(3);
+  confidenceValue.textContent = c.toFixed(2);
   confidenceBar.style.width = `${pct}%`;
   confidenceBar.classList.remove("low", "mid", "high");
   if (c > 0.7) {
@@ -49,6 +51,10 @@ function renderGlossChips(words) {
 
 function updateFromState(state) {
   statusText.textContent = state.status || "Unknown";
+  modelBanner.textContent = state.model_status || "Model status unavailable.";
+  modelBanner.classList.toggle("ok", !state.mock);
+  modelBanner.classList.toggle("warn", Boolean(state.mock));
+  mockWarning.classList.toggle("hidden", !state.mock);
   currentWord.textContent = state.current_word || "-";
   setConfidence(state.confidence || 0);
   renderGlossChips(state.committed_words || []);
@@ -102,6 +108,10 @@ stopBtn.addEventListener("click", async () => {
 clearBtn.addEventListener("click", async () => {
   try {
     const data = await postJson("/reset");
+    currentWord.textContent = "-";
+    setConfidence(0);
+    renderGlossChips([]);
+    sentenceText.textContent = "-";
     updateFromState(data.state);
   } catch (_err) {
     statusText.textContent = "Failed to clear sentence.";

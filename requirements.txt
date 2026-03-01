@@ -13,3 +13,4 @@ torch==2.10.0
 torchvision==0.25.0
 tqdm>=4.67
 gdown>=5.2
+python-dotenv

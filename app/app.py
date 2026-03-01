@@ -213,6 +213,8 @@ class WordRealtimeService:
             return {
                 "running": self.running,
                 "status": self.status,
+                "model_status": "Model loaded successfully." if self.source_mode == "live" else "Running in mock mode (no trained model loaded).",
+                "mock": self.source_mode != "live",
                 "current_word": self.current_word,
                 "confidence": self.current_confidence,
                 "committed_words": list(self.committed_words),

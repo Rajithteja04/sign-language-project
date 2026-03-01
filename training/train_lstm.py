@@ -1,432 +1,255 @@
+from __future__ import annotations
+
 import argparse
-import os
+import json
+from collections import Counter
+from pathlib import Path
+from typing import Dict, List, Sequence, Tuple
+
+import numpy as np
 import torch
 import torch.nn as nn
-from pathlib import Path
-import json
-import random
-from torch.utils.data import DataLoader, Dataset
-from collections import Counter
-import numpy as np
+from torch.utils.data import DataLoader, TensorDataset
 
-from data.adapters.how2sign import load_how2sign
-from data.formats import DatasetSplit, SequenceExample
+from data.adapters.wlasl import load_wlasl
+from features.mediapipe_extractor import FEATURE_DIM
 from models.lstm import LSTMClassifier
-from utils.io import load_config
+from utils.io import load_yaml
 
 
-class SequenceDataset(Dataset):
-    def __init__(self, examples, label_to_id, seq_len: int):
-        self.examples = examples
-        self.label_to_id = label_to_id
-        self.seq_len = seq_len
-
-    def __len__(self):
-        return len(self.examples)
-
-    def __getitem__(self, idx):
-        ex = self.examples[idx]
-        x = torch.from_numpy(np.asarray(ex.features, dtype=np.float32))
-        feat_dim = x.shape[1]
-        if x.shape[0] >= self.seq_len:
-            x = x[: self.seq_len]
-        else:
-            pad = torch.zeros((self.seq_len - x.shape[0], feat_dim), dtype=torch.float32)
-            x = torch.cat([x, pad], dim=0)
-        y = torch.tensor(self.label_to_id[ex.label], dtype=torch.long)
-        return x, y
+def normalize_openpose_like(x: np.ndarray) -> np.ndarray:
+    """
+    Lightweight per-sequence normalization to keep runtime/training behavior stable.
+    """
+    mean = x.mean(axis=0, keepdims=True)
+    std = x.std(axis=0, keepdims=True) + 1e-6
+    return (x - mean) / std
 
 
-def _build_label_map(train_examples, top_k: int):
-    counts = Counter(ex.label for ex in train_examples)
-    keep = [label for label, _ in counts.most_common(top_k)]
-    label_to_id = {label: i for i, label in enumerate(keep)}
-    return label_to_id
-
-
-def _build_overlap_label_map(train_examples, val_examples, top_k: int):
-    train_counts = Counter(ex.label for ex in train_examples)
-    val_counts = Counter(ex.label for ex in val_examples)
-
-    overlap_labels = [label for label in train_counts if label in val_counts]
-    overlap_labels.sort(key=lambda label: (-train_counts[label], -val_counts[label], label))
-    keep = overlap_labels[:top_k]
-    return {label: i for i, label in enumerate(keep)}
-
-
-def _filter_by_label(examples, label_to_id):
-    return [ex for ex in examples if ex.label in label_to_id]
-
-
-def _pooled_split_by_label(examples, top_k: int, min_class_count: int, seed: int):
-    rng = random.Random(seed)
-    by_label = {}
+def _examples_to_tensors(
+    examples,
+    label_to_id: Dict[str, int],
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    features = []
+    labels = []
     for ex in examples:
-        by_label.setdefault(ex.label, []).append(ex)
-
-    counts = Counter({label: len(items) for label, items in by_label.items()})
-    keep_labels = [label for label, count in counts.most_common() if count >= min_class_count][:top_k]
-
-    train_examples = []
-    val_examples = []
-    test_examples = []
-
-    for label in keep_labels:
-        items = list(by_label[label])
-        rng.shuffle(items)
-        n = len(items)
-
-        if n == 2:
-            train_examples.extend(items[:1])
-            val_examples.extend(items[1:2])
+        seq = np.asarray(ex.features, dtype=np.float32)
+        if seq.ndim != 2:
             continue
+        if seq.shape[1] != FEATURE_DIM:
+            raise ValueError(f"Expected feature dim {FEATURE_DIM}, got {seq.shape[1]}")
+        seq = normalize_openpose_like(seq)
+        features.append(seq)
+        labels.append(label_to_id[ex.label])
 
-        val_n = max(1, int(round(n * 0.15)))
-        test_n = max(1, int(round(n * 0.15)))
-        train_n = n - val_n - test_n
+    if not features:
+        return (
+            torch.empty((0, 0, FEATURE_DIM), dtype=torch.float32),
+            torch.empty((0,), dtype=torch.long),
+        )
 
-        if train_n < 1:
-            train_n = 1
-            if val_n > test_n and val_n > 1:
-                val_n -= 1
-            elif test_n > 1:
-                test_n -= 1
-            elif val_n > 1:
-                val_n -= 1
-            else:
-                test_n = 0
-
-        train_examples.extend(items[:train_n])
-        val_examples.extend(items[train_n : train_n + val_n])
-        test_examples.extend(items[train_n + val_n : train_n + val_n + test_n])
-
-    rng.shuffle(train_examples)
-    rng.shuffle(val_examples)
-    rng.shuffle(test_examples)
-
-    return keep_labels, train_examples, val_examples, test_examples
+    x = torch.tensor(np.stack(features, axis=0), dtype=torch.float32)
+    y = torch.tensor(np.asarray(labels, dtype=np.int64), dtype=torch.long)
+    assert x.shape[2] == FEATURE_DIM
+    return x, y
 
 
-def _apply_label_map(examples, label_map):
-    if not label_map:
-        return examples
-    remapped = []
-    for ex in examples:
-        new_label = label_map.get(ex.label, ex.label)
-        if new_label is None:
-            continue
-        if new_label != ex.label:
-            remapped.append(SequenceExample(features=ex.features, label=new_label))
-        else:
-            remapped.append(ex)
-    return remapped
+def _filter_by_topk(train, val, top_k: int):
+    counts = Counter(ex.label for ex in train)
+    keep = {label for label, _ in counts.most_common(top_k)}
+    train_f = [ex for ex in train if ex.label in keep]
+    val_f = [ex for ex in val if ex.label in keep]
+    return train_f, val_f
 
 
-def _run_epoch(model, loader, optimizer, criterion, device):
-    model.train()
-    total_loss = 0.0
-    total_correct = 0
-    total = 0
-    for x, y in loader:
-        x = x.to(device)
-        y = y.to(device)
-        optimizer.zero_grad()
-        logits = model(x)
-        loss = criterion(logits, y)
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item() * y.size(0)
-        preds = logits.argmax(dim=1)
-        total_correct += (preds == y).sum().item()
-        total += y.size(0)
-    return total_loss / max(total, 1), total_correct / max(total, 1)
+def _build_confusion_matrix(y_true: Sequence[int], y_pred: Sequence[int], n: int) -> np.ndarray:
+    cm = np.zeros((n, n), dtype=np.int64)
+    for t, p in zip(y_true, y_pred):
+        if 0 <= t < n and 0 <= p < n:
+            cm[t, p] += 1
+    return cm
 
 
-@torch.no_grad()
-def _evaluate(model, loader, criterion, device):
+def _validate(model: nn.Module, loader: DataLoader, criterion: nn.Module, device: torch.device):
     model.eval()
     total_loss = 0.0
-    total_correct = 0
     total = 0
-    for x, y in loader:
-        x = x.to(device)
-        y = y.to(device)
-        logits = model(x)
-        loss = criterion(logits, y)
-        total_loss += loss.item() * y.size(0)
-        preds = logits.argmax(dim=1)
-        total_correct += (preds == y).sum().item()
-        total += y.size(0)
-    return total_loss / max(total, 1), total_correct / max(total, 1)
-
-
-def _to_examples(items):
-    examples = []
-    for item in items:
-        features = [np.asarray(frame, dtype=np.float32) for frame in item["features"]]
-        examples.append(SequenceExample(features=features, label=item["label"]))
-    return examples
-
-
-def _load_chunked_split(cache_dir: Path, split_name: str):
-    part_files = sorted(cache_dir.glob(f"{split_name}.part*.pt"))
-    legacy_file = cache_dir / f"{split_name}.pt"
-    if not part_files and legacy_file.exists():
-        part_files = [legacy_file]
-    if not part_files:
-        raise RuntimeError(f"No cache parts found for split '{split_name}' in: {cache_dir}")
-
-    items = []
-    for part_file in part_files:
-        part_items = torch.load(part_file, map_location="cpu", weights_only=False)
-        items.extend(part_items)
-    return _to_examples(items)
-
-
-def _resolve_chunked_cache_dir(cache_path: Path, payload: dict):
-    cache_dir_field = payload.get("cache_dir") if isinstance(payload, dict) else None
-    if cache_dir_field:
-        raw = Path(cache_dir_field)
-        candidates = []
-        if raw.is_absolute():
-            candidates.append(raw)
-        else:
-            # Support cache_dir saved relative to the project CWD.
-            candidates.append(raw)
-            # Fallback for legacy resolver assumptions.
-            candidates.append((cache_path.parent / raw).resolve())
-            # Common case: index and cache dir in same parent.
-            candidates.append((cache_path.parent / raw.name).resolve())
-
-        for candidate in candidates:
-            if candidate.exists() and candidate.is_dir():
-                return candidate
-
-    if cache_path.suffix:
-        candidate = cache_path.with_suffix("")
-        if candidate.is_dir():
-            return candidate
-    return None
-
-
-def _load_splits_from_cache(cache_path: Path) -> DatasetSplit:
-    if cache_path.is_dir():
-        cache_dir = cache_path
-        return DatasetSplit(
-            train=_load_chunked_split(cache_dir, "train"),
-            val=_load_chunked_split(cache_dir, "val"),
-            test=_load_chunked_split(cache_dir, "test"),
-        )
-
-    # Cache files are local project artifacts that contain serialized python objects.
-    payload = torch.load(cache_path, map_location="cpu", weights_only=False)
-
-    # Backward-compatible single-file cache format.
-    if isinstance(payload, dict) and "splits" in payload:
-        splits = payload["splits"]
-        return DatasetSplit(
-            train=_to_examples(splits["train"]),
-            val=_to_examples(splits["val"]),
-            test=_to_examples(splits["test"]),
-        )
-
-    # New chunked cache index format.
-    if isinstance(payload, dict) and payload.get("format") == "how2sign_cache_chunked_v1":
-        cache_dir = _resolve_chunked_cache_dir(cache_path, payload)
-        if cache_dir is None or not cache_dir.exists():
-            raise RuntimeError(f"Chunked cache directory not found for index: {cache_path}")
-        return DatasetSplit(
-            train=_load_chunked_split(cache_dir, "train"),
-            val=_load_chunked_split(cache_dir, "val"),
-            test=_load_chunked_split(cache_dir, "test"),
-        )
-
-    raise RuntimeError(f"Invalid cache file format: {cache_path}")
+    correct = 0
+    y_true: List[int] = []
+    y_pred: List[int] = []
+    with torch.no_grad():
+        for xb, yb in loader:
+            xb = xb.to(device)
+            yb = yb.to(device)
+            logits = model(xb)
+            loss = criterion(logits, yb)
+            total_loss += float(loss.item()) * yb.size(0)
+            pred = logits.argmax(dim=1)
+            correct += int((pred == yb).sum().item())
+            total += int(yb.size(0))
+            y_true.extend(yb.cpu().tolist())
+            y_pred.extend(pred.cpu().tolist())
+    avg_loss = (total_loss / total) if total else float("inf")
+    acc = (correct / total) if total else 0.0
+    return avg_loss, acc, y_true, y_pred
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="config/default.yaml")
-    parser.add_argument("--local-config", default="config/local.yaml")
+    parser = argparse.ArgumentParser(description="Train LSTM on word-level sign data")
+    parser.add_argument("--dataset", choices=["wlasl", "how2sign"], default=None)
     parser.add_argument("--dataset-root", default=None)
-    parser.add_argument("--epochs", type=int, default=None)
-    parser.add_argument("--max-samples", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=None)
-    parser.add_argument("--split-mode", choices=["official", "pooled"], default="pooled")
-    parser.add_argument("--min-class-count", type=int, default=2)
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--cache-path", default=None)
-    parser.add_argument("--label-list", default=None, help="Path to newline-separated labels to keep")
-    parser.add_argument("--label-map", default=None, help="JSON file mapping original sentences to canonical labels")
+    parser.add_argument("--max-samples-per-class", type=int, default=None)
+    parser.add_argument("--val-ratio", type=float, default=0.10)
+    parser.add_argument("--cache-features", action="store_true")
+    parser.add_argument("--cache-dir", default="artifacts/cache/wlasl_features")
+    parser.add_argument("--use-bbox-crop", action="store_true")
+    parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument("--learning-rate", type=float, default=None)
+    parser.add_argument("--hidden-dim", type=int, default=None)
+    parser.add_argument("--layers", type=int, default=None)
+    parser.add_argument("--save-confusion-matrix", action="store_true")
     args = parser.parse_args()
 
-    label_whitelist = None
-    if args.label_list:
-        label_list_path = Path(args.label_list)
-        if not label_list_path.exists():
-            raise FileNotFoundError(f'Label list not found: {label_list_path}')
-        label_whitelist = {line.strip() for line in label_list_path.read_text(encoding="utf-8").splitlines() if line.strip()}
-        print(f'Label whitelist loaded: {len(label_whitelist)} labels')
+    cfg = load_yaml("config/default.yaml")
+    dataset = args.dataset or cfg.get("dataset", "wlasl")
+    if dataset == "how2sign":
+        raise RuntimeError(
+            "How2Sign sentence-level LSTM training is disabled in this refactor. "
+            "Use --dataset wlasl for word-level training."
+        )
 
-    label_map = None
-    if args.label_map:
-        label_map_path = Path(args.label_map)
-        if not label_map_path.exists():
-            raise FileNotFoundError(f'Label map not found: {label_map_path}')
-        label_map = json.loads(label_map_path.read_text(encoding="utf-8"))
-        print(f'Label map loaded: {len(label_map)} entries')
+    root = args.dataset_root or cfg.get("dataset_root", "")
+    if not root:
+        raise ValueError("dataset_root is required (arg or config/default.yaml)")
 
-    cfg = load_config(args.config, args.local_config)
-    root = (
-        args.dataset_root
-        or os.getenv("HOW2SIGN_ROOT")
-        or cfg.get("dataset_root", "D:/DATASETS/How2Sign")
-    )
+    top_k = args.top_k if args.top_k is not None else int(cfg.get("top_k_classes", 100))
     seq_len = int(cfg.get("sequence_length", 30))
-    top_k = int(cfg.get("top_k_classes", 200))
-    max_samples = cfg.get("max_samples_per_split", 3000)
-    out_dir = Path(cfg.get("artifacts_dir", "artifacts"))
-    if args.max_samples is not None:
-        max_samples = args.max_samples
-    if args.epochs is not None:
-        cfg["epochs"] = args.epochs
-    if args.top_k is not None:
-        top_k = args.top_k
-    out_dir.mkdir(parents=True, exist_ok=True)
+    epochs = args.epochs if args.epochs is not None else int(cfg.get("epochs", 30))
+    batch_size = args.batch_size if args.batch_size is not None else int(cfg.get("batch_size", 16))
+    lr = args.learning_rate if args.learning_rate is not None else float(cfg.get("learning_rate", 1e-3))
+    hidden_dim = args.hidden_dim if args.hidden_dim is not None else int(cfg.get("lstm_hidden", 256))
+    num_layers = args.layers if args.layers is not None else int(cfg.get("lstm_layers", 2))
 
-    print(f"Using dataset root: {root}")
-    if args.cache_path:
-        cache_path = Path(args.cache_path)
-        if not cache_path.exists():
-            raise FileNotFoundError(
-                f"Cache file not found: {cache_path}. "
-                "Build cache first with: python -m scripts.build_how2sign_cache"
-            )
-        print(f"Loading cached splits from: {cache_path}")
-        splits = _load_splits_from_cache(cache_path)
-        print(
-            f"Loaded cached splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)}"
-        )
-    else:
-        print("Loading How2Sign splits (this can take time on large keypoint sets)...")
-        splits = load_how2sign(root=root, max_samples_per_split=max_samples)
-        print(
-            f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)} "
-            f"(max_samples_per_split={max_samples})"
-        )
-    if label_map:
-        splits = DatasetSplit(
-            train=_apply_label_map(splits.train, label_map),
-            val=_apply_label_map(splits.val, label_map),
-            test=_apply_label_map(splits.test, label_map),
-        )
-    if args.split_mode == "pooled":
-        pooled = list(splits.train) + list(splits.val) + list(splits.test)
-        keep_labels, train_examples, val_examples, test_examples = _pooled_split_by_label(
-            pooled,
-            top_k=top_k,
-            min_class_count=args.min_class_count,
-            seed=args.seed,
-        )
-        print("Pooled train label counts:", Counter(ex.label for ex in train_examples))
-        print("Pooled val label counts:", Counter(ex.label for ex in val_examples))
-        print(
-            f"Pooled split mode: pool_size={len(pooled)} kept_labels={len(keep_labels)} "
-            f"min_class_count={args.min_class_count} seed={args.seed}"
-        )
-        print(
-            f"Pooled split sizes: train={len(train_examples)} val={len(val_examples)} test={len(test_examples)}"
-        )
-        if label_whitelist:
-            train_examples = [ex for ex in train_examples if ex.label in label_whitelist]
-            val_examples = [ex for ex in val_examples if ex.label in label_whitelist]
-            test_examples = [ex for ex in test_examples if ex.label in label_whitelist]
-            print(
-                f"Applied label whitelist: train={len(train_examples)} val={len(val_examples)} test={len(test_examples)}"
-            )
-    else:
-        train_examples = list(splits.train)
-        val_examples = list(splits.val)
-        if label_whitelist:
-            train_examples = [ex for ex in train_examples if ex.label in label_whitelist]
-            val_examples = [ex for ex in val_examples if ex.label in label_whitelist]
-            print(
-                f"Applied label whitelist: train={len(train_examples)} val={len(val_examples)}"
-            )
+    print(f"Dataset: {dataset}")
+    print(f"Loading WLASL from: {root}")
+    splits = load_wlasl(
+        root=root,
+        top_k=top_k,
+        max_samples_per_class=args.max_samples_per_class,
+        seq_len=seq_len,
+        val_ratio=args.val_ratio,
+        cache_features=args.cache_features,
+        cache_dir=args.cache_dir,
+        use_bbox_crop=args.use_bbox_crop,
+    )
+    print(f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)}")
 
-    train_label_count = len({ex.label for ex in train_examples})
-    val_label_count = len({ex.label for ex in val_examples})
-    overlap_label_count = len({ex.label for ex in train_examples} & {ex.label for ex in val_examples})
-    print(f"Label coverage: train_labels={train_label_count} val_labels={val_label_count} overlap={overlap_label_count}")
-
-    label_to_id = _build_overlap_label_map(train_examples, val_examples, top_k=top_k)
-    if not label_to_id:
-        raise RuntimeError(
-            "No train/val overlapping labels found after loading splits. "
-            "Increase --max-samples or verify dataset quality/manifests."
-        )
-
-    train_examples = _filter_by_label(train_examples, label_to_id)
-    val_examples = _filter_by_label(val_examples, label_to_id)
+    train_examples, val_examples = _filter_by_topk(splits.train, splits.val, top_k=top_k)
+    labels = sorted({ex.label for ex in train_examples})
+    if not labels:
+        raise RuntimeError("No labels found after filtering. Check dataset/videos.")
+    label_to_id = {label: idx for idx, label in enumerate(labels)}
     num_classes = len(label_to_id)
+    print(f"Classes kept: {num_classes}")
+
+    x_train, y_train = _examples_to_tensors(train_examples, label_to_id)
+    x_val, y_val = _examples_to_tensors(val_examples, label_to_id)
+    if x_train.numel() == 0 or x_val.numel() == 0:
+        raise RuntimeError("Training or validation tensors are empty.")
     print(
-        f"After class filtering: train={len(train_examples)} val={len(val_examples)} "
-        f"num_classes={num_classes} top_k={top_k}"
+        f"Tensor shapes: train={tuple(x_train.shape)} val={tuple(x_val.shape)} feature_dim={x_train.shape[2]}"
     )
 
-    if not train_examples:
-        raise RuntimeError("No train examples left after class filtering.")
-    if not val_examples:
-        raise RuntimeError(
-            "No validation examples left after class filtering. "
-            "Increase --max-samples or lower --top-k to improve overlap."
-        )
-
-    train_ds = SequenceDataset(train_examples, label_to_id, seq_len)
-    val_ds = SequenceDataset(val_examples, label_to_id, seq_len)
-    print(f"Dataset tensors: seq_len={seq_len} train_size={len(train_ds)} val_size={len(val_ds)}")
-
-    train_loader = DataLoader(train_ds, batch_size=cfg["batch_size"], shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=cfg["batch_size"], shuffle=False)
-    inferred_input_dim = train_ds[0][0].shape[1]
+    train_loader = DataLoader(TensorDataset(x_train, y_train), batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=batch_size, shuffle=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = LSTMClassifier(
-        input_dim=inferred_input_dim,
-        hidden_dim=cfg["lstm_hidden"],
-        num_layers=cfg["lstm_layers"],
+        input_dim=FEATURE_DIM,
+        hidden_dim=hidden_dim,
+        num_layers=num_layers,
         num_classes=num_classes,
     ).to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=cfg["learning_rate"])
     criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    best_val_acc = 0.0
-    for epoch in range(1, cfg["epochs"] + 1):
-        tr_loss, tr_acc = _run_epoch(model, train_loader, optimizer, criterion, device)
-        va_loss, va_acc = _evaluate(model, val_loader, criterion, device) if len(val_ds) else (0.0, 0.0)
+    best_acc = -1.0
+    best_state = None
+    best_cm = None
+
+    for epoch in range(1, epochs + 1):
+        model.train()
+        running_loss = 0.0
+        running_total = 0
+        running_correct = 0
+
+        for xb, yb in train_loader:
+            xb = xb.to(device)
+            yb = yb.to(device)
+            logits = model(xb)
+            loss = criterion(logits, yb)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            running_loss += float(loss.item()) * yb.size(0)
+            pred = logits.argmax(dim=1)
+            running_correct += int((pred == yb).sum().item())
+            running_total += int(yb.size(0))
+
+        train_loss = running_loss / max(running_total, 1)
+        train_acc = running_correct / max(running_total, 1)
+        val_loss, val_acc, y_true, y_pred = _validate(model, val_loader, criterion, device)
         print(
-            f"Epoch {epoch:03d} | "
-            f"train_loss={tr_loss:.4f} train_acc={tr_acc:.4f} | "
-            f"val_loss={va_loss:.4f} val_acc={va_acc:.4f}"
+            f"Epoch {epoch:03d} | train_loss={train_loss:.4f} train_acc={train_acc:.4f} | "
+            f"val_loss={val_loss:.4f} val_acc={val_acc:.4f}"
         )
 
-        if va_acc >= best_val_acc:
-            best_val_acc = va_acc
-            torch.save(model.state_dict(), out_dir / "lstm_best.pt")
-            with open(out_dir / "label_to_id.json", "w", encoding="utf-8") as f:
-                json.dump(label_to_id, f, indent=2)
-            with open(out_dir / "lstm_meta.json", "w", encoding="utf-8") as f:
-                json.dump(
-                    {"input_dim": inferred_input_dim, "sequence_length": seq_len},
-                    f,
-                    indent=2,
-                )
+        if val_acc > best_acc:
+            best_acc = val_acc
+            best_state = {k: v.detach().cpu() for k, v in model.state_dict().items()}
+            best_cm = _build_confusion_matrix(y_true, y_pred, num_classes)
 
-    print(f"Saved best model to: {out_dir / 'lstm_best.pt'}")
+    if best_state is None:
+        raise RuntimeError("Training completed without a best model.")
+
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+    torch.save(best_state, artifacts_dir / "lstm_best.pt")
+    with (artifacts_dir / "label_to_id.json").open("w", encoding="utf-8") as f:
+        json.dump(label_to_id, f, ensure_ascii=False, indent=2)
+    meta = {
+        "dataset": dataset,
+        "feature_dim": FEATURE_DIM,
+        "sequence_length": int(x_train.shape[1]),
+        "num_classes": num_classes,
+        "top_k_classes": top_k,
+        "lstm_hidden": hidden_dim,
+        "lstm_layers": num_layers,
+        "learning_rate": lr,
+        "batch_size": batch_size,
+        "epochs": epochs,
+        "best_val_acc": best_acc,
+    }
+    with (artifacts_dir / "lstm_meta.json").open("w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    if args.save_confusion_matrix and best_cm is not None:
+        with (artifacts_dir / "confusion_matrix.json").open("w", encoding="utf-8") as f:
+            json.dump(best_cm.tolist(), f)
+        print("Saved confusion matrix to artifacts/confusion_matrix.json")
+
+    print("Saved artifacts:")
+    print("- artifacts/lstm_best.pt")
+    print("- artifacts/label_to_id.json")
+    print("- artifacts/lstm_meta.json")
+    print(f"Best validation accuracy: {best_acc:.4f}")
 
 
 if __name__ == "__main__":
     main()
-

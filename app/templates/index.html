@@ -7,41 +7,51 @@
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <main>
+  <main class="layout">
     <h1>Real-Time Sign-to-Text Translation</h1>
-    <section class="controls card">
-      <label for="gesture-mode">Gesture Category</label>
-      <select id="gesture-mode">
-        <option value="word">Word Gesture (WLASL)</option>
-        <option value="sentence">Sentence Gesture (How2Sign)</option>
-      </select>
-      <button id="start-btn" type="button">Start</button>
-      <button id="stop-btn" type="button" disabled>Stop</button>
+
+    <section class="toolbar card">
+      <button id="startBtn" class="btn primary">Start</button>
+      <button id="stopBtn" class="btn">Stop</button>
+      <button id="clearBtn" class="btn warn">Clear Sentence</button>
+      <span id="statusText" class="status">Ready.</span>
     </section>
 
-    <section class="layout">
-      <div class="card">
-        <h2>Camera Preview</h2>
-        <video id="self-view" autoplay muted playsinline></video>
-        <div id="preview-status">Requesting camera permission...</div>
-      </div>
+    <section class="grid">
+      <article class="card">
+        <h2>Webcam Feed</h2>
+        <video id="preview" autoplay playsinline muted></video>
+      </article>
 
-      <div class="card">
-        <div id="status">Connecting...</div>
-        <div id="output">(waiting for predictions)</div>
-        <div id="words-output">words: -</div>
-        <div id="sentence-output">sentence: -</div>
-        <div id="meta">
-          <span id="mode">mode: unknown</span>
-          <span id="gesture-mode-meta">gesture_mode: -</span>
-          <span id="confidence">confidence: 0.0000</span>
-          <span id="timestamp">timestamp: -</span>
+      <article class="card">
+        <div class="field">
+          <label>Current Word</label>
+          <div id="currentWord" class="value">(waiting)</div>
         </div>
-      </div>
+
+        <div class="field">
+          <label>Confidence</label>
+          <div class="conf-row">
+            <span id="confidenceValue">0.000</span>
+          </div>
+          <div class="progress-wrap">
+            <div id="confidenceBar" class="progress-fill low" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Gloss Sequence</label>
+          <div id="glossChips" class="chips"></div>
+        </div>
+
+        <div class="field">
+          <label>Corrected Sentence</label>
+          <div id="sentenceText" class="value sentence">-</div>
+        </div>
+      </article>
     </section>
   </main>
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

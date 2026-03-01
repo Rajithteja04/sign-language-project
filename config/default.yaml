@@ -1,38 +1,10 @@
-dataset: how2sign
-dataset_root: C:/Users/rajit/Datasets/How2Sign
-sequence_length: 45
-feature_dim: 411   # OpenPose-like canonical vector: (25+70+21+21)*3
-lstm_hidden: 384
+dataset: wlasl
+dataset_root: C:/Users/rajit/Datasets/WSL/WLASL-master/start_kit
+top_k_classes: 100
+sequence_length: 30
+feature_dim: 411
+lstm_hidden: 256
 lstm_layers: 2
 batch_size: 16
-learning_rate: 0.0003
+learning_rate: 0.001
 epochs: 30
-top_k_classes: 200
-max_samples_per_split: 3000
-artifacts_dir: artifacts
-
-# Realtime app settings
-camera_index: 0
-emit_interval_ms: 1000
-use_mock_inference: true
-min_pred_confidence: 0.30
-stability_frames: 3
-lstm_weights_path: artifacts/lstm_best.pt
-labels_path: artifacts/label_to_id.json
-meta_path: artifacts/lstm_meta.json
-
-# Mode-specific artifacts
-word_lstm_weights_path: artifacts/lstm_best.pt
-word_labels_path: artifacts/label_to_id.json
-word_meta_path: artifacts/lstm_meta.json
-
-sentence_lstm_weights_path: artifacts/lstm_best.pt
-sentence_labels_path: artifacts/label_to_id.json
-sentence_meta_path: artifacts/lstm_meta.json
-
-word_buffer_size: 12
-nlp_model: null
-nlp_backend: transformer   # transformer | gemini
-gemini_model: gemini-1.5-flash
-gemini_api_key: null
-

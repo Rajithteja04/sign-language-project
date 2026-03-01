@@ -1,41 +1,5 @@
-# Datasets
 How2Sign/
-datasets/
-
-# Local config (machine-specific paths)
-config/local.example.yaml
-config/local.yaml
-.env
-.env.*
-
-# Python cache and env
+artifacts/cache/
+*.part*.pt
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.venv/
-.venv311/
-.venv312/
-venv/
-
-# VS Code
-.vscode/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Model checkpoints (optional)
-checkpoints/
-*.pt
-*.pth
-*.ckpt
-
-# Logs
-logs/
-*.log
-
-
-.venv311/
-artifacts/cache/
-*.whl

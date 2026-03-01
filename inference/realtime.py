@@ -1,91 +1,157 @@
+from __future__ import annotations
+
 import argparse
-import cv2
 import json
-from collections import deque
+import time
+from collections import Counter, deque
 from pathlib import Path
+
+import cv2
 import numpy as np
 import torch
 
-from features.mediapipe_extractor import MediaPipeExtractor
+from features.mediapipe_extractor import FEATURE_DIM, MediaPipeExtractor
 from models.lstm import LSTMClassifier
-from models.transformer import TransformerCorrector
+from models.transformer import correct_text
+
+
+def normalize_openpose_like(x: np.ndarray) -> np.ndarray:
+    mean = x.mean(axis=0, keepdims=True)
+    std = x.std(axis=0, keepdims=True) + 1e-6
+    return (x - mean) / std
+
+
+def _load_artifacts(weights: str, labels: str, meta: str):
+    with open(labels, "r", encoding="utf-8") as f:
+        label_to_id = json.load(f)
+    with open(meta, "r", encoding="utf-8") as f:
+        model_meta = json.load(f)
+
+    id_to_label = {int(v): k for k, v in label_to_id.items()}
+    model = LSTMClassifier(
+        input_dim=int(model_meta["feature_dim"]),
+        hidden_dim=int(model_meta["lstm_hidden"]),
+        num_layers=int(model_meta["lstm_layers"]),
+        num_classes=int(model_meta["num_classes"]),
+    )
+    state = torch.load(weights, map_location="cpu")
+    model.load_state_dict(state)
+    model.eval()
+    return model, id_to_label, model_meta
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="how2sign")
+    parser = argparse.ArgumentParser(description="Realtime word-level sign inference")
     parser.add_argument("--weights", default="artifacts/lstm_best.pt")
     parser.add_argument("--labels", default="artifacts/label_to_id.json")
     parser.add_argument("--meta", default="artifacts/lstm_meta.json")
-    parser.add_argument("--seq-len", type=int, default=30)
-    parser.add_argument("--lstm-hidden", type=int, default=256)
-    parser.add_argument("--lstm-layers", type=int, default=2)
-    parser.add_argument("--nlp-model", default=None)
+    parser.add_argument("--camera-index", type=int, default=0)
+    parser.add_argument("--confidence-threshold", type=float, default=0.6)
+    parser.add_argument("--vote-window", type=int, default=5)
+    parser.add_argument("--cooldown-seconds", type=float, default=1.2)
     args = parser.parse_args()
 
-    cap = cv2.VideoCapture(0)
-    extractor = MediaPipeExtractor()
-    text_corrector = TransformerCorrector(model_name=args.nlp_model)
+    weights = Path(args.weights)
+    labels = Path(args.labels)
+    meta = Path(args.meta)
+    if not (weights.exists() and labels.exists() and meta.exists()):
+        raise FileNotFoundError("Missing artifacts. Expected weights/labels/meta files.")
 
-    weights_path = Path(args.weights)
-    labels_path = Path(args.labels)
-    meta_path = Path(args.meta)
-    model = None
-    id_to_label = {}
-    model_input_dim = None
-
-    if weights_path.exists() and labels_path.exists():
-        with open(labels_path, "r", encoding="utf-8") as f:
-            label_to_id = json.load(f)
-        id_to_label = {v: k for k, v in label_to_id.items()}
-
-        if meta_path.exists():
-            with open(meta_path, "r", encoding="utf-8") as f:
-                meta = json.load(f)
-            model_input_dim = int(meta.get("input_dim", 0))
-            args.seq_len = int(meta.get("sequence_length", args.seq_len))
-        else:
-            model_input_dim = 411
-
-        model = LSTMClassifier(
-            input_dim=model_input_dim,
-            hidden_dim=args.lstm_hidden,
-            num_layers=args.lstm_layers,
-            num_classes=len(id_to_label),
+    model, id_to_label, model_meta = _load_artifacts(str(weights), str(labels), str(meta))
+    seq_len = int(model_meta.get("sequence_length", 30))
+    if int(model_meta.get("feature_dim", FEATURE_DIM)) != FEATURE_DIM:
+        raise ValueError(
+            f"Feature mismatch: meta has {model_meta.get('feature_dim')} but runtime expects {FEATURE_DIM}"
         )
-        model.load_state_dict(torch.load(weights_path, map_location="cpu"))
-        model.eval()
 
-    seq_buffer = deque(maxlen=args.seq_len)
+    cap = cv2.VideoCapture(args.camera_index)
+    if not cap.isOpened():
+        raise RuntimeError(f"Cannot open camera index {args.camera_index}")
+
+    extractor = MediaPipeExtractor()
+    buffer = deque(maxlen=seq_len)
+    pred_history = deque(maxlen=args.vote_window)
+    committed_words = []
+    last_emit_ts = 0.0
+    last_word = ""
 
     while True:
-        ret, frame = cap.read()
-        if not ret:
+        ok, frame = cap.read()
+        if not ok:
             break
 
-        feats = extractor.extract(frame)
-        if model_input_dim is not None:
-            if feats.shape[0] > model_input_dim:
-                feats = feats[:model_input_dim]
-            elif feats.shape[0] < model_input_dim:
-                feats = np.pad(feats, (0, model_input_dim - feats.shape[0]))
-        seq_buffer.append(feats)
+        feat = extractor.extract(frame)
+        if feat.shape[0] != FEATURE_DIM:
+            raise ValueError(f"Runtime feature mismatch: {feat.shape[0]} != {FEATURE_DIM}")
+        buffer.append(feat)
 
-        predicted_gloss = "MODEL_NOT_LOADED"
-        if model is not None and len(seq_buffer) == args.seq_len:
-            x = torch.tensor(np.stack(seq_buffer), dtype=torch.float32).unsqueeze(0)
+        status = "Collecting gesture frames..."
+        current_pred = "-"
+        current_conf = 0.0
+
+        if len(buffer) == seq_len:
+            seq = np.asarray(buffer, dtype=np.float32)
+            seq = normalize_openpose_like(seq)
+            x = torch.tensor(seq[None, ...], dtype=torch.float32)
             with torch.no_grad():
                 logits = model(x)
-                pred_id = int(torch.argmax(logits, dim=1).item())
-            predicted_gloss = id_to_label.get(pred_id, "UNKNOWN")
+                probs = torch.softmax(logits, dim=1)
+                conf, pred_id = torch.max(probs, dim=1)
+                current_conf = float(conf.item())
+                current_pred = id_to_label.get(int(pred_id.item()), "unknown")
 
-        corrected = text_corrector.correct(predicted_gloss)
+            if current_conf >= args.confidence_threshold:
+                pred_history.append(current_pred)
+                voted = Counter(pred_history).most_common(1)[0][0]
+                now = time.time()
+                if voted != last_word and (now - last_emit_ts) >= args.cooldown_seconds:
+                    committed_words.append(voted)
+                    last_word = voted
+                    last_emit_ts = now
+                status = f"Detected: {voted}"
+            else:
+                status = "Low confidence - hold steady sign."
 
-        cv2.putText(frame, corrected, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
+        sentence = correct_text(" ".join(committed_words)) if committed_words else ""
+
+        cv2.putText(frame, status, (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+        cv2.putText(
+            frame,
+            f"pred={current_pred} conf={current_conf:.3f}",
+            (20, 65),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (0, 255, 0),
+            2,
+        )
+        cv2.putText(
+            frame,
+            f"words={' '.join(committed_words) if committed_words else '-'}",
+            (20, 100),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (255, 255, 255),
+            2,
+        )
+        cv2.putText(
+            frame,
+            f"sentence={sentence if sentence else '-'}",
+            (20, 135),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (255, 255, 255),
+            2,
+        )
         cv2.imshow("Sign Language Translation", frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"):
             break
+        if key == ord("c"):
+            committed_words.clear()
+            pred_history.clear()
+            last_word = ""
+            last_emit_ts = 0.0
 
     cap.release()
     cv2.destroyAllWindows()

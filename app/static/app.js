@@ -1,160 +1,113 @@
-const statusEl = document.getElementById("status");
-const outputEl = document.getElementById("output");
-const wordsOutputEl = document.getElementById("words-output");
-const sentenceOutputEl = document.getElementById("sentence-output");
-const modeEl = document.getElementById("mode");
-const gestureModeMetaEl = document.getElementById("gesture-mode-meta");
-const confidenceEl = document.getElementById("confidence");
-const timestampEl = document.getElementById("timestamp");
-const selfViewEl = document.getElementById("self-view");
-const previewStatusEl = document.getElementById("preview-status");
-const modeSelectEl = document.getElementById("gesture-mode");
-const startBtnEl = document.getElementById("start-btn");
-const stopBtnEl = document.getElementById("stop-btn");
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const clearBtn = document.getElementById("clearBtn");
+const statusText = document.getElementById("statusText");
+const currentWord = document.getElementById("currentWord");
+const confidenceValue = document.getElementById("confidenceValue");
+const confidenceBar = document.getElementById("confidenceBar");
+const glossChips = document.getElementById("glossChips");
+const sentenceText = document.getElementById("sentenceText");
+const preview = document.getElementById("preview");
 
-let previewStream = null;
-let recognitionRunning = false;
-let framePumpTimer = null;
-const frameCanvas = document.createElement("canvas");
-
-function setStatus(msg) {
-  statusEl.textContent = msg;
+async function postJson(url) {
+  const response = await fetch(url, { method: "POST" });
+  if (!response.ok) throw new Error(`Request failed: ${url}`);
+  return response.json();
 }
 
-function setPreviewStatus(msg) {
-  previewStatusEl.textContent = msg;
+function setConfidence(conf) {
+  const c = Number(conf || 0);
+  const pct = Math.max(0, Math.min(100, c * 100));
+  confidenceValue.textContent = c.toFixed(3);
+  confidenceBar.style.width = `${pct}%`;
+  confidenceBar.classList.remove("low", "mid", "high");
+  if (c > 0.7) {
+    confidenceBar.classList.add("high");
+  } else if (c >= 0.5) {
+    confidenceBar.classList.add("mid");
+  } else {
+    confidenceBar.classList.add("low");
+  }
 }
 
-function setPrediction(payload) {
-  if (!payload) return;
-  outputEl.textContent = payload.text || "(no text)";
-  const words = Array.isArray(payload.words) ? payload.words.join(" ") : "";
-  wordsOutputEl.textContent = `words: ${words || "-"}`;
-  sentenceOutputEl.textContent = `sentence: ${payload.sentence || "-"}`;
-  modeEl.textContent = `mode: ${payload.mode || "unknown"}`;
-  gestureModeMetaEl.textContent = `gesture_mode: ${payload.gesture_mode || "-"}`;
-  const c = Number(payload.confidence || 0);
-  confidenceEl.textContent = `confidence: ${c.toFixed(4)}`;
-  timestampEl.textContent = `timestamp: ${payload.timestamp || "-"}`;
-}
-
-async function initCameraPreview() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setPreviewStatus("Browser camera API not supported.");
+function renderGlossChips(words) {
+  glossChips.innerHTML = "";
+  if (!words || words.length === 0) {
+    const chip = document.createElement("span");
+    chip.className = "chip muted";
+    chip.textContent = "-";
+    glossChips.appendChild(chip);
     return;
   }
+  words.forEach((word) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = word;
+    glossChips.appendChild(chip);
+  });
+}
 
+function updateFromState(state) {
+  statusText.textContent = state.status || "Unknown";
+  currentWord.textContent = state.current_word || "-";
+  setConfidence(state.confidence || 0);
+  renderGlossChips(state.committed_words || []);
+  sentenceText.textContent = state.corrected_sentence || "-";
+  startBtn.disabled = Boolean(state.running);
+  stopBtn.disabled = !Boolean(state.running);
+}
+
+async function pollState() {
   try {
-    previewStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    selfViewEl.srcObject = previewStream;
-    setPreviewStatus("Camera preview active.");
-  } catch (err) {
-    setPreviewStatus(`Camera preview unavailable: ${err.message || err}`);
-  }
-}
-
-function stopPreview() {
-  if (!previewStream) return;
-  for (const track of previewStream.getTracks()) {
-    track.stop();
-  }
-  previewStream = null;
-  selfViewEl.srcObject = null;
-}
-
-function setControls(isRunning) {
-  recognitionRunning = isRunning;
-  modeSelectEl.disabled = isRunning;
-  startBtnEl.disabled = isRunning;
-  stopBtnEl.disabled = !isRunning;
-}
-
-function startFramePump() {
-  if (framePumpTimer) return;
-  framePumpTimer = setInterval(() => {
-    if (!recognitionRunning) return;
-    if (!previewStream || !selfViewEl.videoWidth || !selfViewEl.videoHeight) return;
-    if (!socket || !socket.connected) return;
-
-    frameCanvas.width = selfViewEl.videoWidth;
-    frameCanvas.height = selfViewEl.videoHeight;
-    const ctx = frameCanvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(selfViewEl, 0, 0, frameCanvas.width, frameCanvas.height);
-    const jpeg = frameCanvas.toDataURL("image/jpeg", 0.75);
-    socket.emit("browser_frame", { image: jpeg });
-  }, 100); // ~10 FPS
-}
-
-async function startRecognition() {
-  const mode = modeSelectEl.value;
-  setStatus(`Starting ${mode} recognition...`);
-
-  try {
-    const resp = await fetch("/session/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode }),
-    });
-    const data = await resp.json();
-    if (!resp.ok || !data.ok) {
-      setStatus(data.error || "Failed to start session.");
-      setControls(false);
-      return;
-    }
-    setControls(true);
-    setStatus(`Running ${mode} recognition.`);
-  } catch (err) {
-    setStatus(`Start failed: ${err.message || err}`);
-    setControls(false);
-  }
-}
-
-async function stopRecognition() {
-  try {
-    await fetch("/session/stop", { method: "POST" });
+    const res = await fetch("/state");
+    if (!res.ok) return;
+    const state = await res.json();
+    updateFromState(state);
   } catch (_err) {
-    // no-op; UI will still transition back
+    statusText.textContent = "Backend disconnected.";
   }
-  setControls(false);
-  setStatus("Recognition stopped. Adjust and click Start.");
 }
 
-setStatus("Connecting to realtime server...");
-initCameraPreview();
-startFramePump();
-setControls(false);
+async function initPreview() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusText.textContent = "Camera API unsupported in this browser.";
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    preview.srcObject = stream;
+  } catch (_err) {
+    statusText.textContent = "Camera preview permission denied or unavailable.";
+  }
+}
 
-const socket = io();
-
-socket.on("connect", () => {
-  setStatus("Connected. Waiting for stream...");
-});
-
-socket.on("disconnect", () => {
-  setStatus("Disconnected from server.");
-  setControls(false);
-});
-
-socket.on("status", (payload) => {
-  if (payload && payload.message) {
-    setStatus(payload.message);
+startBtn.addEventListener("click", async () => {
+  try {
+    const data = await postJson("/start");
+    updateFromState(data.state);
+  } catch (_err) {
+    statusText.textContent = "Failed to start recognition.";
   }
 });
 
-socket.on("runtime", (payload) => {
-  if (!payload) return;
-  setControls(payload.session_state === "running");
-  if (payload.gesture_mode) {
-    modeSelectEl.value = payload.gesture_mode;
+stopBtn.addEventListener("click", async () => {
+  try {
+    const data = await postJson("/stop");
+    updateFromState(data.state);
+  } catch (_err) {
+    statusText.textContent = "Failed to stop recognition.";
   }
 });
 
-socket.on("prediction", (payload) => {
-  setPrediction(payload);
+clearBtn.addEventListener("click", async () => {
+  try {
+    const data = await postJson("/reset");
+    updateFromState(data.state);
+  } catch (_err) {
+    statusText.textContent = "Failed to clear sentence.";
+  }
 });
 
-startBtnEl.addEventListener("click", startRecognition);
-stopBtnEl.addEventListener("click", stopRecognition);
-
-window.addEventListener("beforeunload", stopPreview);
+initPreview();
+pollState();
+setInterval(pollState, 500);

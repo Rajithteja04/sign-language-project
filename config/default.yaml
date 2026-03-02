@@ -5,6 +5,6 @@ sequence_length: 30
 feature_dim: 411
 lstm_hidden: 256
 lstm_layers: 2
-batch_size: 16
+batch_size: 8
 learning_rate: 0.001
 epochs: 30

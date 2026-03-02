@@ -55,7 +55,7 @@ def _safe_int(value, default: int | None = None) -> int | None:
         return default
 
 
-def _iter_samples_from_json(items: Iterable[dict]) -> Iterable[dict]:
+def _iter_samples_from_json(items: Iterable[dict], available_ids: set[str] | None = None) -> Iterable[dict]:
     for entry in items:
         gloss = str(entry.get("gloss", "")).strip().lower()
         if not gloss:
@@ -63,10 +63,12 @@ def _iter_samples_from_json(items: Iterable[dict]) -> Iterable[dict]:
         instances = entry.get("instances", []) or []
         for ins in instances:
             split = str(ins.get("split", "")).strip().lower()
-            if split not in {"train", "test"}:
+            if split not in {"train", "val", "test"}:
                 continue
             video_id = str(ins.get("video_id", "")).strip()
             if not video_id:
+                continue
+            if available_ids is not None and video_id not in available_ids:
                 continue
             start = _safe_int(ins.get("frame_start"))
             end = _safe_int(ins.get("frame_end"))
@@ -74,9 +76,7 @@ def _iter_samples_from_json(items: Iterable[dict]) -> Iterable[dict]:
             if start is None or end is None:
                 continue
             start0 = max(0, start - 1)
-            end0 = max(0, end - 1)
-            if end0 <= start0:
-                continue
+            end0 = end - 1
             yield {
                 "gloss": gloss,
                 "split": split,
@@ -88,7 +88,7 @@ def _iter_samples_from_json(items: Iterable[dict]) -> Iterable[dict]:
             }
 
 
-def _iter_samples_from_csv(path: Path) -> Iterable[dict]:
+def _iter_samples_from_csv(path: Path, available_ids: set[str] | None = None) -> Iterable[dict]:
     with path.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -98,14 +98,14 @@ def _iter_samples_from_csv(path: Path) -> Iterable[dict]:
             start = _safe_int(row.get("frame_start"))
             end = _safe_int(row.get("frame_end"))
             fps = _safe_int(row.get("fps"), default=25) or 25
-            if not gloss or split not in {"train", "test"} or not video_id:
+            if not gloss or split not in {"train", "val", "test"} or not video_id:
+                continue
+            if available_ids is not None and video_id not in available_ids:
                 continue
             if start is None or end is None:
                 continue
             start0 = max(0, start - 1)
-            end0 = max(0, end - 1)
-            if end0 <= start0:
-                continue
+            end0 = end - 1
             yield {
                 "gloss": gloss,
                 "split": split,
@@ -139,6 +139,32 @@ def _cache_path(cache_dir: Path, sample: dict) -> Path:
     return cache_dir / key
 
 
+def _normalize_frame(features: np.ndarray) -> np.ndarray:
+    pose_count = MediaPipeExtractor.POSE_COUNT
+    total_points = FEATURE_DIM // 3
+    if features.shape[0] != FEATURE_DIM:
+        return features
+    if pose_count <= 12 or total_points <= 0:
+        return features
+
+    left_idx = 11
+    right_idx = 12
+    l_off = left_idx * 3
+    r_off = right_idx * 3
+    lx, ly, lz = features[l_off:l_off + 3]
+    rx, ry, rz = features[r_off:r_off + 3]
+
+    torso_center = np.asarray([(lx + rx) * 0.5, (ly + ry) * 0.5], dtype=np.float32)
+    shoulder_dist = float(np.hypot(lx - rx, ly - ry))
+    if shoulder_dist <= 1e-6:
+        return features
+
+    pts = features.reshape(-1, 3).copy()
+    pts[:, 0:2] -= torso_center
+    pts /= (shoulder_dist + 1e-6)
+    return pts.reshape(-1)
+
+
 def _extract_segment_sequence(
     sample: dict,
     video_path: Path,
@@ -147,6 +173,7 @@ def _extract_segment_sequence(
     use_bbox_crop: bool,
     cache_features: bool,
     cache_dir: Path | None,
+    normalize: bool,
 ) -> List[np.ndarray]:
     if cache_features and cache_dir is not None:
         cpath = _cache_path(cache_dir, sample)
@@ -159,12 +186,21 @@ def _extract_segment_sequence(
 
     reader = cv2.VideoCapture(str(video_path))
     if not reader.isOpened():
-        print(f"WARNING: Missing or corrupted video: {video_path}")
         return []
 
     start_frame = int(sample["frame_start"])
     end_frame = int(sample["frame_end"])
     reader.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+
+    if end_frame < start_frame:
+        total_frames = int(reader.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+        if total_frames <= 0:
+            reader.release()
+            return []
+        end_frame = total_frames - 1
+    if end_frame < start_frame:
+        reader.release()
+        return []
 
     frames: List[np.ndarray] = []
     for _ in range(start_frame, end_frame + 1):
@@ -177,7 +213,6 @@ def _extract_segment_sequence(
     reader.release()
 
     if not frames:
-        print(f"WARNING: Empty/incomplete segment for video: {video_path}")
         return []
 
     idxs = _sample_indices(len(frames), seq_len)
@@ -186,6 +221,8 @@ def _extract_segment_sequence(
         vec = extractor.extract(frames[int(i)])
         if vec.shape[0] != FEATURE_DIM:
             raise ValueError(f"Feature mismatch in {video_path}: {vec.shape[0]} != {FEATURE_DIM}")
+        if normalize:
+            vec = _normalize_frame(vec)
         seq.append(vec.astype(np.float32))
 
     while len(seq) < seq_len:
@@ -229,6 +266,7 @@ def load_wlasl(
     cache_features: bool = False,
     cache_dir: str | None = None,
     use_bbox_crop: bool = False,
+    normalize: bool = False,
 ) -> DatasetSplit:
     dataset_root = Path(root)
     if not dataset_root.exists():
@@ -240,12 +278,20 @@ def load_wlasl(
     meta_file = _discover_metadata_file(dataset_root)
     print(f"WLASL metadata file: {meta_file.name}")
 
+    available_ids: set[str] = set()
+    for p in videos_dir.iterdir():
+        if p.is_file():
+            if p.suffix:
+                available_ids.add(p.stem)
+            else:
+                available_ids.add(p.name)
+
     if meta_file.suffix.lower() == ".json":
         with meta_file.open("r", encoding="utf-8") as f:
             raw = json.load(f)
-        all_samples = list(_iter_samples_from_json(raw))
+        all_samples = list(_iter_samples_from_json(raw, available_ids=available_ids))
     else:
-        all_samples = list(_iter_samples_from_csv(meta_file))
+        all_samples = list(_iter_samples_from_csv(meta_file, available_ids=available_ids))
 
     if not all_samples:
         print("WARNING: No valid WLASL samples found after metadata parsing.")
@@ -268,8 +314,13 @@ def load_wlasl(
         selected = limited
 
     train_raw = [s for s in selected if s["split"] == "train"]
+    val_raw = [s for s in selected if s["split"] == "val"]
     test_raw = [s for s in selected if s["split"] == "test"]
-    train_raw, val_raw = _holdout_to_val(train_raw, val_ratio=val_ratio)
+    if not val_raw:
+        train_raw, val_raw = _holdout_to_val(train_raw, val_ratio=val_ratio)
+    elif val_ratio > 0:
+        extra_train, extra_val = _holdout_to_val(train_raw, val_ratio=val_ratio)
+        train_raw, val_raw = extra_train, (val_raw + extra_val)
 
     extractor = MediaPipeExtractor()
     cache_root = Path(cache_dir) if cache_dir else Path("artifacts/cache/wlasl_features")
@@ -281,7 +332,6 @@ def load_wlasl(
         for s in raw_samples:
             video_path = _resolve_video_path(videos_dir, s["video_id"])
             if video_path is None:
-                print(f"WARNING: Missing or corrupted video: {videos_dir / s['video_id']}")
                 continue
             seq = _extract_segment_sequence(
                 sample=s,
@@ -291,6 +341,7 @@ def load_wlasl(
                 use_bbox_crop=use_bbox_crop,
                 cache_features=cache_features,
                 cache_dir=cache_root if cache_features else None,
+                normalize=normalize,
             )
             if not seq:
                 continue

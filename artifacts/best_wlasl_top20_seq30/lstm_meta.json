@@ -1,0 +1,13 @@
+{
+  "dataset": "wlasl",
+  "feature_dim": 411,
+  "sequence_length": 30,
+  "num_classes": 20,
+  "top_k_classes": 20,
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "learning_rate": 0.001,
+  "batch_size": 8,
+  "epochs": 25,
+  "best_val_acc": 0.25
+}

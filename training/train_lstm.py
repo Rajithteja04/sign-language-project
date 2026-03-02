@@ -104,6 +104,8 @@ def main():
     parser.add_argument("--cache-features", action="store_true")
     parser.add_argument("--cache-dir", default="artifacts/cache/wlasl_features")
     parser.add_argument("--use-bbox-crop", action="store_true")
+    parser.add_argument("--seq-len", type=int, default=None)
+    parser.add_argument("--normalize", action="store_true")
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--learning-rate", type=float, default=None)
@@ -125,7 +127,7 @@ def main():
         raise ValueError("dataset_root is required (arg or config/default.yaml)")
 
     top_k = args.top_k if args.top_k is not None else int(cfg.get("top_k_classes", 100))
-    seq_len = int(cfg.get("sequence_length", 30))
+    seq_len = args.seq_len if args.seq_len is not None else int(cfg.get("sequence_length", 30))
     epochs = args.epochs if args.epochs is not None else int(cfg.get("epochs", 30))
     batch_size = args.batch_size if args.batch_size is not None else int(cfg.get("batch_size", 16))
     lr = args.learning_rate if args.learning_rate is not None else float(cfg.get("learning_rate", 1e-3))
@@ -143,6 +145,7 @@ def main():
         cache_features=args.cache_features,
         cache_dir=args.cache_dir,
         use_bbox_crop=args.use_bbox_crop,
+        normalize=args.normalize,
     )
     print(f"Loaded splits: train={len(splits.train)} val={len(splits.val)} test={len(splits.test)}")
 

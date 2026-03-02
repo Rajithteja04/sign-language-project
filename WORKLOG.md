@@ -55,3 +55,13 @@
 - Comparison summary: Best val acc across runs is 0.2812 (Run 3, seq_len=30, top_k=20, hidden_dim=128, layers=2).
 - Comparison summary: Seq-len impact (30 -> 45, layers=2, hidden_dim=128, top_k=20) decreased best val acc from 0.2812 to 0.2656.
 - Comparison summary: Layers impact (2 -> 1, seq_len=30, hidden_dim=128, top_k=20) decreased best val acc from 0.2812 to 0.2344.
+
+## 2026-03-02 - ASL Alphabet Training Script (Standalone)
+
+- Change: Rewrote `training/train_asl_alphabet.py` to be standalone for ASL alphabet images using `MediaPipeExtractor` and `LSTMClassifier` without touching WLASL code; reason: prepare ASL-only pipeline; outcome: supports max 500 images per class, stratified 80/20 split, seq_len=1, DataLoader batching, GPU/CPU selection, and saves model + label map.
+- Change: Added repo-root `mediapipe_extractor.py` shim importing from `features.mediapipe_extractor`; reason: satisfy `from mediapipe_extractor import MediaPipeExtractor` without altering WLASL code; outcome: ASL training script can import successfully.
+- Run 1: `python -m training.train_asl_alphabet` (dataset root `D:\personal\Project\Datasets\ASL\asl_alphabet_train\asl_alphabet_train`, max 500 images/class, batch_size=64, epochs=20) -> best val acc=0.3666.
+- Change: Upgraded `training/train_asl_alphabet.py` with CLI args, per-class sampling cap, shoulder-based normalization, and mini-batch training; reason: improve scalability and control for ASL-only training; outcome: configurable runs with explicit summary metrics.
+- Run 2: `python -m training.train_asl_alphabet` (defaults: max_images_per_class=1000, batch_size=128, epochs=50, hidden_dim=256, layers=2, lr=5e-4) -> total=29000, train=23200, val=5800, best val acc=0.2974.
+- Change: Added standalone `training/train_asl_cnn.py` for ASL alphabet CNN training with ImageFolder, 4-block Conv+BN+Pool, ImageNet normalization, CLI-configurable batch/epochs/lr/img-size, and test-set evaluation; reason: provide CNN baseline for ASL alphabet without touching WLASL or MediaPipe code; outcome: script saves `artifacts/asl_cnn_best.pt` and label map plus prints per-epoch metrics and test accuracy.
+- Change: Simplified `training/train_asl_cnn.py` to train/validate only on the train folder with an 80/20 random split; reason: test folder is flat (no class subfolders) and incompatible with ImageFolder; outcome: best model saved from validation and run summary printed without test evaluation.

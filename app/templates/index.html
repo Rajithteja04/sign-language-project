@@ -3,31 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Real-Time Sign Language Word Recognition System</title>
+  <title>How2Sign Real-Time Phrase Demo</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
   <main class="layout">
-    <h1>Real-Time Sign Language Word Recognition System</h1>
+    <h1>How2Sign Real-Time Phrase Demo</h1>
     <section id="modelBanner" class="banner">Model status: checking...</section>
 
     <section class="toolbar card">
       <button id="startBtn" class="btn primary">Start</button>
       <button id="stopBtn" class="btn">Stop</button>
-      <button id="clearBtn" class="btn warn">Clear Sentence</button>
+      <button id="clearBtn" class="btn warn">Reset Session</button>
       <span id="statusText" class="status">Ready.</span>
     </section>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Webcam Feed</h2>
+    <section class="grid primary">
+      <article class="card capture-card">
+        <h2>Module I ? MediaPipe Landmark Extraction (Feature Generation)</h2>
         <img id="preview" alt="Live webcam feed" />
+        <p class="helper-text">
+          This module extracts skeletal landmarks from each video frame using MediaPipe. The captured pose, face, and hand landmarks are stacked into a fixed-length vector that feeds later training stages.
+        </p>
+        <details class="debug-panel">
+          <summary>Live Extraction Dashboard</summary>
+          <div class="module-section">
+            <h3>Frame Processing</h3>
+            <div class="debug-grid">
+              <div class="debug-row"><span>Processed Frames</span><span id="dbgFrameCount">0</span></div>
+              <div class="debug-row"><span>Frame Resolution</span><span id="dbgResolution">-</span></div>
+            </div>
+          </div>
+          <div class="module-section">
+            <h3>Landmark Detection</h3>
+            <p class="landmark-hint">Pose landmarks expected: 33 ? Face: 468 ? Hands: 21 per hand</p>
+            <div class="debug-grid">
+              <div class="debug-row"><span>Pose Landmarks</span><span id="dbgPose">0</span></div>
+              <div class="debug-row"><span>Face Landmarks</span><span id="dbgFace">0</span></div>
+              <div class="debug-row"><span>Left Hand Landmarks</span><span id="dbgLeft">0</span></div>
+              <div class="debug-row"><span>Right Hand Landmarks</span><span id="dbgRight">0</span></div>
+              <div class="debug-row"><span>Total Landmarks</span><span id="dbgTotal">0</span></div>
+            </div>
+          </div>
+          <div class="module-section">
+            <h3>Feature Vector Generation</h3>
+            <p class="feature-hint">Each frame is converted into a 411-dimensional feature vector combining pose, face, and hand landmarks.</p>
+            <div class="debug-grid">
+              <div class="debug-row"><span>Feature Vector Dimension</span><span id="dbgDim">411</span></div>
+              <div class="debug-row"><span>Normalization Applied</span><span id="dbgNorm">True</span></div>
+            </div>
+          </div>
+          <p class="module-note">
+            Output of Module I: for every video frame, MediaPipe extracts skeletal landmarks and converts them into normalized feature vectors. These vectors feed Module II (BiLSTM) for gesture recognition.
+          </p>
+        </details>
+        <div id="mockWarning" class="mock-warning">System Mode: Module I Demonstration (Feature Extraction Only)</div>
       </article>
 
-      <article class="card">
+      <article id="predictionCard" class="card prediction-card">
         <div class="field">
-          <label>Current Word</label>
-          <div id="currentWord" class="value current-word">(waiting)</div>
+          <label>Detected Sentence</label>
+          <div id="detectedSentence" class="value detected">Detecting gesture...</div>
         </div>
 
         <div class="field">
@@ -41,30 +77,33 @@
         </div>
 
         <div class="field">
-          <label>Gloss Sequence</label>
-          <div id="glossChips" class="chips"></div>
+          <label>Phrase History</label>
+          <div id="glossChips" class="chips history"></div>
         </div>
 
         <div class="field">
-          <label>Corrected Sentence</label>
-          <div id="sentenceText" class="value sentence">-</div>
+          <label>Session Summary</label>
+          <div id="sessionSummary" class="value sentence">-</div>
         </div>
 
-        <details class="debug-panel">
-          <summary>Module I - Spatial Feature Extraction Details</summary>
-          <div class="debug-grid">
-            <div class="debug-row"><span>Frame Count</span><span id="dbgFrameCount">0</span></div>
-            <div class="debug-row"><span>Resolution</span><span id="dbgResolution">-</span></div>
-            <div class="debug-row"><span>Pose Landmarks</span><span id="dbgPose">0</span></div>
-            <div class="debug-row"><span>Face Landmarks</span><span id="dbgFace">0</span></div>
-            <div class="debug-row"><span>Left Hand Landmarks</span><span id="dbgLeft">0</span></div>
-            <div class="debug-row"><span>Right Hand Landmarks</span><span id="dbgRight">0</span></div>
-            <div class="debug-row"><span>Total Landmarks</span><span id="dbgTotal">0</span></div>
-            <div class="debug-row"><span>Feature Vector Dimension</span><span id="dbgDim">411</span></div>
-            <div class="debug-row"><span>Normalization Applied</span><span id="dbgNorm">True</span></div>
-          </div>
-        </details>
-        <div id="mockWarning" class="mock-warning hidden">Warning: Predictions are simulated (mock mode).</div>
+      </article>
+    </section>
+
+    <section class="grid secondary">
+      <article class="card gestures-card">
+        <h2>Demo Gestures</h2>
+        <div id="demoGestures" class="chips legend"></div>
+      </article>
+
+      <article class="card info-card">
+        <h2>System Info</h2>
+        <ul class="info-list">
+          <li><span>Dataset</span><span id="infoDataset">How2Sign</span></li>
+          <li><span>Training Samples</span><span id="infoTrain">-</span></li>
+          <li><span>Validation Samples</span><span id="infoVal">-</span></li>
+          <li><span>Model</span><span id="infoModel">-</span></li>
+          <li><span>Sequence Length</span><span id="infoSeq">-</span></li>
+        </ul>
       </article>
     </section>
   </main>

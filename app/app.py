@@ -46,6 +46,14 @@ class WordRealtimeService:
 
         self.model = None
         self.id_to_label: dict[int, str] = {}
+        self.class_labels: list[str] = []
+        self.system_info = {
+            "dataset": "How2Sign",
+            "train_samples": 192,
+            "val_samples": 41,
+            "model": "BiLSTM (128 hidden units)",
+            "sequence_length": 30,
+        }
         self.seq_len = 30
         self.extractor = MediaPipeExtractor()
         self.camera = camera_manager
@@ -83,7 +91,10 @@ class WordRealtimeService:
                 m = json.load(f)
 
             self.id_to_label = {int(v): k for k, v in label_to_id.items()}
+            self.class_labels = [label for label, _ in sorted(label_to_id.items(), key=lambda kv: kv[1])]
             self.seq_len = int(m.get("sequence_length", 30))
+            self.system_info["sequence_length"] = self.seq_len
+            self.system_info["model"] = "BiLSTM (128 hidden units)"
 
             model = LSTMClassifier(
                 input_dim=int(m["feature_dim"]),
@@ -106,6 +117,7 @@ class WordRealtimeService:
         except Exception as exc:
             self.source_mode = "mock"
             self.status = f"Model load failed ({exc}). Running in mock mode."
+            self.class_labels = []
 
     def _reset_buffers(self) -> None:
         self.vote_buffer.clear()
@@ -241,6 +253,8 @@ class WordRealtimeService:
                 "gloss_sequence": " ".join(self.committed_words),
                 "corrected_sentence": self.corrected_sentence,
                 "mode": self.source_mode,
+                "class_labels": list(self.class_labels),
+                "system_info": dict(self.system_info),
                 "debug_module1": dict(self.debug_module1),
             }
 

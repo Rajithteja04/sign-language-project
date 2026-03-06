@@ -80,3 +80,10 @@
 - Change: Snapshot folder now also includes cache size token (from cache filename) in the tag (e.g., `how2sign_20000_...`); reason: distinguish runs by dataset size; outcome: artifacts are uniquely named per cache size.
 - Change: Updated `config/default.yaml` dataset_root to `D:/personal/Project/Datasets/How2Sign`; reason: ensure How2Sign training shows correct root by default; outcome: dataset_root now points to How2Sign unless overridden.
 - Run 3: `python -m training.train_how2sign_lstm --cache-path "artifacts\cache\how2sign_cache_9000.pt" --top-k 5 --seq-len 60 --hidden-dim 128 --layers 1 --split-mode pooled --epochs 60 --lr 5e-4 --dropout 0.1 --bidirectional` -> pooled split sizes train=62, val=14; best val acc=0.6429; saved snapshot to `artifacts\how2sign_top5_seq60_bi`.
+
+## 2026-03-06 - Module I UI Demo Mode
+
+- Change: Refined realtime UI to highlight MediaPipe-only demo when running in mock mode; reason: presentation focuses on Module I feature extraction; outcome: prediction card hides automatically in mock mode and banner text clarifies system state.
+- Change: `app/templates/index.html` now describes Module I workflow (frame processing, landmark detection, feature vector generation) with updated copy and helper text; reason: make the panel self-explanatory for reviewers; outcome: clear messaging about MediaPipe’s role.
+- Change: `app/static/styles.css` adds styling for the new sections, helper hints, and module note; reason: improve readability and structure; outcome: cleaner spacing and typography for the extraction dashboard.
+- Change: `app/static/app.js` now toggles prediction UI based on mock mode, renders demo gesture legend/system info, and smooths detections with a confidence threshold; reason: align frontend behavior with Module I-only demo requirements; outcome: no predictions shown during feature-only runs while keeping diagnostic data live.

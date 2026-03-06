@@ -1,5 +1,5 @@
 dataset: wlasl
-dataset_root: C:/Users/rajit/Datasets/WSL/WLASL-master/start_kit
+dataset_root: D:/personal/Project/Datasets/How2Sign
 top_k_classes: 100
 sequence_length: 30
 feature_dim: 411

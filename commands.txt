@@ -1,2 +1,36 @@
 .venv311\Scripts\Activate.ps1
 python -m app.app
+
+After preprocess.py, you should see:
+
+start_kit/
+    videos/
+        <video_samples>.mp4
+    WLASL_v0.3.json
+
+Before training, test metadata parsing:
+python -m training.train_lstm --dataset wlasl --dataset-root "C:\path\to\start_kit" --max-samples 50
+
+This should print:
+    Loaded train/val/test counts
+    Top-k gloss selection
+If it crashes → fix before heavy training.
+
+Build Feature Cache
+python -m training.train_lstm ^
+--dataset wlasl ^
+--dataset-root "C:\path\to\start_kit" ^
+--cache-features ^
+--cache-dir artifacts/cache/wlasl_features ^
+--top-k 100 ^
+--epochs 30
+
+What this does:
+Extracts MediaPipe features once
+Saves them to .pt files
+Then trains LSTM on cached features
+Saves:
+    lstm_best.pt
+    label_to_id.json
+    lstm_meta.json
+    

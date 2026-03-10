@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediaPipe Holistic Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090f;
+    --surface: #0e1220;
+    --border: #1e2540;
+    --glow-blue: #3b82f6;
+    --glow-cyan: #06b6d4;
+    --glow-violet: #8b5cf6;
+    --glow-green: #10b981;
+    --glow-orange: #f59e0b;
+    --glow-pink: #ec4899;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(59,130,246,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 35% at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 760px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 52px;
+  }
+
+  header .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--glow-cyan);
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  header h1 span {
+    color: var(--glow-blue);
+  }
+
+  header p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── Pipeline container ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── Each stage card ── */
+  .stage {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+    position: relative;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise 0.5s ease forwards;
+  }
+
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .stage:hover::before { opacity: 1; }
+
+  /* Color variants */
+  .stage.blue   { --c: var(--glow-blue);   }
+  .stage.cyan   { --c: var(--glow-cyan);   }
+  .stage.violet { --c: var(--glow-violet); }
+  .stage.green  { --c: var(--glow-green);  }
+  .stage.orange { --c: var(--glow-orange); }
+  .stage.pink   { --c: var(--glow-pink);   }
+
+  .stage::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--c), transparent);
+    border-radius: 14px 14px 0 0;
+  }
+
+  .stage:hover {
+    border-color: color-mix(in srgb, var(--c) 40%, transparent);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--c) 12%, transparent);
+  }
+
+  /* Stage delays */
+  .stage:nth-child(1)  { animation-delay: 0.05s; }
+  .stage:nth-child(3)  { animation-delay: 0.15s; }
+  .stage:nth-child(5)  { animation-delay: 0.25s; }
+  .stage:nth-child(7)  { animation-delay: 0.35s; }
+  .stage:nth-child(9)  { animation-delay: 0.45s; }
+  .stage:nth-child(11) { animation-delay: 0.55s; }
+  .stage:nth-child(13) { animation-delay: 0.65s; }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stage-inner {
+    padding: 20px 24px 22px;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .stage-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .stage-content {}
+
+  .stage-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .stage-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 20%, transparent);
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .stage-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .stage-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+
+  /* Bullet pills */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 18%, transparent);
+    padding: 3px 9px;
+    border-radius: 100px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Special: MediaPipe tri-split ── */
+  .mediapipe-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .mp-region {
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+  }
+
+  .mp-region-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .mp-region.pose  .mp-region-title { color: var(--glow-blue); }
+  .mp-region.face  .mp-region-title { color: var(--glow-cyan); }
+  .mp-region.hands .mp-region-title { color: var(--glow-violet); }
+
+  .mp-region p {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .mp-region .count {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .mp-region.pose  .count { color: var(--glow-blue); }
+  .mp-region.face  .count { color: var(--glow-cyan); }
+  .mp-region.hands .count { color: var(--glow-violet); }
+
+  /* ── Arrow connector ── */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 36px;
+    justify-content: center;
+    gap: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    animation: rise 0.4s ease forwards;
+  }
+
+  .connector:nth-child(2)  { animation-delay: 0.10s; }
+  .connector:nth-child(4)  { animation-delay: 0.20s; }
+  .connector:nth-child(6)  { animation-delay: 0.30s; }
+  .connector:nth-child(8)  { animation-delay: 0.40s; }
+  .connector:nth-child(10) { animation-delay: 0.50s; }
+  .connector:nth-child(12) { animation-delay: 0.60s; }
+
+  .connector .line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(to bottom, var(--border), color-mix(in srgb, var(--glow-blue) 30%, var(--border)));
+  }
+
+  .connector .arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid color-mix(in srgb, var(--glow-blue) 50%, var(--border));
+  }
+
+  /* ── Output card ── */
+  .output-badge {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .badge-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .badge-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--glow-green);
+  }
+
+  .badge-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  /* footer */
+  footer {
+    margin-top: 40px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="label">System Architecture</div>
+    <h1>MediaPipe <span>Holistic</span> Pipeline</h1>
+    <p>Landmark extraction & feature vector generation for gesture recognition</p>
+  </header>
+
+  <div class="pipeline">
+
+    <!-- 1. Input -->
+    <div class="stage blue" style="animation-delay:0.05s">
+      <div class="stage-inner">
+        <div class="stage-icon">🎥</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">01 · Input</span>
+            <span class="stage-title">Live Webcam Video Stream</span>
+          </div>
+          <p class="stage-desc">Continuous real-time video captured from the user's webcam. Each frame is passed downstream for processing.</p>
+          <div class="pills">
+            <span class="pill">Continuous frames</span>
+            <span class="pill">Real-time capture</span>
+            <span class="pill">RGB video</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="line"></div><div class="arrow"></div></div>
+
+    <!-- 2. Frame Capture -->
+    <div class="stage cyan" style="animation-delay:0.15s">
+      <div class="stage-inner">
+        <div class="stage-icon">🖼️</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">02 · Capture</span>
+            <span class="stage-title">Frame Capture Layer</span>
+          </div>
+          <p class="stage-desc">Webcam captures live frames at regular intervals. Each frame is decoded and buffered for landmark detection.</p>
+          <div class="pills">
+            <span class="pill">Frame decode</span>
+            <span class="pill">Buffer management</span>
+            <span class="pill">Preprocessing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="line"></div><div class="arrow"></div></div>
+
+    <!-- 3. MediaPipe -->
+    <div class="stage violet" style="animation-delay:0.25s">
+      <div class="stage-inner">
+        <div class="stage-icon">🧠</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">03 · Detection</span>
+            <span class="stage-title">MediaPipe Holistic Landmark Model</span>
+          </div>
+          <p class="stage-desc">Simultaneously detects keypoints across three anatomical regions using ML-based holistic pose estimation.</p>
+
+          <div class="mediapipe-split">
+            <div class="mp-region pose">
+              <div class="count">33</div>
+              <div class="mp-region-title">Pose</div>
+              <p>Full-body joint landmarks including torso, limbs &amp; hips</p>
+            </div>
+            <div class="mp-region face">
+              <div class="count">468</div>
+              <div class="mp-region-title">Face</div>
+              <p>Dense facial mesh keypoints for expression tracking</p>
+            </div>
+            <div class="mp-region hands">
+              <div class="count">21×2</div>
+              <div class="mp-region-title">Hands</div>
+              <p>Finger joint landmarks per hand for gesture detail</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="line"></div><div class="arrow"></div></div>
+
+    <!-- 4. Skeletal Viz -->
+    <div class="stage green" style="animation-delay:0.35s">
+      <div class="stage-inner">
+        <div class="stage-icon">🦴</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">04 · Visualization</span>
+            <span class="stage-title">Skeletal Landmark Overlay</span>
+          </div>
+          <p class="stage-desc">Detected landmarks are rendered as an annotated skeleton over the live video frame for real-time visual feedback and debugging.</p>
+          <div class="pills">
+            <span class="pill">Body skeleton</span>
+            <span class="pill">Hand wireframe</span>
+            <span class="pill">Face mesh</span>
+            <span class="pill">Real-time overlay</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="line"></div><div class="arrow"></div></div>
+
+    <!-- 5. Normalization -->
+    <div class="stage orange" style="animation-delay:0.45s">
+      <div class="stage-inner">
+        <div class="stage-icon">📐</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">05 · Normalization</span>
+            <span class="stage-title">Coordinate Normalization Stage</span>
+          </div>
+          <p class="stage-desc">Raw landmark coordinates are extracted, scaled, and normalized to produce consistent, scale-invariant spatial representations across different signers and camera setups.</p>
+          <div class="pills">
+            <span class="pill">x, y, z extraction</span>
+            <span class="pill">Scale invariance</span>
+            <span class="pill">Min-max / unit norm</span>
+            <span class="pill">Visibility filtering</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="line"></div><div class="arrow"></div></div>
+
+    <!-- 6. Feature Vector -->
+    <div class="stage pink" style="animation-delay:0.55s">
+      <div class="stage-inner">
+        <div class="stage-icon">🧮</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">06 · Encoding</span>
+            <span class="stage-title">Feature Vector Generation</span>
+          </div>
+          <p class="stage-desc">All normalized landmark coordinates are flattened and concatenated into a single structured numerical vector capturing the full spatial configuration of the signer per frame.</p>
+
+          <div class="output-badge">
+            <div class="badge">
+              <div class="badge-label">Vector dimensions</div>
+              <div class="badge-value">≈ 411</div>
+              <div class="badge-sub">Per-frame feature size</div>
+            </div>
+            <div class="badge">
+              <div class="badge-label">Composition</div>
+              <div class="badge-value">3 regions</div>
+              <div class="badge-sub">Pose + Face + Hands</div>
+            </div>
+            <div class="badge">
+              <div class="badge-label">Downstream</div>
+              <div class="badge-value">LSTM</div>
+              <div class="badge-sub">Gesture recognition</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="line"></div><div class="arrow"></div></div>
+
+    <!-- 7. Output -->
+    <div class="stage blue" style="animation-delay:0.65s">
+      <div class="stage-inner">
+        <div class="stage-icon">📤</div>
+        <div class="stage-content">
+          <div class="stage-header">
+            <span class="stage-num">07 · Output</span>
+            <span class="stage-title">High-Dimensional Feature Vector</span>
+          </div>
+          <p class="stage-desc">A structured ~411-dimensional numerical vector per frame, ready to feed into the LSTM-based gesture recognition module for sequence classification.</p>
+          <div class="pills">
+            <span class="pill">~411-dim vector</span>
+            <span class="pill">Per frame</span>
+            <span class="pill">Input → LSTM</span>
+            <span class="pill">Gesture recognition</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pipeline -->
+
+  <footer>MediaPipe Holistic · Landmark Feature Extraction Pipeline</footer>
+
+</div>
+</body>
+</html>

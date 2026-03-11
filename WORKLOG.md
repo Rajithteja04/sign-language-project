@@ -87,3 +87,16 @@
 - Change: `app/templates/index.html` now describes Module I workflow (frame processing, landmark detection, feature vector generation) with updated copy and helper text; reason: make the panel self-explanatory for reviewers; outcome: clear messaging about MediaPipe’s role.
 - Change: `app/static/styles.css` adds styling for the new sections, helper hints, and module note; reason: improve readability and structure; outcome: cleaner spacing and typography for the extraction dashboard.
 - Change: `app/static/app.js` now toggles prediction UI based on mock mode, renders demo gesture legend/system info, and smooths detections with a confidence threshold; reason: align frontend behavior with Module I-only demo requirements; outcome: no predictions shown during feature-only runs while keeping diagnostic data live.
+
+## 2026-03-11 - Multi-Dataset Expansion (LSA64 + MS-ASL + Artifacts)
+
+- Change: Added `data/adapters/lsa64.py` and `training/train_lsa64_lstm.py`; reason: support the 64-class Argentine Sign Language dataset; outcome: balanced splits (per-class 50 videos) with caching to `artifacts/cache/lsa64_seq30` and snapshotting to `artifacts/lsa64/<run_tag>`.
+- Change: Added `data/adapters/msasl.py` and `training/train_msasl_lstm.py`; reason: bring MS-ASL (trimmed train/val/test folders) into the unified pipeline; outcome: MediaPipe feature caching to `artifacts/cache/msasl_seq30` plus LSTM checkpoints under `artifacts/msasl/<run_tag>`.
+- Change: Standardized artifact archival by copying every successful run into dedicated subfolders (`artifacts/final_best`, `artifacts/how2sign_*`, `artifacts/wlasl/top6_seq30_h128_l2_norm`, `artifacts/msasl/...`) while keeping top-level `artifacts/lstm_best.pt` reserved for the live app.
+- Run (WLASL Top-6 demo set): `python -m training.train_lstm --dataset wlasl ... --top-k 6 --seq-len 30 --hidden-dim 128 --layers 2 --normalize --epochs 40` -> train=72, val=21, test=11, best val acc=0.6190, artifacts stored in `artifacts/wlasl/top6_seq30_h128_l2_norm/`.
+- Cache (LSA64): `python -m training.train_lsa64_lstm --dataset-root "D:\...\LSA64" --seq-len 30 --top-k 64 --cache-features --cache-dir artifacts\cache\lsa64_seq30 --epochs 0` -> 3,200 clips cached once, no model trained.
+- Run (MS-ASL top-20): `python -m training.train_msasl_lstm --dataset-root "D:\...\MSASL" --top-k 20 --cache-features --cache-dir artifacts\cache\msasl_seq30 --normalize --epochs 40 --batch-size 16 --learning-rate 5e-4 --hidden-dim 128 --layers 2` -> train=568, val=114, test=165, best val acc=0.5877, snapshot `artifacts/msasl/msasl_top20_seq30_h128_l2_bs16_lr5e-04/`.
+- Run (MS-ASL top-10): same command with `--top-k 10` -> train=300, val=59, test=127, best val acc=0.7797, snapshot `artifacts/msasl/msasl_top10_seq30_h128_l2_bs16_lr5e-04/`.
+- Run (MS-ASL top-6): `--top-k 6` -> train=186, val=39, test=59, best val acc=0.7436, snapshot `artifacts/msasl/msasl_top6_seq30_h128_l2_bs16_lr5e-04/`.
+- Run (MS-ASL top-5): `--top-k 5` -> train=157, val=32, test=56, best val acc=0.8125, snapshot `artifacts/msasl/msasl_top5_seq30_h128_l2_bs16_lr5e-04/`.
+- Note: All How2Sign / WLASL / MS-ASL / LSA64 runs now stash their artifacts in dataset-specific folders so future experiments don’t overwrite live-demo weights.

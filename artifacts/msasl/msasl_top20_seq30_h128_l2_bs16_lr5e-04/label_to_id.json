@@ -1,0 +1,22 @@
+{
+  "cousin": 0,
+  "deaf": 1,
+  "eat": 2,
+  "family": 3,
+  "father": 4,
+  "finish": 5,
+  "friend": 6,
+  "here": 7,
+  "like": 8,
+  "milk": 9,
+  "mother": 10,
+  "nice": 11,
+  "orange": 12,
+  "pencil": 13,
+  "school": 14,
+  "sister": 15,
+  "student": 16,
+  "teacher": 17,
+  "what": 18,
+  "where": 19
+}

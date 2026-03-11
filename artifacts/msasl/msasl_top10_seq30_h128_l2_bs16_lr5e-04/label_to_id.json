@@ -1,0 +1,12 @@
+{
+  "cousin": 0,
+  "eat": 1,
+  "family": 2,
+  "father": 3,
+  "finish": 4,
+  "nice": 5,
+  "student": 6,
+  "teacher": 7,
+  "what": 8,
+  "where": 9
+}

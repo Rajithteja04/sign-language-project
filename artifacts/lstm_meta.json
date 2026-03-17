@@ -1,13 +1,21 @@
 {
-  "dataset": "wlasl",
+  "dataset": "MS-ASL (top-6)",
+  "dataset_version": "msasl_top6_seq30_h128_l2_bs16_lr5e-04",
   "feature_dim": 411,
   "sequence_length": 30,
   "num_classes": 6,
-  "top_k_classes": 6,
+  "class_labels": ["cousin", "eat", "finish", "nice", "student", "teacher"],
+  "top_k": 6,
+  "train_samples": 186,
+  "val_samples": 39,
+  "test_samples": 59,
   "lstm_hidden": 128,
   "lstm_layers": 2,
-  "learning_rate": 0.001,
-  "batch_size": 8,
+  "bidirectional": false,
+  "dropout": 0.0,
+  "learning_rate": 0.0005,
+  "batch_size": 16,
   "epochs": 40,
-  "best_val_acc": 0.7142857142857143
+  "best_val_acc": 0.7436,
+  "artifact_dir": "artifacts/msasl/msasl_top6_seq30_h128_l2_bs16_lr5e-04"
 }

@@ -48,11 +48,11 @@ class WordRealtimeService:
         self.id_to_label: dict[int, str] = {}
         self.class_labels: list[str] = []
         self.system_info = {
-            "dataset": "How2Sign",
-            "train_samples": 192,
-            "val_samples": 41,
-            "model": "BiLSTM (128 hidden units)",
-            "sequence_length": 30,
+            "dataset": "-",
+            "train_samples": "-",
+            "val_samples": "-",
+            "model": "-",
+            "sequence_length": None,
         }
         self.seq_len = 30
         self.extractor = MediaPipeExtractor()
@@ -94,7 +94,20 @@ class WordRealtimeService:
             self.class_labels = [label for label, _ in sorted(label_to_id.items(), key=lambda kv: kv[1])]
             self.seq_len = int(m.get("sequence_length", 30))
             self.system_info["sequence_length"] = self.seq_len
-            self.system_info["model"] = "BiLSTM (128 hidden units)"
+            hidden = m.get("lstm_hidden")
+            layers = m.get("lstm_layers")
+            is_bi = bool(m.get("bidirectional"))
+            model_name = "BiLSTM" if is_bi else "LSTM"
+            if hidden and layers:
+                self.system_info["model"] = f"{model_name} ({hidden} hidden, layers={layers})"
+            else:
+                self.system_info["model"] = model_name
+            if "dataset" in m:
+                self.system_info["dataset"] = m["dataset"]
+            if "train_samples" in m:
+                self.system_info["train_samples"] = m["train_samples"]
+            if "val_samples" in m:
+                self.system_info["val_samples"] = m["val_samples"]
 
             model = LSTMClassifier(
                 input_dim=int(m["feature_dim"]),

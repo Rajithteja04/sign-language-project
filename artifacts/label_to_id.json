@@ -1,8 +1,8 @@
 {
-  "before": 0,
-  "candy": 1,
-  "computer": 2,
-  "drink": 3,
-  "go": 4,
-  "who": 5
+  "cousin": 0,
+  "eat": 1,
+  "finish": 2,
+  "nice": 3,
+  "student": 4,
+  "teacher": 5
 }

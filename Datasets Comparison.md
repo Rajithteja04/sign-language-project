@@ -9,7 +9,7 @@
 | MS-ASL | 20 (seq=30, h=128, l=2) | 568 / 114 / 165 | 0.5877 | `artifacts/msasl/msasl_top20_seq30_h128_l2_bs16_lr5e-04/` |  |
 | MS-ASL | 10 (seq=30, h=128, l=2) | 300 / 59 / 127 | 0.7797 | `artifacts/msasl/msasl_top10_seq30_h128_l2_bs16_lr5e-04/` |  |
 | MS-ASL | 6 (seq=30, h=128, l=2) | 186 / 39 / 59 | 0.7436 | `artifacts/msasl/msasl_top6_seq30_h128_l2_bs16_lr5e-04/` |  |
-| MS-ASL | **5** (seq=30, h=128, l=2) | 157 / 32 / 56 | **0.8125** | `artifacts/msasl/msasl_top5_seq30_h128_l2_bs16_lr5e-04/` | ✓ |
+| MS-ASL | **5** (seq=30, h=128, l=2) | 157 / 32 / 56 | **0.8125** | `artifacts/msasl/msasl_top5_seq30_h128_l2_bs16_lr5e-04/` | ✓ |![1773300500613](image/DatasetsComparison/1773300500613.png)![1773300513907](image/DatasetsComparison/1773300513907.png)
 | LSA64 | 64 (cache build only) | 3,200 clips cached | — | `artifacts/lsa64/lsa64_top64_seq30_h128_l2_bs1_lr1e-03/` | *(training pending)* |
 
 **Notes & Observations**

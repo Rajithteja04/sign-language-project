@@ -100,3 +100,21 @@
 - Run (MS-ASL top-6): `--top-k 6` -> train=186, val=39, test=59, best val acc=0.7436, snapshot `artifacts/msasl/msasl_top6_seq30_h128_l2_bs16_lr5e-04/`.
 - Run (MS-ASL top-5): `--top-k 5` -> train=157, val=32, test=56, best val acc=0.8125, snapshot `artifacts/msasl/msasl_top5_seq30_h128_l2_bs16_lr5e-04/`.
 - Note: All How2Sign / WLASL / MS-ASL / LSA64 runs now stash their artifacts in dataset-specific folders so future experiments don’t overwrite live-demo weights.
+
+## 2026-03-27 - Final Runtime Setup Hardening (Real Mode)
+
+- Change: Updated frontend runtime files (`app/templates/index.html`, `app/static/app.js`) with cache-busted static URLs and resilient `/state` polling; reason: remove stale-browser issues where UI stayed on "Loading model status..."; outcome: UI picks latest JS/CSS and reflects backend state correctly.
+- Change: Standardized launch runbook in `commands.txt`; reason: reduce startup confusion before demos; outcome: one clean sequence for env activation, preflight, app launch, and fallback refresh.
+- Change: Added `scripts/preflight_runtime.py`; reason: verify real-mode readiness without manual guessing; outcome: preflight now checks required artifacts, model/load compatibility, dry forward pass, and camera availability.
+- Runtime baseline confirmed: top-level artifacts in use are `artifacts/lstm_best.pt`, `artifacts/label_to_id.json`, `artifacts/lstm_meta.json` and app starts in `mode=live` when they are valid.
+
+## 2026-03-27 - Module 3 Stabilization (Sentence Formation)
+
+- Change: Upgraded `models/transformer.py` with token normalization and immediate-repeat removal before sentence generation.
+- Change: Added `words_to_sentence(words: list[str])` entrypoint so runtime passes committed words directly (clean module boundary).
+- Change: Added robust fallback routing when `t5-small` output is weak/prompt-leaked; reason: keep sentence output reliable for demo usage.
+- Change: Added deterministic fallback templates for current demo vocabulary (`cousin`, `eat`, `finish`, `nice`, `teacher`) to produce stable meaningful sentences.
+- Change: Switched runtime callsites to list-based sentence generation:
+  - `app/app.py` now uses `words_to_sentence(self.committed_words)`
+  - `inference/realtime.py` now uses `words_to_sentence(committed_words)`
+- Validation: `python -m py_compile models/transformer.py app/app.py inference/realtime.py` passed.

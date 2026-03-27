@@ -1,5 +1,6 @@
 How2Sign/
 artifacts/cache/
+artifacts/local_backup/
 *.part*.pt
 __pycache__/
 *.pyc

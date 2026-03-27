@@ -1,113 +1,69 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>How2Sign Real-Time Phrase Demo</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <title>Real Time Sign Recognition</title>
+  <link rel="stylesheet" href="/static/styles.css?v=20260327_1" />
 </head>
 <body>
-  <main class="layout">
-    <h1>How2Sign Real-Time Phrase Demo</h1>
-    <section id="modelBanner" class="banner">Model status: checking...</section>
+  <main class="page">
+    <header class="page-header">
+      <h1>Real Time Sign Recognition</h1>
+      <p class="subhead">Live sign detection, word recognition, and sentence formation</p>
+    </header>
+
+    <section id="modelBanner" class="banner warning">Loading model status...</section>
 
     <section class="toolbar card">
       <button id="startBtn" class="btn primary">Start</button>
       <button id="stopBtn" class="btn">Stop</button>
-      <button id="clearBtn" class="btn warn">Reset Session</button>
+      <button id="clearBtn" class="btn warn">Clear Sentence</button>
       <span id="statusText" class="status">Ready.</span>
     </section>
 
-    <section class="grid primary">
-      <article class="card capture-card">
-        <h2>Module I ? MediaPipe Landmark Extraction (Feature Generation)</h2>
-        <img id="preview" alt="Live webcam feed" />
-        <p class="helper-text">
-          This module extracts skeletal landmarks from each video frame using MediaPipe. The captured pose, face, and hand landmarks are stacked into a fixed-length vector that feeds later training stages.
-        </p>
-        <details class="debug-panel">
-          <summary>Live Extraction Dashboard</summary>
-          <div class="module-section">
-            <h3>Frame Processing</h3>
-            <div class="debug-grid">
-              <div class="debug-row"><span>Processed Frames</span><span id="dbgFrameCount">0</span></div>
-              <div class="debug-row"><span>Frame Resolution</span><span id="dbgResolution">-</span></div>
-            </div>
-          </div>
-          <div class="module-section">
-            <h3>Landmark Detection</h3>
-            <p class="landmark-hint">Pose landmarks expected: 33 ? Face: 468 ? Hands: 21 per hand</p>
-            <div class="debug-grid">
-              <div class="debug-row"><span>Pose Landmarks</span><span id="dbgPose">0</span></div>
-              <div class="debug-row"><span>Face Landmarks</span><span id="dbgFace">0</span></div>
-              <div class="debug-row"><span>Left Hand Landmarks</span><span id="dbgLeft">0</span></div>
-              <div class="debug-row"><span>Right Hand Landmarks</span><span id="dbgRight">0</span></div>
-              <div class="debug-row"><span>Total Landmarks</span><span id="dbgTotal">0</span></div>
-            </div>
-          </div>
-          <div class="module-section">
-            <h3>Feature Vector Generation</h3>
-            <p class="feature-hint">Each frame is converted into a 411-dimensional feature vector combining pose, face, and hand landmarks.</p>
-            <div class="debug-grid">
-              <div class="debug-row"><span>Feature Vector Dimension</span><span id="dbgDim">411</span></div>
-              <div class="debug-row"><span>Normalization Applied</span><span id="dbgNorm">True</span></div>
-            </div>
-          </div>
-          <p class="module-note">
-            Output of Module I: for every video frame, MediaPipe extracts skeletal landmarks and converts them into normalized feature vectors. These vectors feed Module II (BiLSTM) for gesture recognition.
-          </p>
-        </details>
-        <div id="mockWarning" class="mock-warning">System Mode: Module I Demonstration (Feature Extraction Only)</div>
+    <section class="grid">
+      <article class="card webcam-card">
+        <h2>User Camera</h2>
+        <img id="previewFeed" src="/video_feed" alt="Live Camera Feed" />
+        <p id="cameraStatus" class="note">Initializing camera...</p>
       </article>
 
-      <article id="predictionCard" class="card prediction-card">
+      <article class="card output-card">
         <div class="field">
-          <label>Detected Sentence</label>
-          <div id="detectedSentence" class="value detected">Detecting gesture...</div>
+          <label>Current Word</label>
+          <div id="currentWord" class="value word">-</div>
         </div>
 
         <div class="field">
           <label>Confidence</label>
-          <div class="conf-row">
-            <span id="confidenceValue">0.00</span>
-          </div>
+          <div class="confidence-line"><span id="confidenceValue">0.000</span></div>
           <div class="progress-wrap">
             <div id="confidenceBar" class="progress-fill low" style="width: 0%"></div>
           </div>
         </div>
 
         <div class="field">
-          <label>Phrase History</label>
-          <div id="glossChips" class="chips history"></div>
+          <label>Recognized Words</label>
+          <div id="glossChips" class="chips"></div>
         </div>
 
         <div class="field">
-          <label>Session Summary</label>
-          <div id="sessionSummary" class="value sentence">-</div>
+          <label>Generated Sentence</label>
+          <div id="sentenceText" class="value sentence">-</div>
         </div>
 
-      </article>
-    </section>
-
-    <section class="grid secondary">
-      <article class="card gestures-card">
-        <h2>Demo Gestures</h2>
-        <div id="demoGestures" class="chips legend"></div>
-      </article>
-
-      <article class="card info-card">
-        <h2>System Info</h2>
-        <ul class="info-list">
-          <li><span>Dataset</span><span id="infoDataset">How2Sign</span></li>
-          <li><span>Training Samples</span><span id="infoTrain">-</span></li>
-          <li><span>Validation Samples</span><span id="infoVal">-</span></li>
-          <li><span>Model</span><span id="infoModel">-</span></li>
-          <li><span>Sequence Length</span><span id="infoSeq">-</span></li>
-        </ul>
+        <div class="metrics">
+          <div class="metric"><span>Mode</span><strong id="modeValue">-</strong></div>
+          <div class="metric"><span>Stream FPS</span><strong id="fpsValue">0.0</strong></div>
+          <div class="metric"><span>Recognized Count</span><strong id="recognizedCount">0</strong></div>
+          <div class="metric"><span>Decision Margin</span><strong id="marginValue">0.000</strong></div>
+          <div class="metric"><span>Last Update</span><strong id="timestampValue">-</strong></div>
+        </div>
       </article>
     </section>
   </main>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=20260327_1"></script>
 </body>
 </html>

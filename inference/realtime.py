@@ -12,7 +12,7 @@ import torch
 
 from features.mediapipe_extractor import FEATURE_DIM, MediaPipeExtractor
 from models.lstm import LSTMClassifier
-from models.transformer import correct_text
+from models.transformer import words_to_sentence
 
 
 def normalize_openpose_like(x: np.ndarray) -> np.ndarray:
@@ -112,7 +112,7 @@ def main():
             else:
                 status = "Low confidence - hold steady sign."
 
-        sentence = correct_text(" ".join(committed_words)) if committed_words else ""
+        sentence = words_to_sentence(committed_words)
 
         cv2.putText(frame, status, (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
         cv2.putText(

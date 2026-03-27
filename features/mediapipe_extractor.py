@@ -31,6 +31,37 @@ class MediaPipeExtractor:
             smooth_landmarks=True,
             refine_face_landmarks=False,
         )
+        # Hysteresis state to reduce pose-count flicker in UI debug panel.
+        self._torso_score = 0
+        self._torso_visible_state = False
+
+    def _torso_visible(self, pose_landmarks, min_visibility: float = 0.35) -> bool:
+        """Stable upper-body gate for demo: shoulders visible => pose shown."""
+        if not pose_landmarks or not hasattr(pose_landmarks, "landmark"):
+            self._torso_score = max(self._torso_score - 1, -3)
+        else:
+            lms = pose_landmarks.landmark
+            shoulders = (11, 12)
+            shoulder_vis = 0
+            for idx in shoulders:
+                if idx < len(lms):
+                    vis = float(getattr(lms[idx], "visibility", 0.0))
+                    if vis >= min_visibility:
+                        shoulder_vis += 1
+
+            # Positive if both shoulders are visible; otherwise decay.
+            if shoulder_vis >= 2:
+                self._torso_score = min(self._torso_score + 1, 3)
+            else:
+                self._torso_score = max(self._torso_score - 1, -3)
+
+        # Hysteresis to prevent rapid 0<->33 flicker.
+        if self._torso_score >= 1:
+            self._torso_visible_state = True
+        elif self._torso_score <= -1:
+            self._torso_visible_state = False
+
+        return self._torso_visible_state
 
     @staticmethod
     def _flatten_landmarks(landmark_list, expected_count: int) -> list[float]:
@@ -63,12 +94,13 @@ class MediaPipeExtractor:
         image = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         result = self.holistic.process(image)
 
-        pose_count = len(result.pose_landmarks.landmark) if result.pose_landmarks else 0
+        torso_visible = self._torso_visible(result.pose_landmarks)
+        pose_count = len(result.pose_landmarks.landmark) if (result.pose_landmarks and torso_visible) else 0
         face_count = len(result.face_landmarks.landmark) if result.face_landmarks else 0
         left_count = len(result.left_hand_landmarks.landmark) if result.left_hand_landmarks else 0
         right_count = len(result.right_hand_landmarks.landmark) if result.right_hand_landmarks else 0
 
-        pose = self._flatten_landmarks(result.pose_landmarks, self.POSE_COUNT)
+        pose = self._flatten_landmarks(result.pose_landmarks if torso_visible else None, self.POSE_COUNT)
         face = self._flatten_landmarks(result.face_landmarks, self.FACE_COUNT)
         left = self._flatten_landmarks(result.left_hand_landmarks, self.HAND_COUNT)
         right = self._flatten_landmarks(result.right_hand_landmarks, self.HAND_COUNT)

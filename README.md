@@ -104,17 +104,27 @@ python -m training.train_msasl_lstm ^
 
 Snapshots appear in `artifacts/msasl/msasl_top<k>_seq30_h128_l2_bs16_lr5e-04/`. Repeat with different `--top-k` to compare demo subsets.
 
-## Realtime Demo (Module I / II)
+## Realtime Web App (Final Demo)
+
+Use top-level artifacts:
+
+- `artifacts/lstm_best.pt`
+- `artifacts/label_to_id.json`
+- `artifacts/lstm_meta.json`
+
+Run preflight:
 
 ```powershell
-python -m inference.realtime ^
-    --weights artifacts/lstm_best.pt ^
-    --labels artifacts/label_to_id.json ^
-    --meta artifacts/lstm_meta.json
+python -m scripts.preflight_runtime --camera-index 0
 ```
 
-- `q` quits, `c` clears committed words.
-- Mock mode hides predictions and only shows Module I telemetry; flip `WordRealtimeService.source_mode` to `live` after copying the right artifacts.
+Start app:
+
+```powershell
+python -m app.app
+```
+
+Then open `http://127.0.0.1:5000` and do a hard refresh (`Ctrl+F5`) if browser cache is stale.
 
 ## Notes
 

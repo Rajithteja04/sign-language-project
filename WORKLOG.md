@@ -118,3 +118,21 @@
   - `app/app.py` now uses `words_to_sentence(self.committed_words)`
   - `inference/realtime.py` now uses `words_to_sentence(committed_words)`
 - Validation: `python -m py_compile models/transformer.py app/app.py inference/realtime.py` passed.
+
+## 2026-03-31 - Module 3 Terminal Test Run (Demo Vocabulary)
+
+- Run: `python -m scripts.test_module3_words`
+- Allowed tokens tested: `cousin, eat, finish, nice, teacher`
+- Observed outputs before final noun-only patch:
+  - `cousin eat` -> `My cousin is eating.`
+  - `cousin eat finish` -> `My cousin finished eating.`
+  - `eat finish` -> `I finished eating.`
+  - `eat nice` -> `I want to eat, and it is nice.`
+  - `cousin nice` -> `My cousin is nice.`
+  - `eat teacher` -> `The teacher is eating.`
+  - `cousin teacher` -> `Cousin teacher.` (identified as error)
+  - `cousin finish` -> `My cousin finished.`
+  - `finish nice` -> `I finished, and it was nice.`
+  - `teacher finish` / `finish teacher` -> `The teacher finished.`
+- Fix applied: updated noun-only fallback in `models/transformer.py` so `cousin teacher` now resolves to `My cousin is a teacher.`
+- Validation: `python -m py_compile models/transformer.py` passed after fix.

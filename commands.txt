@@ -21,6 +21,5 @@ Ctrl + F5
 # Close Zoom/Teams/Camera app and retry preflight
 python -m scripts.preflight_runtime --camera-index 0
 
-## 7) NLP quick terminal test (without camera)
-python -m scripts.test_nlp
-
+## 7) Module-3 NLP terminal test (demo vocabulary)
+python -m scripts.test_module3_words

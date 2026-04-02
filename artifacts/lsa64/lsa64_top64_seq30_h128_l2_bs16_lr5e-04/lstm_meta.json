@@ -1,0 +1,19 @@
+{
+  "dataset": "LSA64 (top-64)",
+  "feature_dim": 411,
+  "sequence_length": 30,
+  "num_classes": 64,
+  "train_samples": 2560,
+  "val_samples": 320,
+  "test_samples": 320,
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "bidirectional": false,
+  "dropout": 0.5,
+  "learning_rate": 0.0005,
+  "batch_size": 16,
+  "epochs": 40,
+  "best_val_acc": 0.9719,
+  "normalize": true,
+  "cache_dir": "artifacts/cache/lsa64_main_seq30"
+}

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import re
 from typing import Optional
 
@@ -11,7 +13,31 @@ try:
 except Exception:  # pragma: no cover
     torch = None
     AutoModelForSeq2SeqLM = None
-    AutoTokenizer = None
+AutoTokenizer = None
+
+MSASL_VOCAB = {"COUSIN", "EAT", "FINISH", "NICE", "TEACHER"}
+
+
+def _load_lsa64_gloss_map() -> dict[str, str]:
+    path = Path(__file__).resolve().parents[1] / "data" / "lsa64_labels.json"
+    if not path.exists():
+        return {}
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            raw = json.load(f)
+    except Exception:
+        return {}
+    normalized: dict[str, str] = {}
+    for key, phrase in raw.items():
+        norm = re.sub(r"[^A-Z0-9]+", "_", key.upper()).strip("_")
+        if not norm:
+            continue
+        normalized[norm] = phrase
+    return normalized
+
+
+LSA64_GLOSS_MAP = _load_lsa64_gloss_map()
+LSA64_VOCAB = set(LSA64_GLOSS_MAP.keys())
 
 
 class TransformerCorrector:
@@ -40,18 +66,24 @@ class TransformerCorrector:
 
     def correct(self, gloss: str) -> str:
         tokens = normalize_gloss_tokens(gloss)
+        return self.correct_tokens(tokens)
+
+    def correct_tokens(self, tokens: list[str]) -> str:
         if not tokens:
             return ""
 
-        gloss_text = " ".join(tokens)
-        demo_vocab = {"COUSIN", "EAT", "FINISH", "NICE", "TEACHER"}
-        if set(tokens).issubset(demo_vocab):
-            return _rule_based_fallback(tokens)
+        token_set = set(tokens)
+        if token_set.issubset(MSASL_VOCAB):
+            return _msasl_fallback(tokens)
 
+        if LSA64_VOCAB and token_set.issubset(LSA64_VOCAB):
+            return _lsa64_fallback(tokens)
+
+        gloss_text = " ".join(tokens)
         self._ensure_loaded()
 
         if not self._ready:
-            return _rule_based_fallback(tokens)
+            return _generic_fallback(tokens)
 
         prompt = f"translate gloss to english: {gloss_text}"
 
@@ -76,11 +108,13 @@ class TransformerCorrector:
         text = self.tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
 
         if not text:
-            return _rule_based_fallback(tokens)
+            return _generic_fallback(tokens)
 
         # If t5-small output is noisy, prompt-leaked, or gloss-echoed, use fallback.
         if text.upper().strip(".!?") == gloss_text or _looks_invalid_output(text):
-            return _rule_based_fallback(tokens)
+            if LSA64_VOCAB and token_set.issubset(LSA64_VOCAB):
+                return _lsa64_fallback(tokens)
+            return _generic_fallback(tokens)
 
         text = text[0].upper() + text[1:] if text else ""
         if text and text[-1] not in ".!?":
@@ -114,7 +148,12 @@ def words_to_sentence(words: list[str]) -> str:
     """
     if not words:
         return ""
-    return gloss_to_sentence(" ".join(words))
+    tokens: list[str] = []
+    for word in words:
+        token = _sanitize_token(word)
+        if token:
+            tokens.append(token)
+    return _get_singleton("t5-small").correct_tokens(tokens)
 
 
 def correct_text(raw_gloss: str) -> str:
@@ -127,18 +166,26 @@ def normalize_gloss_tokens(gloss: str) -> list[str]:
     """
     if not gloss:
         return []
-    raw = re.findall(r"[A-Za-z']+", gloss.upper())
+    gloss = gloss.replace("-", "_")
+    raw = re.findall(r"[A-Za-z_']+", gloss.upper())
     if not raw:
         return []
     cleaned: list[str] = []
     for tok in raw:
+        tok = tok.strip("_")
+        if not tok:
+            continue
         if cleaned and cleaned[-1] == tok:
             continue
         cleaned.append(tok)
     return cleaned
 
 
-def _rule_based_fallback(tokens: list[str]) -> str:
+def _sanitize_token(word: str) -> str:
+    return re.sub(r"[^A-Z0-9]+", "_", word.upper()).strip("_")
+
+
+def _msasl_fallback(tokens: list[str]) -> str:
     """
     Lightweight deterministic fallback for demo stability when t5-small output is weak.
     """
@@ -205,6 +252,44 @@ def _rule_based_fallback(tokens: list[str]) -> str:
     if text and text[-1] not in ".!?":
         text += "."
     return text
+
+
+def _generic_fallback(tokens: list[str]) -> str:
+    if not tokens:
+        return ""
+    text = " ".join(tok.capitalize() for tok in tokens if tok)
+    if not text:
+        return ""
+    if text[-1] not in ".!?":
+        text += "."
+    return text
+
+
+def _lsa64_fallback(tokens: list[str]) -> str:
+    if not tokens:
+        return ""
+    phrases: list[str] = []
+    for tok in tokens:
+        key = _sanitize_token(tok)
+        phrase = LSA64_GLOSS_MAP.get(key, tok.capitalize())
+        if phrase:
+            phrases.append(phrase)
+    deduped: list[str] = []
+    for phrase in phrases:
+        if not deduped or deduped[-1] != phrase:
+            deduped.append(phrase)
+    if not deduped:
+        return ""
+    if len(deduped) == 1:
+        return f"Recognized sign: {deduped[0]}."
+    body = ", ".join(deduped[:-1])
+    if body:
+        sentence = f"Recognized sequence: {body}, and {deduped[-1]}"
+    else:
+        sentence = f"Recognized sequence: {deduped[-1]}"
+    if sentence[-1] not in ".!?":
+        sentence += "."
+    return sentence
 
 
 def _looks_invalid_output(text: str) -> bool:

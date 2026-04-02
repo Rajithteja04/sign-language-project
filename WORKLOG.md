@@ -136,3 +136,11 @@
   - `teacher finish` / `finish teacher` -> `The teacher finished.`
 - Fix applied: updated noun-only fallback in `models/transformer.py` so `cousin teacher` now resolves to `My cousin is a teacher.`
 - Validation: `python -m py_compile models/transformer.py` passed after fix.
+
+## 2026-04-02 - LSA64 Evaluation Fixes & NLP Expansion
+
+- Added `data/lsa64_labels.json` and `data/lsa64_numeric_labels.json` to unify gloss token ? human-readable mappings for Module III.
+- Enhanced `models/transformer.py` and `scripts/test_module3_words.py` to sanitize tokens, support all 64 LSA glosses, and provide deterministic sentence fallbacks when T5 output is empty or echo-like.
+- Built `scripts/run_video_inference.py` for single-clip debugging and `scripts/eval_lsa64_dataset.py` for bulk evaluation using cached landmark tensors.
+- Regenerated `artifacts/lsa64/lsa64_top64_seq30_h128_l2_bs16_lr5e-04` metadata so it records `normalize: true` and cache location; this restored full-dataset accuracy to 97.3%.
+- Created plots under `artifacts/plots/` (accuracy comparison, latency breakdown, per-label accuracy) for report visuals.

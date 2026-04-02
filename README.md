@@ -131,3 +131,32 @@ Then open `http://127.0.0.1:5000` and do a hard refresh (`Ctrl+F5`) if browser c
 - All datasets share the same MediaPipe Holistic extractor (`FEATURE_DIM=411`).
 - Caches live in `artifacts/cache/<dataset>_seq<len>/`. Delete them if you need to rebuild from scratch.
 - Final demo artifacts live in `artifacts/final_best/` so the UI can stay locked to a known-good model while experiments continue elsewhere.
+
+## Datasets & Artifacts
+
+- `artifacts/wlasl/top6_seq30_h128_l2_norm/` holds the 6-word WLASL demo model (validation ~62%).
+- `artifacts/how2sign_20000_top5_seq45_h128_l1_lr0.0005_do0.1_bi/` stores the 5-phrase How2Sign BiLSTM run (~56% val acc).
+- `artifacts/msasl/msasl_top6_seq30_h128_l2_bs16_lr5e-04/` contains the MS-ASL top-6 checkpoint (~74% val acc).
+- `artifacts/lsa64/lsa64_top64_seq30_h128_l2_bs16_lr5e-04/` now includes the 64-class LSA64 model (97% val acc) plus cached evaluation logs.
+- `artifacts/plots/` holds comparison charts (accuracy vs. prior work, latency breakdown, per-label accuracy).
+
+## Offline Evaluation
+
+Use the new helpers to validate checkpoints without rerunning MediaPipe:
+
+```powershell
+# Single video sanity check
+python -m scripts.run_video_inference `
+    --video "D:\personal\Project\Datasets\LSA64\MAIN\LSA64\001\001_001_001.mp4" `
+    --artifacts artifacts\lsa64\lsa64_top64_seq30_h128_l2_bs16_lr5e-04 `
+    --topk 5
+
+# Full-dataset sweep with cached sequences
+python -m scripts.eval_lsa64_dataset `
+    --dataset-root "D:\personal\Project\Datasets\LSA64\MAIN\LSA64" `
+    --artifacts artifacts\lsa64\lsa64_top64_seq30_h128_l2_bs16_lr5e-04 `
+    --csv artifacts\lsa64\lsa64_eval_cached.csv `
+    --topk 5
+```
+
+`lstm_meta.json` now records `normalize: true` and `cache_dir`, so both scripts load the cached landmark tensors and finish in ~20 seconds.

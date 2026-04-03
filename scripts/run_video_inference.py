@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -27,9 +28,48 @@ def _load_numeric_names() -> dict[str, str]:
 NUMERIC_NAMES = _load_numeric_names()
 
 
+TOKEN_SANITIZE_RE = re.compile(r"[^A-Z0-9]+")
+
+
+def _sanitize_token(word: str) -> str:
+    return TOKEN_SANITIZE_RE.sub("_", word.upper()).strip("_")
+
+
+def _load_phrase_map() -> dict[str, str]:
+    path = Path(__file__).resolve().parents[1] / "data" / "lsa64_labels.json"
+    mapping: dict[str, str] = {}
+    if path.exists():
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                raw = json.load(f)
+            for key, meta in raw.items():
+                token = _sanitize_token(key)
+                if not token:
+                    continue
+                if isinstance(meta, dict):
+                    phrase = meta.get("phrase") or key.replace("_", " ").lower()
+                else:
+                    phrase = str(meta)
+                phrase = (phrase or "").strip()
+                if phrase:
+                    mapping[token] = phrase[0].upper() + phrase[1:]
+        except Exception:
+            pass
+    return mapping
+
+
+PHRASE_MAP = _load_phrase_map()
+
+
 def _format_label(label: str) -> str:
     pretty = NUMERIC_NAMES.get(label)
-    return f"{pretty} ({label})" if pretty else label
+    if pretty:
+        return pretty
+    token = _sanitize_token(label)
+    phrase = PHRASE_MAP.get(token)
+    if phrase:
+        return phrase
+    return label.replace("_", " ").title()
 
 
 def _infer_hidden_and_layers(state: dict[str, torch.Tensor]) -> tuple[int, int]:

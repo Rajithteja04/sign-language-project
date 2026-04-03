@@ -2,7 +2,7 @@
 const stopBtn = document.getElementById("stopBtn");
 const clearBtn = document.getElementById("clearBtn");
 const statusText = document.getElementById("statusText");
-const modelBanner = document.getElementById("modelBanner");
+const engineDot = document.getElementById("engineDot");
 const currentWord = document.getElementById("currentWord");
 const confidenceValue = document.getElementById("confidenceValue");
 const confidenceBar = document.getElementById("confidenceBar");
@@ -15,6 +15,10 @@ const marginValue = document.getElementById("marginValue");
 const timestampValue = document.getElementById("timestampValue");
 const cameraStatus = document.getElementById("cameraStatus");
 const previewFeed = document.getElementById("previewFeed");
+const guidelinesBtn = document.getElementById("guidelinesBtn");
+const guidelinesModal = document.getElementById("guidelinesModal");
+const guidelinesClose = document.getElementById("guidelinesClose");
+const guidelinesBackdrop = document.getElementById("guidelinesBackdrop");
 
 async function postJson(url) {
   const response = await fetch(url, { method: "POST" });
@@ -26,9 +30,10 @@ async function postJson(url) {
 
 function setConnectionError(message) {
   statusText.textContent = message;
-  modelBanner.textContent = "Backend not responding. Check terminal/logs and refresh.";
-  modelBanner.classList.remove("success");
-  modelBanner.classList.add("warning");
+  if (engineDot) {
+    engineDot.classList.remove("ready", "mock");
+    engineDot.classList.add("offline");
+  }
   startBtn.disabled = true;
   stopBtn.disabled = true;
 }
@@ -65,19 +70,22 @@ function renderGlossChips(words) {
   });
 }
 
-function applyModelBanner(state) {
-  modelBanner.textContent = state.model_status || "Model status unavailable.";
-  modelBanner.classList.remove("warning", "success");
-  if (state.mode === "live") {
-    modelBanner.classList.add("success");
+function setEngineIndicator(state) {
+  if (!engineDot) return;
+  const mode = (state.mode || "").toLowerCase();
+  engineDot.classList.remove("ready", "offline", "mock");
+  if (mode === "live") {
+    engineDot.classList.add("ready");
+  } else if (mode === "mock") {
+    engineDot.classList.add("mock");
   } else {
-    modelBanner.classList.add("warning");
+    engineDot.classList.add("offline");
   }
 }
 
 function updateFromState(state) {
   statusText.textContent = state.status || "Unknown";
-  applyModelBanner(state);
+  setEngineIndicator(state);
 
   currentWord.textContent = state.current_word || "-";
   setConfidence(state.confidence || 0);
@@ -143,6 +151,33 @@ if (previewFeed) {
     cameraStatus.textContent = "Video feed unavailable.";
   });
 }
+
+function openGuidelines() {
+  if (!guidelinesModal) return;
+  guidelinesModal.classList.add("open");
+  guidelinesModal.setAttribute("aria-hidden", "false");
+}
+
+function closeGuidelines() {
+  if (!guidelinesModal) return;
+  guidelinesModal.classList.remove("open");
+  guidelinesModal.setAttribute("aria-hidden", "true");
+}
+
+if (guidelinesBtn) {
+  guidelinesBtn.addEventListener("click", openGuidelines);
+}
+if (guidelinesClose) {
+  guidelinesClose.addEventListener("click", closeGuidelines);
+}
+if (guidelinesBackdrop) {
+  guidelinesBackdrop.addEventListener("click", closeGuidelines);
+}
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape") {
+    closeGuidelines();
+  }
+});
 
 pollState();
 setInterval(pollState, 300);

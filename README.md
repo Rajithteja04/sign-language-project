@@ -106,11 +106,13 @@ Snapshots appear in `artifacts/msasl/msasl_top<k>_seq30_h128_l2_bs16_lr5e-04/`. 
 
 ## Realtime Web App (Final Demo)
 
-Use top-level artifacts:
+The web app now ships with the **LSA64 top-64** checkpoint by default. The files it reads are:
 
-- `artifacts/lstm_best.pt`
-- `artifacts/label_to_id.json`
-- `artifacts/lstm_meta.json`
+- `artifacts/lstm_best.pt` (copied from `artifacts/lsa64/lsa64_top64_seq30_h128_l2_bs16_lr5e-04/`)
+- `artifacts/label_to_id.json` (tokenized gloss map, 64 entries)
+- `artifacts/lstm_meta.json` (sequence length, hidden dim, dataset tag, etc.)
+
+If you need to demo a different dataset, copy that run’s trio into either `artifacts/` or `artifacts/final_best/` before launching the app.
 
 Run preflight:
 
@@ -125,6 +127,32 @@ python -m app.app
 ```
 
 Then open `http://127.0.0.1:5000` and do a hard refresh (`Ctrl+F5`) if browser cache is stale.
+
+### Demo Checklist
+
+1. Run `python -m scripts.preflight_runtime --camera-index 0` to verify MediaPipe, artifacts, and camera.
+2. Launch `python -m app.app`, wait for the **Recognition Engine** dot to turn green, then open the UI.
+3. Walk the signer through the **User Guidelines** modal (toolbar button) before recording.
+4. Signing rhythm: neutral pose ≈1 s → perform sign ≈1 s → hold ≈2 s until the new chip appears.
+5. Use **Clear Sentence** between takes; use **Stop** at the end to freeze the stream.
+6. If the engine dot goes amber/red, restart the backend or reload the artifacts before continuing.
+
+### Module III Sample Sentences
+
+| Dataset | Gloss tokens | Output sentence |
+| --- | --- | --- |
+| MS-ASL | `COUSIN EAT` | My cousin is eating. |
+| MS-ASL | `COUSIN EAT FINISH` | My cousin finished eating. |
+| MS-ASL | `TEACHER NICE` | The teacher is nice. |
+| MS-ASL | `FINISH TEACHER` | The teacher finished. |
+| MS-ASL | `EAT NICE` | I want to eat, and it is nice. |
+| LSA64 | `ARGENTINA HELP` | Argentina is helping. |
+| LSA64 | `SON RUN` | My son is running. |
+| LSA64 | `WHERE MAP` | Where is the map? |
+| LSA64 | `CANDY GREEN` | Candy is green. |
+| LSA64 | `BRIGHT` | It is bright. |
+
+T5-small generates sentences when confident; otherwise, the new role-aware fallback ensures every gloss combination still yields a natural sentence.
 
 ## Notes
 

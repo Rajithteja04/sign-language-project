@@ -18,7 +18,7 @@ AutoTokenizer = None
 MSASL_VOCAB = {"COUSIN", "EAT", "FINISH", "NICE", "TEACHER"}
 
 
-def _load_lsa64_gloss_map() -> dict[str, str]:
+def _load_lsa64_metadata() -> dict[str, dict[str, str]]:
     path = Path(__file__).resolve().parents[1] / "data" / "lsa64_labels.json"
     if not path.exists():
         return {}
@@ -27,17 +27,31 @@ def _load_lsa64_gloss_map() -> dict[str, str]:
             raw = json.load(f)
     except Exception:
         return {}
-    normalized: dict[str, str] = {}
-    for key, phrase in raw.items():
+    normalized: dict[str, dict[str, str]] = {}
+    for key, meta in raw.items():
         norm = re.sub(r"[^A-Z0-9]+", "_", key.upper()).strip("_")
         if not norm:
             continue
-        normalized[norm] = phrase
+        if isinstance(meta, dict):
+            phrase = meta.get("phrase") or key.replace("_", " ").lower()
+            role = meta.get("role", "object")
+            progressive = meta.get("progressive")
+        else:
+            phrase = str(meta)
+            role = "object"
+            progressive = None
+        entry: dict[str, str] = {
+            "phrase": phrase,
+            "role": role,
+        }
+        if progressive:
+            entry["progressive"] = progressive
+        normalized[norm] = entry
     return normalized
 
 
-LSA64_GLOSS_MAP = _load_lsa64_gloss_map()
-LSA64_VOCAB = set(LSA64_GLOSS_MAP.keys())
+LSA64_METADATA = _load_lsa64_metadata()
+LSA64_VOCAB = set(LSA64_METADATA.keys())
 
 
 class TransformerCorrector:
@@ -268,28 +282,204 @@ def _generic_fallback(tokens: list[str]) -> str:
 def _lsa64_fallback(tokens: list[str]) -> str:
     if not tokens:
         return ""
-    phrases: list[str] = []
+
+    seen: set[tuple[str, str]] = set()
+    buckets: dict[str, list[dict[str, str]]] = {}
+
     for tok in tokens:
         key = _sanitize_token(tok)
-        phrase = LSA64_GLOSS_MAP.get(key, tok.capitalize())
-        if phrase:
-            phrases.append(phrase)
-    deduped: list[str] = []
-    for phrase in phrases:
-        if not deduped or deduped[-1] != phrase:
-            deduped.append(phrase)
-    if not deduped:
-        return ""
-    if len(deduped) == 1:
-        return f"Recognized sign: {deduped[0]}."
-    body = ", ".join(deduped[:-1])
-    if body:
-        sentence = f"Recognized sequence: {body}, and {deduped[-1]}"
+        meta = LSA64_METADATA.get(key)
+        if not meta:
+            continue
+        phrase = meta.get("phrase")
+        role = meta.get("role", "object")
+        if not phrase:
+            continue
+        sig = (role, phrase.lower())
+        if sig in seen:
+            continue
+        seen.add(sig)
+        buckets.setdefault(role, []).append(meta)
+
+    if not buckets:
+        return _generic_fallback(tokens)
+
+    objects = [m["phrase"] for m in buckets.get("object", [])]
+    subjects = [m["phrase"] for m in buckets.get("subject", [])]
+    adjectives = [m["phrase"] for m in buckets.get("adjective", [])]
+    verbs = buckets.get("verb", [])
+    questions = buckets.get("question", [])
+
+    subject_phrase = _join_phrases(subjects)
+    borrowed_subject = False
+    if not subject_phrase and not verbs and objects:
+        subject_phrase = objects.pop(0)
+        borrowed_subject = True
+    object_phrase = _join_phrases(objects)
+
+    if questions:
+        return _lsa64_question_sentence(questions[0], subject_phrase, object_phrase)
+
+    sentences: list[str] = []
+
+    if verbs:
+        sentences.append(
+            _lsa64_verb_sentence(
+                subject_phrase or "someone",
+                object_phrase,
+                verbs[0],
+            )
+        )
+
+    if adjectives:
+        target = object_phrase or subject_phrase or "it"
+        sentences.append(_lsa64_adjective_sentence(target, adjectives))
+
+    if not sentences:
+        noun_phrase = subject_phrase or object_phrase
+        if noun_phrase:
+            copula = "are" if _is_plural_phrase(noun_phrase) else "is"
+            sentences.append(f"{_capitalize_phrase(noun_phrase)} {copula} detected.")
+        else:
+            fallback = ", ".join(tok.capitalize() for tok in tokens if tok)
+            if not fallback:
+                fallback = "Detected gesture"
+            sentences.append(f"{fallback}.")
+
+    return " ".join(sentences)
+
+
+def _lsa64_question_sentence(
+    question_meta: dict[str, str],
+    subject_phrase: Optional[str],
+    object_phrase: Optional[str],
+) -> str:
+    prompt = (question_meta.get("phrase") or "where").strip()
+    target = object_phrase or subject_phrase or "it"
+    target = target.strip()
+    if not target:
+        target = "it"
+    if prompt.lower() == "where":
+        copula = "are" if _is_plural_phrase(target) else "is"
+        sentence = f"Where {copula} {target}?".replace("  ", " ").strip()
     else:
-        sentence = f"Recognized sequence: {deduped[-1]}"
-    if sentence[-1] not in ".!?":
-        sentence += "."
+        sentence = f"{_capitalize_phrase(prompt)} {target}?".replace("  ", " ").strip()
+    if sentence and sentence[0].islower():
+        sentence = sentence[0].upper() + sentence[1:]
     return sentence
+
+
+def _lsa64_verb_sentence(
+    subject_phrase: str,
+    object_phrase: Optional[str],
+    verb_meta: dict[str, str],
+) -> str:
+    subject = subject_phrase or "someone"
+    copula = "are" if _is_plural_phrase(subject) else "is"
+    progressive = _verb_progressive(verb_meta)
+    base_verb = verb_meta.get("phrase", "act")
+
+    if progressive:
+        clause = f"{_capitalize_phrase(subject)} {copula} {progressive}"
+    else:
+        clause = f"{_capitalize_phrase(subject)} {base_verb}"
+
+    if object_phrase:
+        clause = f"{clause} {object_phrase}"
+
+    clause = clause.strip()
+    if clause and clause[-1] not in ".!?":
+        clause += "."
+    return clause
+
+
+def _lsa64_adjective_sentence(target_phrase: str, adjectives: list[str]) -> str:
+    target = target_phrase or "it"
+    adj_text = _join_phrases(adjectives)
+    copula = "are" if _is_plural_phrase(target) else "is"
+    sentence = f"{_capitalize_phrase(target)} {copula} {adj_text}."
+    return sentence
+
+
+def _join_phrases(items: list[str]) -> str:
+    cleaned = [item.strip() for item in items if item and item.strip()]
+    if not cleaned:
+        return ""
+    if len(cleaned) == 1:
+        return cleaned[0]
+    if len(cleaned) == 2:
+        return f"{cleaned[0]} and {cleaned[1]}"
+    return ", ".join(cleaned[:-1]) + f", and {cleaned[-1]}"
+
+
+def _capitalize_phrase(text: str) -> str:
+    if not text:
+        return ""
+    text = text.strip()
+    if not text:
+        return ""
+    return text[0].upper() + text[1:]
+
+
+def _is_plural_phrase(text: str) -> bool:
+    if not text:
+        return False
+    lowered = text.lower()
+    if " and " in lowered:
+        return True
+    plural_keywords = {
+        "colors",
+        "women",
+        "men",
+        "people",
+        "countries",
+        "sons",
+        "daughters",
+    }
+    last_word = lowered.split()[-1]
+    if last_word in plural_keywords:
+        return True
+    if last_word.endswith("s") and not last_word.endswith("ss"):
+        return True
+    return False
+
+
+def _verb_progressive(meta: dict[str, str]) -> str:
+    if not meta:
+        return ""
+    if "progressive" in meta and meta["progressive"]:
+        return meta["progressive"]
+    phrase = meta.get("phrase", "")
+    if not phrase:
+        return ""
+    words = phrase.split()
+    words[-1] = _ing_form(words[-1])
+    return " ".join(words)
+
+
+def _ing_form(word: str) -> str:
+    if not word:
+        return ""
+    base = word.lower()
+    if base.endswith("ie"):
+        return base[:-2] + "ying"
+    if base.endswith("ee"):
+        return base + "ing"
+    if len(base) > 2 and _is_cvc(base):
+        return base + base[-1] + "ing"
+    if base.endswith("e"):
+        return base[:-1] + "ing"
+    if base.endswith("ing"):
+        return base
+    return base + "ing"
+
+
+def _is_cvc(word: str) -> bool:
+    vowels = "aeiou"
+    if len(word) < 3:
+        return False
+    a, b, c = word[-3], word[-2], word[-1]
+    return (a not in vowels) and (b in vowels) and (c not in vowels and c not in "wy")
 
 
 def _looks_invalid_output(text: str) -> bool:

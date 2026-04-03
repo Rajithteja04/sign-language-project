@@ -2,6 +2,7 @@
 
 import datetime as dt
 import json
+import re
 import threading
 import time
 from collections import Counter, deque
@@ -16,6 +17,52 @@ from flask import Flask, Response, jsonify, render_template
 from features.mediapipe_extractor import FEATURE_DIM, MediaPipeExtractor
 from models.lstm import LSTMClassifier
 from models.transformer import words_to_sentence
+
+
+TOKEN_SANITIZE_RE = re.compile(r"[^A-Z0-9]+")
+
+
+def _sanitize_token(word: str) -> str:
+    return TOKEN_SANITIZE_RE.sub("_", word.upper()).strip("_")
+
+
+def _format_phrase(text: str) -> str:
+    text = (text or "").strip()
+    if not text:
+        return ""
+    return text[0].upper() + text[1:]
+
+
+def _load_token_phrase_map() -> dict[str, str]:
+    base: dict[str, str] = {}
+    data_path = Path(__file__).resolve().parents[1] / "data" / "lsa64_labels.json"
+    if data_path.exists():
+        try:
+            with data_path.open("r", encoding="utf-8") as f:
+                raw = json.load(f)
+            for key, meta in raw.items():
+                token = _sanitize_token(key)
+                if not token:
+                    continue
+                if isinstance(meta, dict):
+                    phrase = meta.get("phrase") or key.replace("_", " ").lower()
+                else:
+                    phrase = str(meta)
+                if phrase:
+                    base[token] = _format_phrase(phrase)
+        except Exception:
+            pass
+    msasl_tokens = {
+        "COUSIN": "My cousin",
+        "EAT": "Eat",
+        "FINISH": "Finish",
+        "NICE": "Nice",
+        "TEACHER": "Teacher",
+        "STUDENT": "Student",
+    }
+    for token, phrase in msasl_tokens.items():
+        base.setdefault(token, phrase)
+    return base
 
 
 def normalize_openpose_like(x: np.ndarray) -> np.ndarray:
@@ -139,6 +186,12 @@ class WordRealtimeService:
         self.extractor: MediaPipeExtractor | None = None
         self.processed_frames = 0
 
+        self.dataset_name = "Model not loaded"
+        self.num_classes = 0
+        self.hidden_dim = 0
+        self.num_layers = 0
+        self.token_phrase_map = _load_token_phrase_map()
+
         self.camera = CameraManager(camera_index=0)
         self.camera.start()
         self._init_extractor()
@@ -213,6 +266,10 @@ class WordRealtimeService:
                     meta_data.get("layers", self._infer_num_layers(state)),
                 )
             )
+            self.dataset_name = str(meta_data.get("dataset", "Custom LSTM"))
+            self.num_classes = num_classes
+            self.hidden_dim = hidden_dim
+            self.num_layers = num_layers
 
             model = LSTMClassifier(
                 input_dim=feature_dim,
@@ -225,7 +282,7 @@ class WordRealtimeService:
             self.model = model
 
             self.source_mode = "live"
-            self.model_status = "Model loaded successfully (real mode)."
+            self.model_status = f"Model loaded: {self.dataset_name} ({self.num_classes} classes)."
             self.status = "Model ready. Click Start."
         except Exception as exc:
             self.source_mode = "error"
@@ -251,6 +308,15 @@ class WordRealtimeService:
 
         motion = float(np.mean(np.abs(hand[active] - prev_hand[active])))
         return has_hand, motion, hand
+
+    def _display_token(self, token: str) -> str:
+        if not token or token == "-":
+            return "-"
+        phrase = self.token_phrase_map.get(token)
+        if phrase:
+            return phrase
+        human = token.replace("_", " ").lower()
+        return _format_phrase(human)
 
     def _set_idle(self, message: str) -> None:
         with self.lock:
@@ -424,14 +490,17 @@ class WordRealtimeService:
     def state(self) -> dict[str, Any]:
         cam = self.camera.state()
         with self.lock:
+            committed_display = [self._display_token(tok) for tok in self.committed_words]
             return {
                 "running": self.running,
                 "status": self.status,
                 "model_status": self.model_status,
-                "current_word": self.current_word,
+                "current_word": self._display_token(self.current_word),
+                "current_token": self.current_word,
                 "confidence": self.current_confidence,
                 "margin": self.current_margin,
-                "committed_words": list(self.committed_words),
+                "committed_words": committed_display,
+                "committed_tokens": list(self.committed_words),
                 "gloss_sequence": " ".join(self.committed_words),
                 "corrected_sentence": self.corrected_sentence,
                 "mode": self.source_mode,
@@ -440,6 +509,13 @@ class WordRealtimeService:
                 "camera_status": cam["status"],
                 "preview_ready": cam["ready"],
                 "timestamp": self.last_update_utc.isoformat(),
+                "model_info": {
+                    "dataset": self.dataset_name,
+                    "num_classes": self.num_classes,
+                    "sequence_length": self.seq_len,
+                    "hidden_dim": self.hidden_dim,
+                    "layers": self.num_layers,
+                },
             }
 
 

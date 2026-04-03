@@ -144,3 +144,12 @@
 - Built `scripts/run_video_inference.py` for single-clip debugging and `scripts/eval_lsa64_dataset.py` for bulk evaluation using cached landmark tensors.
 - Regenerated `artifacts/lsa64/lsa64_top64_seq30_h128_l2_bs16_lr5e-04` metadata so it records `normalize: true` and cache location; this restored full-dataset accuracy to 97.3%.
 - Created plots under `artifacts/plots/` (accuracy comparison, latency breakdown, per-label accuracy) for report visuals.
+
+## 2026-04-03 - Final Demo Switch to LSA64
+
+- Copied the 64-class LSA64 checkpoint into `artifacts/` and `artifacts/final_best/` so the runtime now boots with the highest-accuracy model.
+- Regenerated `artifacts/label_to_id.json` to expose uppercase gloss tokens (`OPAQUE`, `HELP`, `RUN`, etc.) instead of numeric IDs, enabling Module II + Module III to stay in sync.
+- Updated `app/app.py` to load the dataset tag from metadata, surface it in the UI banner, show human-readable words (via `data/lsa64_labels.json`), and expose both raw tokens and display strings in `/state`.
+- Refreshed `scripts/run_video_inference.py` to pretty-print the same phrases, ensuring offline clips and the live UI show consistent wording.
+- Documented the new default in `README.md` (Realtime Web App section) and recorded the switch here for auditability.
+- UI polish: rebuilt `app/templates/index.html`, `app/static/styles.css`, and `app/static/app.js` so the demo fills the viewport, replaces the text banner with a minimal status indicator (green/red dot), and presents camera/output panels that feel closer to a production console.

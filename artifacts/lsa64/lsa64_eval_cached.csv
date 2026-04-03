@@ -702,213 +702,218 @@ D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_001.mp4,Born (015),Dra
 D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_002.mp4,Born (015),Argentina (024),0,0.9152,Argentina (024),0.9152,Pink (008),0.0661,Born (015),0.0047,Rice (044),0.0027,Bathe (058),0.0024
 D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_003.mp4,Born (015),Drawer (014),0,0.0891,Drawer (014),0.0891,Buy (059),0.0581,Argentina (024),0.0563,Find (064),0.0485,Born (015),0.0446
 D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_004.mp4,Born (015),Drawer (014),0,0.0917,Drawer (014),0.0917,Argentina (024),0.0539,Buy (059),0.0514,Born (015),0.0507,Find (064),0.0504
-4),0.9843,Born (015),0.0090,Man (012),0.0020,Buy (059),0.0011,Green (003),0.0010
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\014\014_009_005.mp4,Drawer (014),Drawer (014),1,0.9620,Drawer (014),0.9620,Green (003),0.0193,Man (012),0.0062,Born (015),0.0026,Red (002),0.0023
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\014\014_010_001.mp4,Drawer (014),Man (012),0,0.8226,Man (012),0.8226,Drawer (014),0.0884,Enemy (010),0.0620,Born (015),0.0059,Buy (059),0.0039
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\014\014_010_002.mp4,Drawer (014),Drawer (014),1,0.9857,Drawer (014),0.9857,Born (015),0.0058,Man (012),0.0034,Buy (059),0.0018,Green (003),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\014\014_010_003.mp4,Drawer (014),Drawer (014),1,0.9443,Drawer (014),0.9443,Man (012),0.0330,Born (015),0.0101,Buy (059),0.0030,Enemy (010),0.0019
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\014\014_010_004.mp4,Drawer (014),Drawer (014),1,0.4670,Drawer (014),0.4670,Man (012),0.4496,Green (003),0.0201,Born (015),0.0180,Enemy (010),0.0138
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\014\014_010_005.mp4,Drawer (014),Drawer (014),1,0.9878,Drawer (014),0.9878,Born (015),0.0052,Man (012),0.0025,Buy (059),0.0016,Green (003),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_001_001.mp4,Born (015),Born (015),1,0.9974,Born (015),0.9974,Drawer (014),0.0013,Hungry (033),0.0005,Argentina (024),0.0002,Food (023),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_001_002.mp4,Born (015),Born (015),1,0.9973,Born (015),0.9973,Drawer (014),0.0008,Food (023),0.0006,Hungry (033),0.0006,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_001_003.mp4,Born (015),Born (015),1,0.9961,Born (015),0.9961,Drawer (014),0.0022,Hungry (033),0.0007,Argentina (024),0.0004,Pink (008),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_001_004.mp4,Born (015),Born (015),1,0.9973,Born (015),0.9973,Drawer (014),0.0011,Food (023),0.0004,Hungry (033),0.0004,Argentina (024),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_001_005.mp4,Born (015),Born (015),1,0.9982,Born (015),0.9982,Drawer (014),0.0007,Hungry (033),0.0004,Food (023),0.0003,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_002_001.mp4,Born (015),Born (015),1,0.9954,Born (015),0.9954,Drawer (014),0.0020,Hungry (033),0.0009,Argentina (024),0.0007,Pink (008),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_002_002.mp4,Born (015),Born (015),1,0.9977,Born (015),0.9977,Hungry (033),0.0006,Drawer (014),0.0006,Food (023),0.0004,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_002_003.mp4,Born (015),Born (015),1,0.9981,Born (015),0.9981,Hungry (033),0.0007,Drawer (014),0.0005,Food (023),0.0002,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_002_004.mp4,Born (015),Born (015),1,0.9923,Born (015),0.9923,Hungry (033),0.0036,Drawer (014),0.0018,Argentina (024),0.0011,Barbecue (045),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_002_005.mp4,Born (015),Born (015),1,0.9979,Born (015),0.9979,Hungry (033),0.0008,Drawer (014),0.0008,Argentina (024),0.0002,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_003_001.mp4,Born (015),Born (015),1,0.9981,Born (015),0.9981,Drawer (014),0.0006,Hungry (033),0.0005,Food (023),0.0002,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_003_002.mp4,Born (015),Born (015),1,0.9978,Born (015),0.9978,Drawer (014),0.0010,Hungry (033),0.0006,Argentina (024),0.0002,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_003_003.mp4,Born (015),Born (015),1,0.9982,Born (015),0.9982,Drawer (014),0.0006,Hungry (033),0.0004,Food (023),0.0002,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_003_004.mp4,Born (015),Born (015),1,0.9961,Born (015),0.9961,Drawer (014),0.0011,Food (023),0.0007,Argentina (024),0.0007,Hungry (033),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_003_005.mp4,Born (015),Born (015),1,0.9970,Born (015),0.9970,Hungry (033),0.0008,Drawer (014),0.0007,Food (023),0.0006,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_001.mp4,Born (015),Born (015),1,0.9938,Born (015),0.9938,Drawer (014),0.0031,Hungry (033),0.0012,Argentina (024),0.0008,Pink (008),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_002.mp4,Born (015),Born (015),1,0.9905,Born (015),0.9905,Hungry (033),0.0052,Drawer (014),0.0020,Help (056),0.0002,Dance (057),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_003.mp4,Born (015),Born (015),1,0.9932,Born (015),0.9932,Drawer (014),0.0031,Hungry (033),0.0012,Argentina (024),0.0010,Pink (008),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_004.mp4,Born (015),Born (015),1,0.9945,Born (015),0.9945,Drawer (014),0.0019,Hungry (033),0.0014,Argentina (024),0.0012,Pink (008),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_005.mp4,Born (015),Born (015),1,0.9959,Born (015),0.9959,Hungry (033),0.0015,Drawer (014),0.0013,Argentina (024),0.0007,Food (023),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_001.mp4,Born (015),Born (015),1,0.9956,Born (015),0.9956,Drawer (014),0.0022,Food (023),0.0007,Hungry (033),0.0005,Run (061),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_002.mp4,Born (015),Born (015),1,0.9961,Born (015),0.9961,Drawer (014),0.0018,Hungry (033),0.0007,Food (023),0.0006,Argentina (024),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_003.mp4,Born (015),Born (015),1,0.9967,Born (015),0.9967,Drawer (014),0.0015,Hungry (033),0.0008,Food (023),0.0003,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_004.mp4,Born (015),Born (015),1,0.9958,Born (015),0.9958,Drawer (014),0.0019,Hungry (033),0.0008,Food (023),0.0006,Argentina (024),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_005.mp4,Born (015),Born (015),1,0.9959,Born (015),0.9959,Drawer (014),0.0019,Hungry (033),0.0007,Food (023),0.0005,Argentina (024),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_001.mp4,Born (015),Born (015),1,0.9971,Born (015),0.9971,Hungry (033),0.0012,Drawer (014),0.0010,Food (023),0.0002,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_002.mp4,Born (015),Born (015),1,0.9920,Born (015),0.9920,Drawer (014),0.0023,Food (023),0.0017,Hungry (033),0.0010,Man (012),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_003.mp4,Born (015),Born (015),1,0.9972,Born (015),0.9972,Hungry (033),0.0011,Drawer (014),0.0010,Food (023),0.0002,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_004.mp4,Born (015),Born (015),1,0.9973,Born (015),0.9973,Drawer (014),0.0010,Hungry (033),0.0008,Food (023),0.0002,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_005.mp4,Born (015),Born (015),1,0.9971,Born (015),0.9971,Hungry (033),0.0011,Drawer (014),0.0010,Food (023),0.0002,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_001.mp4,Born (015),Born (015),1,0.9942,Born (015),0.9942,Hungry (033),0.0028,Drawer (014),0.0016,Argentina (024),0.0008,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_002.mp4,Born (015),Born (015),1,0.9965,Born (015),0.9965,Hungry (033),0.0015,Drawer (014),0.0013,Argentina (024),0.0004,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_003.mp4,Born (015),Born (015),1,0.9946,Born (015),0.9946,Hungry (033),0.0025,Drawer (014),0.0018,Argentina (024),0.0006,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_004.mp4,Born (015),Born (015),1,0.9939,Born (015),0.9939,Hungry (033),0.0030,Drawer (014),0.0016,Argentina (024),0.0009,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_005.mp4,Born (015),Born (015),1,0.9943,Born (015),0.9943,Hungry (033),0.0025,Drawer (014),0.0016,Argentina (024),0.0009,Pink (008),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_001.mp4,Born (015),Born (015),1,0.9657,Born (015),0.9657,Drawer (014),0.0248,Hungry (033),0.0036,Man (012),0.0016,Food (023),0.0008
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_002.mp4,Born (015),Born (015),1,0.9517,Born (015),0.9517,Drawer (014),0.0389,Hungry (033),0.0029,Man (012),0.0020,Buy (059),0.0008
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_003.mp4,Born (015),Man (012),0,0.5096,Man (012),0.5096,Born (015),0.3020,Enemy (010),0.0768,Drawer (014),0.0616,Light blue (006),0.0062
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_004.mp4,Born (015),Born (015),1,0.9955,Born (015),0.9955,Drawer (014),0.0026,Hungry (033),0.0008,Food (023),0.0002,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_005.mp4,Born (015),Born (015),1,0.9969,Born (015),0.9969,Drawer (014),0.0013,Hungry (033),0.0008,Food (023),0.0004,Argentina (024),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_001.mp4,Born (015),Born (015),1,0.9964,Born (015),0.9964,Hungry (033),0.0014,Drawer (014),0.0011,Argentina (024),0.0005,Food (023),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_002.mp4,Born (015),Born (015),1,0.9936,Born (015),0.9936,Drawer (014),0.0023,Argentina (024),0.0017,Hungry (033),0.0013,Pink (008),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_003.mp4,Born (015),Born (015),1,0.9956,Born (015),0.9956,Drawer (014),0.0019,Hungry (033),0.0012,Argentina (024),0.0004,Food (023),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_004.mp4,Born (015),Born (015),1,0.9970,Born (015),0.9970,Hungry (033),0.0011,Drawer (014),0.0009,Argentina (024),0.0003,Food (023),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_005.mp4,Born (015),Born (015),1,0.9958,Born (015),0.9958,Drawer (014),0.0018,Hungry (033),0.0013,Food (023),0.0004,Argentina (024),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_001.mp4,Born (015),Born (015),1,0.9978,Born (015),0.9978,Drawer (014),0.0011,Hungry (033),0.0005,Food (023),0.0001,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_002.mp4,Born (015),Born (015),1,0.9979,Born (015),0.9979,Drawer (014),0.0011,Hungry (033),0.0004,Food (023),0.0001,Argentina (024),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_003.mp4,Born (015),Born (015),1,0.9959,Born (015),0.9959,Drawer (014),0.0026,Hungry (033),0.0009,Argentina (024),0.0002,Food (023),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_004.mp4,Born (015),Born (015),1,0.9973,Born (015),0.9973,Drawer (014),0.0015,Hungry (033),0.0007,Argentina (024),0.0002,Food (023),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_005.mp4,Born (015),Born (015),1,0.9974,Born (015),0.9974,Drawer (014),0.0014,Hungry (033),0.0006,Argentina (024),0.0001,Food (023),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_001.mp4,Learn (016),Learn (016),1,0.9886,Learn (016),0.9886,Milk (021),0.0057,Uruguay (025),0.0023,Away (013),0.0014,Skimmer (018),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_002.mp4,Learn (016),Learn (016),1,0.9903,Learn (016),0.9903,Milk (021),0.0043,Uruguay (025),0.0029,Call (017),0.0005,Away (013),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_003.mp4,Learn (016),Learn (016),1,0.9900,Learn (016),0.9900,Milk (021),0.0060,Uruguay (025),0.0019,Away (013),0.0005,Skimmer (018),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_004.mp4,Learn (016),Learn (016),1,0.9904,Learn (016),0.9904,Milk (021),0.0045,Uruguay (025),0.0027,Away (013),0.0004,Call (017),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_005.mp4,Learn (016),Learn (016),1,0.9947,Learn (016),0.9947,Milk (021),0.0023,Uruguay (025),0.0011,Call (017),0.0004,Away (013),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_001.mp4,Learn (016),Learn (016),1,0.9930,Learn (016),0.9930,Milk (021),0.0041,Away (013),0.0010,Uruguay (025),0.0005,Green (003),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_002.mp4,Learn (016),Learn (016),1,0.9938,Learn (016),0.9938,Milk (021),0.0041,Uruguay (025),0.0005,Away (013),0.0004,Green (003),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_003.mp4,Learn (016),Learn (016),1,0.9889,Learn (016),0.9889,Milk (021),0.0081,Away (013),0.0009,Uruguay (025),0.0008,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_004.mp4,Learn (016),Learn (016),1,0.9916,Learn (016),0.9916,Milk (021),0.0056,Away (013),0.0008,Uruguay (025),0.0008,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_005.mp4,Learn (016),Learn (016),1,0.9906,Learn (016),0.9906,Milk (021),0.0062,Away (013),0.0011,Uruguay (025),0.0007,Green (003),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_001.mp4,Learn (016),Learn (016),1,0.9955,Learn (016),0.9955,Milk (021),0.0024,Uruguay (025),0.0004,Away (013),0.0003,Call (017),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_002.mp4,Learn (016),Learn (016),1,0.9951,Learn (016),0.9951,Milk (021),0.0029,Uruguay (025),0.0004,Away (013),0.0003,Enemy (010),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_003.mp4,Learn (016),Learn (016),1,0.9953,Learn (016),0.9953,Milk (021),0.0028,Away (013),0.0004,Uruguay (025),0.0004,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_004.mp4,Learn (016),Learn (016),1,0.9922,Learn (016),0.9922,Milk (021),0.0052,Away (013),0.0007,Uruguay (025),0.0007,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_005.mp4,Learn (016),Learn (016),1,0.9955,Learn (016),0.9955,Milk (021),0.0027,Away (013),0.0004,Uruguay (025),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_001.mp4,Learn (016),Learn (016),1,0.9954,Learn (016),0.9954,Milk (021),0.0026,Uruguay (025),0.0006,Away (013),0.0004,Enemy (010),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_002.mp4,Learn (016),Learn (016),1,0.9956,Learn (016),0.9956,Milk (021),0.0026,Uruguay (025),0.0005,Away (013),0.0004,Enemy (010),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_003.mp4,Learn (016),Learn (016),1,0.9956,Learn (016),0.9956,Milk (021),0.0025,Uruguay (025),0.0005,Away (013),0.0004,Enemy (010),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_004.mp4,Learn (016),Learn (016),1,0.9927,Learn (016),0.9927,Milk (021),0.0032,Uruguay (025),0.0006,Enemy (010),0.0006,Away (013),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_005.mp4,Learn (016),Learn (016),1,0.9926,Learn (016),0.9926,Milk (021),0.0040,Uruguay (025),0.0006,Enemy (010),0.0005,Away (013),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_001.mp4,Learn (016),Learn (016),1,0.9921,Learn (016),0.9921,Milk (021),0.0045,Uruguay (025),0.0016,Away (013),0.0004,Skimmer (018),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_002.mp4,Learn (016),Learn (016),1,0.9948,Learn (016),0.9948,Milk (021),0.0027,Uruguay (025),0.0009,Away (013),0.0003,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_003.mp4,Learn (016),Learn (016),1,0.9950,Learn (016),0.9950,Milk (021),0.0026,Uruguay (025),0.0008,Away (013),0.0003,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_004.mp4,Learn (016),Learn (016),1,0.9916,Learn (016),0.9916,Milk (021),0.0049,Uruguay (025),0.0016,Away (013),0.0004,Skimmer (018),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_005.mp4,Learn (016),Learn (016),1,0.9947,Learn (016),0.9947,Milk (021),0.0026,Uruguay (025),0.0010,Away (013),0.0003,Call (017),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_001.mp4,Learn (016),Learn (016),1,0.9910,Learn (016),0.9910,Milk (021),0.0045,Enemy (010),0.0009,Green (003),0.0006,Red (002),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_002.mp4,Learn (016),Learn (016),1,0.9950,Learn (016),0.9950,Milk (021),0.0032,Away (013),0.0005,Uruguay (025),0.0003,Green (003),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_003.mp4,Learn (016),Learn (016),1,0.9952,Learn (016),0.9952,Milk (021),0.0028,Away (013),0.0004,Uruguay (025),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_004.mp4,Learn (016),Learn (016),1,0.9956,Learn (016),0.9956,Milk (021),0.0025,Away (013),0.0004,Uruguay (025),0.0004,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_005.mp4,Learn (016),Learn (016),1,0.9952,Learn (016),0.9952,Milk (021),0.0029,Away (013),0.0004,Uruguay (025),0.0004,Green (003),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_001.mp4,Learn (016),Learn (016),1,0.9874,Learn (016),0.9874,Milk (021),0.0053,Call (017),0.0025,Uruguay (025),0.0009,Away (013),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_002.mp4,Learn (016),Learn (016),1,0.9937,Learn (016),0.9937,Milk (021),0.0038,Away (013),0.0006,Uruguay (025),0.0004,Call (017),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_003.mp4,Learn (016),Learn (016),1,0.9948,Learn (016),0.9948,Milk (021),0.0028,Call (017),0.0004,Away (013),0.0004,Uruguay (025),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_004.mp4,Learn (016),Learn (016),1,0.9944,Learn (016),0.9944,Milk (021),0.0037,Away (013),0.0005,Uruguay (025),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_005.mp4,Learn (016),Learn (016),1,0.9946,Learn (016),0.9946,Milk (021),0.0035,Away (013),0.0005,Uruguay (025),0.0003,Enemy (010),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_001.mp4,Learn (016),Learn (016),1,0.9921,Learn (016),0.9921,Milk (021),0.0051,Uruguay (025),0.0010,Away (013),0.0007,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_002.mp4,Learn (016),Learn (016),1,0.9925,Learn (016),0.9925,Milk (021),0.0046,Uruguay (025),0.0010,Away (013),0.0007,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_003.mp4,Learn (016),Learn (016),1,0.9923,Learn (016),0.9923,Milk (021),0.0048,Uruguay (025),0.0009,Away (013),0.0007,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_004.mp4,Learn (016),Learn (016),1,0.9941,Learn (016),0.9941,Milk (021),0.0037,Uruguay (025),0.0006,Away (013),0.0006,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_005.mp4,Learn (016),Learn (016),1,0.9927,Learn (016),0.9927,Milk (021),0.0046,Uruguay (025),0.0010,Away (013),0.0005,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_001.mp4,Learn (016),Learn (016),1,0.9954,Learn (016),0.9954,Milk (021),0.0026,Uruguay (025),0.0004,Away (013),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_002.mp4,Learn (016),Learn (016),1,0.9955,Learn (016),0.9955,Milk (021),0.0024,Uruguay (025),0.0004,Away (013),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_003.mp4,Learn (016),Learn (016),1,0.9947,Learn (016),0.9947,Milk (021),0.0029,Uruguay (025),0.0006,Enemy (010),0.0003,Away (013),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_004.mp4,Learn (016),Learn (016),1,0.9924,Learn (016),0.9924,Milk (021),0.0034,Uruguay (025),0.0013,Call (017),0.0009,Away (013),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_005.mp4,Learn (016),Learn (016),1,0.9953,Learn (016),0.9953,Milk (021),0.0027,Uruguay (025),0.0004,Away (013),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_001.mp4,Learn (016),Learn (016),1,0.9940,Learn (016),0.9940,Milk (021),0.0037,Away (013),0.0006,Uruguay (025),0.0006,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_002.mp4,Learn (016),Learn (016),1,0.9953,Learn (016),0.9953,Milk (021),0.0027,Uruguay (025),0.0004,Away (013),0.0003,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_003.mp4,Learn (016),Learn (016),1,0.9954,Learn (016),0.9954,Milk (021),0.0027,Uruguay (025),0.0004,Away (013),0.0004,Enemy (010),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_004.mp4,Learn (016),Learn (016),1,0.9936,Learn (016),0.9936,Milk (021),0.0041,Away (013),0.0007,Uruguay (025),0.0005,Skimmer (018),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_005.mp4,Learn (016),Learn (016),1,0.9950,Learn (016),0.9950,Milk (021),0.0029,Uruguay (025),0.0004,Away (013),0.0003,Enemy (010),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_001.mp4,Call (017),Call (017),1,0.9985,Call (017),0.9985,Women (009),0.0003,Man (012),0.0003,Learn (016),0.0002,Son (011),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_002.mp4,Call (017),Call (017),1,0.9991,Call (017),0.9991,Women (009),0.0002,Son (011),0.0001,Man (012),0.0001,Learn (016),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_003.mp4,Call (017),Call (017),1,0.9980,Call (017),0.9980,Man (012),0.0004,Learn (016),0.0004,Women (009),0.0003,Find (064),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_004.mp4,Call (017),Call (017),1,0.9989,Call (017),0.9989,Women (009),0.0003,Man (012),0.0001,Son (011),0.0001,Find (064),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_005.mp4,Call (017),Call (017),1,0.9986,Call (017),0.9986,Man (012),0.0003,Learn (016),0.0002,Find (064),0.0002,Women (009),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_001.mp4,Call (017),Call (017),1,0.9946,Call (017),0.9946,Women (009),0.0027,Son (011),0.0005,Last name (027),0.0005,Man (012),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_002.mp4,Call (017),Call (017),1,0.9930,Call (017),0.9930,Women (009),0.0041,Son (011),0.0007,Man (012),0.0007,Last name (027),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_003.mp4,Call (017),Call (017),1,0.9886,Call (017),0.9886,Women (009),0.0078,Last name (027),0.0010,Son (011),0.0008,Man (012),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_004.mp4,Call (017),Call (017),1,0.9944,Call (017),0.9944,Women (009),0.0034,Son (011),0.0006,Man (012),0.0005,Last name (027),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_005.mp4,Call (017),Call (017),1,0.9970,Call (017),0.9970,Women (009),0.0015,Son (011),0.0004,Man (012),0.0003,Last name (027),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_001.mp4,Call (017),Call (017),1,0.9985,Call (017),0.9985,Find (064),0.0003,Learn (016),0.0003,Man (012),0.0003,Women (009),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_002.mp4,Call (017),Call (017),1,0.9987,Call (017),0.9987,Find (064),0.0003,Learn (016),0.0002,Man (012),0.0002,Women (009),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_003.mp4,Call (017),Call (017),1,0.9991,Call (017),0.9991,Find (064),0.0002,Man (012),0.0001,Learn (016),0.0001,Women (009),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_004.mp4,Call (017),Call (017),1,0.9988,Call (017),0.9988,Find (064),0.0003,Learn (016),0.0002,Man (012),0.0002,Women (009),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_005.mp4,Call (017),Call (017),1,0.9990,Call (017),0.9990,Find (064),0.0002,Man (012),0.0001,Learn (016),0.0001,Women (009),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_001.mp4,Call (017),Call (017),1,0.9881,Call (017),0.9881,Find (064),0.0039,Learn (016),0.0030,Uruguay (025),0.0008,Skimmer (018),0.0008
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_002.mp4,Call (017),Call (017),1,0.9862,Call (017),0.9862,Find (064),0.0049,Learn (016),0.0028,Colors (007),0.0014,Uruguay (025),0.0009
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_003.mp4,Call (017),Call (017),1,0.9882,Call (017),0.9882,Find (064),0.0049,Colors (007),0.0019,Learn (016),0.0016,Uruguay (025),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_004.mp4,Call (017),Call (017),1,0.9989,Call (017),0.9989,Find (064),0.0002,Learn (016),0.0002,Man (012),0.0001,Women (009),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_005.mp4,Call (017),Call (017),1,0.9988,Call (017),0.9988,Find (064),0.0002,Women (009),0.0002,Learn (016),0.0001,Son (011),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_001.mp4,Call (017),Call (017),1,0.9966,Call (017),0.9966,Women (009),0.0014,Last name (027),0.0004,Ship (037),0.0004,Son (011),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_002.mp4,Call (017),Call (017),1,0.9987,Call (017),0.9987,Women (009),0.0004,Son (011),0.0002,Man (012),0.0001,Learn (016),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_003.mp4,Call (017),Call (017),1,0.9987,Call (017),0.9987,Women (009),0.0003,Man (012),0.0002,Son (011),0.0001,Find (064),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_004.mp4,Call (017),Call (017),1,0.9987,Call (017),0.9987,Women (009),0.0004,Son (011),0.0002,Man (012),0.0001,Last name (027),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_005.mp4,Call (017),Call (017),1,0.9948,Call (017),0.9948,Women (009),0.0022,Last name (027),0.0009,Ship (037),0.0007,Son (011),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_001.mp4,Call (017),Call (017),1,0.9967,Call (017),0.9967,Women (009),0.0019,Last name (027),0.0004,Son (011),0.0003,Man (012),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_002.mp4,Call (017),Call (017),1,0.9986,Call (017),0.9986,Women (009),0.0005,Son (011),0.0002,Man (012),0.0002,Last name (027),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_003.mp4,Call (017),Call (017),1,0.9930,Call (017),0.9930,Women (009),0.0030,Last name (027),0.0019,Find (064),0.0003,Ship (037),0.0003
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_004.mp4,Call (017),Call (017),1,0.9749,Call (017),0.9749,Women (009),0.0169,Last name (027),0.0043,Ship (037),0.0013,Son (011),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_005.mp4,Call (017),Call (017),1,0.9943,Call (017),0.9943,Women (009),0.0032,Last name (027),0.0008,Son (011),0.0004,Ship (037),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_001.mp4,Call (017),Call (017),1,0.9963,Call (017),0.9963,Find (064),0.0019,Learn (016),0.0004,Colors (007),0.0002,Women (009),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_002.mp4,Call (017),Call (017),1,0.9960,Call (017),0.9960,Find (064),0.0019,Colors (007),0.0004,Learn (016),0.0003,Women (009),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_003.mp4,Call (017),Call (017),1,0.9946,Call (017),0.9946,Find (064),0.0028,Colors (007),0.0005,Learn (016),0.0004,Uruguay (025),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_004.mp4,Call (017),Call (017),1,0.9911,Call (017),0.9911,Find (064),0.0043,Colors (007),0.0011,Learn (016),0.0010,Uruguay (025),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_005.mp4,Call (017),Call (017),1,0.9942,Call (017),0.9942,Find (064),0.0029,Learn (016),0.0008,Colors (007),0.0004,Uruguay (025),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_001.mp4,Call (017),Call (017),1,0.9758,Call (017),0.9758,Women (009),0.0113,Last name (027),0.0065,Ship (037),0.0031,Find (064),0.0010
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_002.mp4,Call (017),Call (017),1,0.9991,Call (017),0.9991,Women (009),0.0002,Find (064),0.0001,Man (012),0.0001,Son (011),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_003.mp4,Call (017),Call (017),1,0.9991,Call (017),0.9991,Women (009),0.0002,Find (064),0.0001,Son (011),0.0001,Man (012),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_004.mp4,Call (017),Call (017),1,0.9991,Call (017),0.9991,Women (009),0.0002,Man (012),0.0001,Find (064),0.0001,Son (011),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_005.mp4,Call (017),Call (017),1,0.9991,Call (017),0.9991,Women (009),0.0002,Man (012),0.0001,Find (064),0.0001,Son (011),0.0001
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_001.mp4,Call (017),Call (017),1,0.9876,Call (017),0.9876,Women (009),0.0037,Last name (027),0.0036,Ship (037),0.0028,Find (064),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_002.mp4,Call (017),Call (017),1,0.9899,Call (017),0.9899,Women (009),0.0030,Last name (027),0.0027,Ship (037),0.0021,Find (064),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_003.mp4,Call (017),Call (017),1,0.9901,Call (017),0.9901,Women (009),0.0032,Last name (027),0.0026,Ship (037),0.0019,Find (064),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_004.mp4,Call (017),Call (017),1,0.9915,Call (017),0.9915,Women (009),0.0031,Last name (027),0.0019,Ship (037),0.0014,Son (011),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_005.mp4,Call (017),Call (017),1,0.9742,Call (017),0.9742,Women (009),0.0134,Last name (027),0.0053,Ship (037),0.0035,Find (064),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_001.mp4,Call (017),Call (017),1,0.9978,Call (017),0.9978,Women (009),0.0006,Last name (027),0.0004,Man (012),0.0003,Find (064),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_002.mp4,Call (017),Call (017),1,0.9980,Call (017),0.9980,Women (009),0.0005,Last name (027),0.0004,Man (012),0.0003,Find (064),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_003.mp4,Call (017),Call (017),1,0.9974,Call (017),0.9974,Women (009),0.0008,Last name (027),0.0005,Man (012),0.0004,Son (011),0.0002
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_004.mp4,Call (017),Call (017),1,0.9934,Call (017),0.9934,Women (009),0.0019,Last name (027),0.0019,Man (012),0.0006,Son (011),0.0004
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_005.mp4,Call (017),Call (017),1,0.9929,Call (017),0.9929,Last name (027),0.0026,Women (009),0.0012,Man (012),0.0006,Ship (037),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_001.mp4,Skimmer (018),Skimmer (018),1,0.8012,Skimmer (018),0.8012,Bright (005),0.1797,Find (064),0.0064,Milk (021),0.0042,Opaque (001),0.0024
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_002.mp4,Skimmer (018),Skimmer (018),1,0.6897,Skimmer (018),0.6897,Bright (005),0.2954,Find (064),0.0039,Shut down (052),0.0035,Milk (021),0.0026
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_003.mp4,Skimmer (018),Skimmer (018),1,0.8827,Skimmer (018),0.8827,Bright (005),0.1027,Milk (021),0.0055,Opaque (001),0.0033,Find (064),0.0019
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_004.mp4,Skimmer (018),Bright (005),0,0.5442,Bright (005),0.5442,Skimmer (018),0.4336,Shut down (052),0.0090,Opaque (001),0.0030,Milk (021),0.0028
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_005.mp4,Skimmer (018),Skimmer (018),1,0.8170,Skimmer (018),0.8170,Bright (005),0.1653,Milk (021),0.0044,Opaque (001),0.0043,Find (064),0.0031
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_001.mp4,Skimmer (018),Skimmer (018),1,0.8689,Skimmer (018),0.8689,Bright (005),0.0850,Milk (021),0.0270,Away (013),0.0060,Opaque (001),0.0044
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_002.mp4,Skimmer (018),Skimmer (018),1,0.8980,Skimmer (018),0.8980,Bright (005),0.0870,Milk (021),0.0050,Opaque (001),0.0031,Find (064),0.0023
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_003.mp4,Skimmer (018),Skimmer (018),1,0.8964,Skimmer (018),0.8964,Bright (005),0.0877,Milk (021),0.0057,Opaque (001),0.0035,Find (064),0.0020
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_004.mp4,Skimmer (018),Skimmer (018),1,0.8797,Skimmer (018),0.8797,Bright (005),0.1025,Milk (021),0.0058,Opaque (001),0.0043,Find (064),0.0025
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_005.mp4,Skimmer (018),Skimmer (018),1,0.9018,Skimmer (018),0.9018,Bright (005),0.0816,Milk (021),0.0060,Opaque (001),0.0040,Find (064),0.0020
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_001.mp4,Skimmer (018),Skimmer (018),1,0.9343,Skimmer (018),0.9343,Bright (005),0.0560,Milk (021),0.0026,Find (064),0.0016,Opaque (001),0.0015
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_002.mp4,Skimmer (018),Skimmer (018),1,0.9367,Skimmer (018),0.9367,Bright (005),0.0520,Milk (021),0.0031,Find (064),0.0023,Opaque (001),0.0020
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_003.mp4,Skimmer (018),Skimmer (018),1,0.9302,Skimmer (018),0.9302,Bright (005),0.0618,Milk (021),0.0023,Opaque (001),0.0012,Find (064),0.0012
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_004.mp4,Skimmer (018),Skimmer (018),1,0.9324,Skimmer (018),0.9324,Bright (005),0.0594,Milk (021),0.0023,Find (064),0.0013,Opaque (001),0.0012
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_005.mp4,Skimmer (018),Skimmer (018),1,0.9367,Skimmer (018),0.9367,Bright (005),0.0529,Milk (021),0.0029,Away (013),0.0016,Find (064),0.0015
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_001.mp4,Skimmer (018),Skimmer (018),1,0.9006,Skimmer (018),0.9006,Bright (005),0.0889,Milk (021),0.0048,Opaque (001),0.0017,Find (064),0.0011
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_002.mp4,Skimmer (018),Skimmer (018),1,0.7939,Skimmer (018),0.7939,Bright (005),0.1978,Milk (021),0.0021,Find (064),0.0019,Opaque (001),0.0012
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_003.mp4,Skimmer (018),Skimmer (018),1,0.9145,Skimmer (018),0.9145,Bright (005),0.0765,Milk (021),0.0031,Opaque (001),0.0020,Find (064),0.0013
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_004.mp4,Skimmer (018),Skimmer (018),1,0.9071,Skimmer (018),0.9071,Bright (005),0.0827,Opaque (001),0.0028,Milk (021),0.0025,Find (064),0.0017
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_005.mp4,Skimmer (018),Skimmer (018),1,0.9034,Skimmer (018),0.9034,Bright (005),0.0878,Milk (021),0.0028,Opaque (001),0.0017,Find (064),0.0012
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_001.mp4,Skimmer (018),Skimmer (018),1,0.8902,Skimmer (018),0.8902,Bright (005),0.1014,Milk (021),0.0025,Opaque (001),0.0012,Find (064),0.0012
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_002.mp4,Skimmer (018),Skimmer (018),1,0.8459,Skimmer (018),0.8459,Bright (005),0.1449,Milk (021),0.0029,Find (064),0.0015,Opaque (001),0.0013
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_003.mp4,Skimmer (018),Skimmer (018),1,0.8686,Skimmer (018),0.8686,Bright (005),0.1210,Milk (021),0.0038,Opaque (001),0.0016,Find (064),0.0014
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_004.mp4,Skimmer (018),Skimmer (018),1,0.8832,Skimmer (018),0.8832,Bright (005),0.1060,Milk (021),0.0037,Opaque (001),0.0018,Find (064),0.0016
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_005.mp4,Skimmer (018),Skimmer (018),1,0.8712,Skimmer (018),0.8712,Bright (005),0.1180,Milk (021),0.0039,Opaque (001),0.0017,Find (064),0.0015
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_001.mp4,Skimmer (018),Skimmer (018),1,0.8997,Skimmer (018),0.8997,Bright (005),0.0692,Away (013),0.0120,Milk (021),0.0039,Chewing gum (047),0.0029
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_002.mp4,Skimmer (018),Skimmer (018),1,0.8640,Skimmer (018),0.8640,Bright (005),0.1270,Milk (021),0.0022,Find (064),0.0020,Shut down (052),0.0010
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_003.mp4,Skimmer (018),Skimmer (018),1,0.8071,Skimmer (018),0.8071,Bright (005),0.1841,Milk (021),0.0023,Find (064),0.0017,Shut down (052),0.0014
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_004.mp4,Skimmer (018),Skimmer (018),1,0.7388,Skimmer (018),0.7388,Bright (005),0.2551,Find (064),0.0017,Shut down (052),0.0012,Milk (021),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_005.mp4,Skimmer (018),Skimmer (018),1,0.7200,Skimmer (018),0.7200,Bright (005),0.2723,Find (064),0.0032,Milk (021),0.0009,Son (011),0.0008
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_001.mp4,Skimmer (018),Bright (005),0,0.5822,Bright (005),0.5822,Skimmer (018),0.4123,Find (064),0.0014,Milk (021),0.0010,Shut down (052),0.0009
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_002.mp4,Skimmer (018),Skimmer (018),1,0.6072,Skimmer (018),0.6072,Bright (005),0.3868,Milk (021),0.0019,Find (064),0.0012,Shut down (052),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_003.mp4,Skimmer (018),Skimmer (018),1,0.5843,Skimmer (018),0.5843,Bright (005),0.4091,Milk (021),0.0020,Find (064),0.0014,Shut down (052),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_004.mp4,Skimmer (018),Skimmer (018),1,0.6090,Skimmer (018),0.6090,Bright (005),0.3834,Milk (021),0.0025,Find (064),0.0017,Enemy (010),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_005.mp4,Skimmer (018),Bright (005),0,0.6324,Bright (005),0.6324,Skimmer (018),0.3624,Find (064),0.0014,Milk (021),0.0009,Son (011),0.0005
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_001.mp4,Skimmer (018),Skimmer (018),1,0.5326,Skimmer (018),0.5326,Bright (005),0.4617,Find (064),0.0014,Shut down (052),0.0012,Milk (021),0.0011
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_002.mp4,Skimmer (018),Skimmer (018),1,0.7125,Skimmer (018),0.7125,Bright (005),0.2786,Find (064),0.0030,Milk (021),0.0021,Shut down (052),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_003.mp4,Skimmer (018),Skimmer (018),1,0.8901,Skimmer (018),0.8901,Bright (005),0.0626,Away (013),0.0290,Milk (021),0.0064,Chewing gum (047),0.0026
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_004.mp4,Skimmer (018),Skimmer (018),1,0.8014,Skimmer (018),0.8014,Bright (005),0.1863,Milk (021),0.0038,Find (064),0.0026,Uruguay (025),0.0012
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_005.mp4,Skimmer (018),Skimmer (018),1,0.6745,Skimmer (018),0.6745,Bright (005),0.3149,Find (064),0.0043,Son (011),0.0012,Milk (021),0.0011
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_001.mp4,Skimmer (018),Skimmer (018),1,0.8854,Skimmer (018),0.8854,Bright (005),0.1078,Milk (021),0.0020,Find (064),0.0013,Opaque (001),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_002.mp4,Skimmer (018),Skimmer (018),1,0.9281,Skimmer (018),0.9281,Bright (005),0.0579,Milk (021),0.0074,Opaque (001),0.0022,Find (064),0.0013
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_003.mp4,Skimmer (018),Skimmer (018),1,0.5669,Skimmer (018),0.5669,Bright (005),0.4284,Find (064),0.0014,Milk (021),0.0008,Shut down (052),0.0007
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_004.mp4,Skimmer (018),Skimmer (018),1,0.6231,Skimmer (018),0.6231,Bright (005),0.3718,Find (064),0.0016,Milk (021),0.0009,Shut down (052),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_005.mp4,Skimmer (018),Skimmer (018),1,0.6718,Skimmer (018),0.6718,Bright (005),0.3230,Find (064),0.0017,Milk (021),0.0007,Son (011),0.0006
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_001.mp4,Skimmer (018),Bright (005),0,0.5093,Bright (005),0.5093,Skimmer (018),0.4849,Milk (021),0.0015,Find (064),0.0013,Shut down (052),0.0008
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_002.mp4,Skimmer (018),Skimmer (018),1,0.5315,Skimmer (018),0.5315,Bright (005),0.4475,Colors (007),0.0073,Find (064),0.0034,Milk (021),0.0033
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_003.mp4,Skimmer (018),Skimmer (018),1,0.5612,Skimmer (018),0.5612,Bright (005),0.4296,Find (064),0.0024,Milk (021),0.0020,Son (011),0.0010
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_004.mp4,Skimmer (018),Skimmer (018),1,0.5730,Skimmer (018),0.5730,Bright (005),0.4171,Find (064),0.0030,Milk (021),0.0018,Son (011),0.0011
-D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_005.mp4,Skimmer (018),Skimmer (018),1,0.5454,Skimmer (018),0.5454,Bright (005),0.4319,Colors (007),0.0069,Find (064),0.0045,Milk (021),0.0036
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_004_005.mp4,Born (015),Drawer (014),0,0.0865,Drawer (014),0.0865,Buy (059),0.0607,Argentina (024),0.0555,Milk (021),0.0419,Country (026),0.0395
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_001.mp4,Born (015),Milk (021),0,0.0535,Milk (021),0.0535,Buy (059),0.0522,Man (012),0.0472,Realize (062),0.0438,Enemy (010),0.0366
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_002.mp4,Born (015),Drawer (014),0,0.0873,Drawer (014),0.0873,Find (064),0.0654,Argentina (024),0.0598,Born (015),0.0531,Buy (059),0.0527
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_003.mp4,Born (015),Drawer (014),0,0.0801,Drawer (014),0.0801,Find (064),0.0616,Argentina (024),0.0569,Buy (059),0.0518,Born (015),0.0466
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_004.mp4,Born (015),Drawer (014),0,0.0843,Drawer (014),0.0843,Buy (059),0.0641,Argentina (024),0.0632,Milk (021),0.0433,Country (026),0.0406
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_005_005.mp4,Born (015),Drawer (014),0,0.0804,Drawer (014),0.0804,Find (064),0.0541,Argentina (024),0.0534,Buy (059),0.0532,Milk (021),0.0455
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_001.mp4,Born (015),Buy (059),0,0.1591,Buy (059),0.1591,Enemy (010),0.0545,Realize (062),0.0491,Milk (021),0.0483,Deaf (042),0.0413
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_002.mp4,Born (015),Buy (059),0,0.2079,Buy (059),0.2079,Enemy (010),0.0509,Deaf (042),0.0496,Milk (021),0.0467,Realize (062),0.0463
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_003.mp4,Born (015),Buy (059),0,0.2035,Buy (059),0.2035,Enemy (010),0.0535,Milk (021),0.0504,Deaf (042),0.0460,Realize (062),0.0447
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_004.mp4,Born (015),Buy (059),0,0.2031,Buy (059),0.2031,Deaf (042),0.0529,Milk (021),0.0516,Realize (062),0.0464,Enemy (010),0.0455
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_006_005.mp4,Born (015),Buy (059),0,0.2023,Buy (059),0.2023,Milk (021),0.0559,Enemy (010),0.0523,Realize (062),0.0432,Drawer (014),0.0422
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_001.mp4,Born (015),Drawer (014),0,0.0811,Drawer (014),0.0811,Buy (059),0.0650,Argentina (024),0.0567,Milk (021),0.0439,Country (026),0.0418
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_002.mp4,Born (015),Drawer (014),0,0.0775,Drawer (014),0.0775,Buy (059),0.0575,Argentina (024),0.0529,Milk (021),0.0481,Find (064),0.0458
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_003.mp4,Born (015),Drawer (014),0,0.0835,Drawer (014),0.0835,Argentina (024),0.0604,Buy (059),0.0586,Milk (021),0.0464,Country (026),0.0400
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_004.mp4,Born (015),Drawer (014),0,0.0779,Drawer (014),0.0779,Buy (059),0.0537,Argentina (024),0.0530,Milk (021),0.0470,Find (064),0.0450
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_007_005.mp4,Born (015),Drawer (014),0,0.0870,Drawer (014),0.0870,Argentina (024),0.0557,Milk (021),0.0490,Buy (059),0.0483,Find (064),0.0473
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_001.mp4,Born (015),Buy (059),0,0.1107,Buy (059),0.1107,Deaf (042),0.0652,Realize (062),0.0584,Milk (021),0.0583,Man (012),0.0487
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_002.mp4,Born (015),Buy (059),0,0.1069,Buy (059),0.1069,Milk (021),0.0583,Realize (062),0.0547,Man (012),0.0479,Drawer (014),0.0441
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_003.mp4,Born (015),Buy (059),0,0.1034,Buy (059),0.1034,Milk (021),0.0648,Man (012),0.0594,Realize (062),0.0559,Deaf (042),0.0556
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_004.mp4,Born (015),Buy (059),0,0.0930,Buy (059),0.0930,Milk (021),0.0577,Drawer (014),0.0515,Enemy (010),0.0503,Man (012),0.0494
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_008_005.mp4,Born (015),Buy (059),0,0.1231,Buy (059),0.1231,Drawer (014),0.0612,Milk (021),0.0597,Realize (062),0.0489,Enemy (010),0.0423
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_001.mp4,Born (015),Drawer (014),0,0.0959,Drawer (014),0.0959,Argentina (024),0.0813,Buy (059),0.0703,Country (026),0.0460,Born (015),0.0429
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_002.mp4,Born (015),Drawer (014),0,0.1046,Drawer (014),0.1046,Argentina (024),0.0898,Buy (059),0.0700,Country (026),0.0472,Born (015),0.0435
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_003.mp4,Born (015),Drawer (014),0,0.0961,Drawer (014),0.0961,Argentina (024),0.0815,Buy (059),0.0626,Find (064),0.0518,Born (015),0.0509
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_004.mp4,Born (015),Buy (059),0,0.1135,Buy (059),0.1135,Drawer (014),0.0730,Country (026),0.0581,Milk (021),0.0539,Realize (062),0.0525
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_009_005.mp4,Born (015),Buy (059),0,0.1755,Buy (059),0.1755,Milk (021),0.0670,Deaf (042),0.0475,Country (026),0.0474,Realize (062),0.0463
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_001.mp4,Born (015),Buy (059),0,0.1454,Buy (059),0.1454,Milk (021),0.0719,Man (012),0.0588,Enemy (010),0.0509,Realize (062),0.0483
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_002.mp4,Born (015),Buy (059),0,0.1297,Buy (059),0.1297,Milk (021),0.0745,Man (012),0.0578,Enemy (010),0.0524,Realize (062),0.0451
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_003.mp4,Born (015),Buy (059),0,0.1199,Buy (059),0.1199,Milk (021),0.0745,Man (012),0.0624,Realize (062),0.0483,Enemy (010),0.0481
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_004.mp4,Born (015),Buy (059),0,0.1164,Buy (059),0.1164,Milk (021),0.0740,Man (012),0.0589,Realize (062),0.0481,Enemy (010),0.0466
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\015\015_010_005.mp4,Born (015),Buy (059),0,0.1454,Buy (059),0.1454,Milk (021),0.0707,Man (012),0.0563,Enemy (010),0.0526,Realize (062),0.0459
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_001.mp4,Learn (016),Realize (062),0,0.0496,Realize (062),0.0496,Man (012),0.0467,Deaf (042),0.0338,Buy (059),0.0327,Son (011),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_002.mp4,Learn (016),Realize (062),0,0.0493,Realize (062),0.0493,Man (012),0.0471,Deaf (042),0.0325,Buy (059),0.0321,Son (011),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_003.mp4,Learn (016),Realize (062),0,0.0479,Realize (062),0.0479,Man (012),0.0460,Deaf (042),0.0322,Son (011),0.0312,Buy (059),0.0309
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_004.mp4,Learn (016),Realize (062),0,0.0481,Realize (062),0.0481,Man (012),0.0469,Deaf (042),0.0322,Son (011),0.0312,Buy (059),0.0305
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_001_005.mp4,Learn (016),Realize (062),0,0.0476,Realize (062),0.0476,Man (012),0.0469,Deaf (042),0.0323,Son (011),0.0315,Buy (059),0.0300
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_001.mp4,Learn (016),Realize (062),0,0.0509,Realize (062),0.0509,Man (012),0.0470,Buy (059),0.0368,Milk (021),0.0327,Son (011),0.0322
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_002.mp4,Learn (016),Realize (062),0,0.0473,Realize (062),0.0473,Man (012),0.0464,Buy (059),0.0328,Son (011),0.0318,Milk (021),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_003.mp4,Learn (016),Realize (062),0,0.0507,Realize (062),0.0507,Man (012),0.0503,Buy (059),0.0363,Milk (021),0.0331,Son (011),0.0322
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_004.mp4,Learn (016),Realize (062),0,0.0497,Realize (062),0.0497,Man (012),0.0491,Buy (059),0.0356,Milk (021),0.0328,Son (011),0.0322
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_002_005.mp4,Learn (016),Realize (062),0,0.0495,Realize (062),0.0495,Man (012),0.0493,Buy (059),0.0353,Milk (021),0.0328,Son (011),0.0323
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_001.mp4,Learn (016),Realize (062),0,0.0544,Realize (062),0.0544,Man (012),0.0518,Buy (059),0.0390,Milk (021),0.0325,Deaf (042),0.0321
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_002.mp4,Learn (016),Realize (062),0,0.0520,Realize (062),0.0520,Man (012),0.0495,Buy (059),0.0367,Deaf (042),0.0317,Son (011),0.0316
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_003.mp4,Learn (016),Realize (062),0,0.0532,Realize (062),0.0532,Man (012),0.0508,Buy (059),0.0379,Milk (021),0.0323,Son (011),0.0323
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_004.mp4,Learn (016),Realize (062),0,0.0534,Realize (062),0.0534,Man (012),0.0521,Buy (059),0.0385,Milk (021),0.0332,Son (011),0.0325
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_003_005.mp4,Learn (016),Realize (062),0,0.0541,Realize (062),0.0541,Man (012),0.0515,Buy (059),0.0393,Milk (021),0.0329,Deaf (042),0.0322
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_001.mp4,Learn (016),Realize (062),0,0.0476,Realize (062),0.0476,Man (012),0.0473,Son (011),0.0328,Buy (059),0.0323,Deaf (042),0.0318
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_002.mp4,Learn (016),Realize (062),0,0.0483,Realize (062),0.0483,Man (012),0.0479,Buy (059),0.0330,Son (011),0.0328,Deaf (042),0.0312
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_003.mp4,Learn (016),Realize (062),0,0.0500,Realize (062),0.0500,Man (012),0.0493,Buy (059),0.0344,Son (011),0.0328,Deaf (042),0.0318
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_004.mp4,Learn (016),Buy (059),0,0.0668,Buy (059),0.0668,Milk (021),0.0620,Man (012),0.0607,Deaf (042),0.0557,Realize (062),0.0536
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_004_005.mp4,Learn (016),Buy (059),0,0.0642,Buy (059),0.0642,Man (012),0.0623,Milk (021),0.0618,Realize (062),0.0545,Deaf (042),0.0530
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_001.mp4,Learn (016),Realize (062),0,0.0510,Realize (062),0.0510,Man (012),0.0478,Buy (059),0.0335,Deaf (042),0.0329,Son (011),0.0310
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_002.mp4,Learn (016),Realize (062),0,0.0490,Realize (062),0.0490,Man (012),0.0468,Buy (059),0.0318,Deaf (042),0.0317,Son (011),0.0313
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_003.mp4,Learn (016),Realize (062),0,0.0500,Realize (062),0.0500,Man (012),0.0468,Buy (059),0.0329,Deaf (042),0.0321,Son (011),0.0313
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_004.mp4,Learn (016),Realize (062),0,0.0492,Realize (062),0.0492,Man (012),0.0457,Buy (059),0.0335,Deaf (042),0.0320,Son (011),0.0305
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_005_005.mp4,Learn (016),Realize (062),0,0.0470,Realize (062),0.0470,Man (012),0.0450,Son (011),0.0310,Deaf (042),0.0310,Buy (059),0.0308
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_001.mp4,Learn (016),Realize (062),0,0.0505,Realize (062),0.0505,Man (012),0.0481,Buy (059),0.0463,Milk (021),0.0389,Deaf (042),0.0374
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_002.mp4,Learn (016),Realize (062),0,0.0538,Realize (062),0.0538,Man (012),0.0480,Buy (059),0.0435,Milk (021),0.0350,Deaf (042),0.0322
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_003.mp4,Learn (016),Realize (062),0,0.0506,Realize (062),0.0506,Man (012),0.0470,Buy (059),0.0400,Milk (021),0.0345,Deaf (042),0.0312
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_004.mp4,Learn (016),Realize (062),0,0.0494,Realize (062),0.0494,Man (012),0.0468,Buy (059),0.0363,Milk (021),0.0329,Son (011),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_006_005.mp4,Learn (016),Realize (062),0,0.0501,Realize (062),0.0501,Man (012),0.0467,Buy (059),0.0399,Milk (021),0.0348,Deaf (042),0.0316
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_001.mp4,Learn (016),Man (012),0,0.0503,Man (012),0.0503,Realize (062),0.0488,Buy (059),0.0351,Milk (021),0.0341,Son (011),0.0328
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_002.mp4,Learn (016),Man (012),0,0.0522,Man (012),0.0522,Realize (062),0.0520,Buy (059),0.0376,Milk (021),0.0342,Son (011),0.0325
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_003.mp4,Learn (016),Realize (062),0,0.0513,Realize (062),0.0513,Man (012),0.0507,Buy (059),0.0375,Milk (021),0.0342,Enemy (010),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_004.mp4,Learn (016),Realize (062),0,0.0501,Realize (062),0.0501,Man (012),0.0497,Buy (059),0.0355,Milk (021),0.0332,Son (011),0.0320
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_007_005.mp4,Learn (016),Man (012),0,0.0504,Man (012),0.0504,Realize (062),0.0490,Buy (059),0.0344,Milk (021),0.0333,Son (011),0.0326
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_001.mp4,Learn (016),Realize (062),0,0.0564,Realize (062),0.0564,Man (012),0.0505,Buy (059),0.0423,Deaf (042),0.0341,Milk (021),0.0324
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_002.mp4,Learn (016),Realize (062),0,0.0569,Realize (062),0.0569,Man (012),0.0513,Buy (059),0.0429,Deaf (042),0.0341,Milk (021),0.0328
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_003.mp4,Learn (016),Realize (062),0,0.0569,Realize (062),0.0569,Man (012),0.0513,Buy (059),0.0429,Deaf (042),0.0342,Son (011),0.0330
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_004.mp4,Learn (016),Realize (062),0,0.0579,Realize (062),0.0579,Man (012),0.0510,Buy (059),0.0465,Milk (021),0.0344,Deaf (042),0.0335
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_008_005.mp4,Learn (016),Realize (062),0,0.0556,Realize (062),0.0556,Man (012),0.0502,Buy (059),0.0422,Milk (021),0.0327,Deaf (042),0.0327
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_001.mp4,Learn (016),Realize (062),0,0.0489,Realize (062),0.0489,Man (012),0.0484,Buy (059),0.0348,Milk (021),0.0323,Son (011),0.0320
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_002.mp4,Learn (016),Realize (062),0,0.0487,Realize (062),0.0487,Man (012),0.0482,Buy (059),0.0352,Milk (021),0.0327,Son (011),0.0318
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_003.mp4,Learn (016),Man (012),0,0.0518,Man (012),0.0518,Realize (062),0.0511,Buy (059),0.0422,Milk (021),0.0376,Deaf (042),0.0367
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_004.mp4,Learn (016),Man (012),0,0.0477,Man (012),0.0477,Realize (062),0.0464,Son (011),0.0333,Buy (059),0.0329,Milk (021),0.0326
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_009_005.mp4,Learn (016),Realize (062),0,0.0486,Realize (062),0.0486,Man (012),0.0481,Buy (059),0.0350,Milk (021),0.0325,Son (011),0.0318
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_001.mp4,Learn (016),Man (012),0,0.0518,Man (012),0.0518,Realize (062),0.0507,Buy (059),0.0355,Son (011),0.0333,Milk (021),0.0331
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_002.mp4,Learn (016),Man (012),0,0.0490,Man (012),0.0490,Realize (062),0.0487,Buy (059),0.0345,Milk (021),0.0327,Son (011),0.0309
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_003.mp4,Learn (016),Man (012),0,0.0493,Man (012),0.0493,Realize (062),0.0487,Buy (059),0.0341,Milk (021),0.0326,Son (011),0.0320
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_004.mp4,Learn (016),Man (012),0,0.0511,Man (012),0.0511,Realize (062),0.0492,Buy (059),0.0354,Milk (021),0.0343,Son (011),0.0333
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\016\016_010_005.mp4,Learn (016),Man (012),0,0.0479,Man (012),0.0479,Realize (062),0.0465,Son (011),0.0324,Milk (021),0.0319,Buy (059),0.0317
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_001.mp4,Call (017),Buy (059),0,0.0714,Buy (059),0.0714,Deaf (042),0.0610,Realize (062),0.0558,Milk (021),0.0553,Man (012),0.0512
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_002.mp4,Call (017),Buy (059),0,0.0612,Buy (059),0.0612,Deaf (042),0.0567,Realize (062),0.0548,Man (012),0.0518,Milk (021),0.0517
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_003.mp4,Call (017),Deaf (042),0,0.0539,Deaf (042),0.0539,Realize (062),0.0537,Man (012),0.0519,Buy (059),0.0513,Milk (021),0.0464
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_004.mp4,Call (017),Realize (062),0,0.0537,Realize (062),0.0537,Deaf (042),0.0532,Man (012),0.0525,Buy (059),0.0507,Milk (021),0.0462
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_001_005.mp4,Call (017),Realize (062),0,0.0546,Realize (062),0.0546,Deaf (042),0.0538,Man (012),0.0528,Buy (059),0.0509,Milk (021),0.0460
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_001.mp4,Call (017),Man (012),0,0.0427,Man (012),0.0427,Realize (062),0.0422,Son (011),0.0324,Milk (021),0.0311,Deaf (042),0.0293
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_002.mp4,Call (017),Realize (062),0,0.0556,Realize (062),0.0556,Deaf (042),0.0519,Man (012),0.0508,Buy (059),0.0464,Milk (021),0.0398
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_003.mp4,Call (017),Man (012),0,0.0417,Man (012),0.0417,Realize (062),0.0395,Son (011),0.0314,Milk (021),0.0303,Enemy (010),0.0272
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_004.mp4,Call (017),Man (012),0,0.0422,Man (012),0.0422,Realize (062),0.0397,Son (011),0.0319,Milk (021),0.0302,Women (009),0.0272
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_002_005.mp4,Call (017),Realize (062),0,0.0557,Realize (062),0.0557,Man (012),0.0515,Deaf (042),0.0512,Buy (059),0.0454,Milk (021),0.0392
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_001.mp4,Call (017),Buy (059),0,0.0874,Buy (059),0.0874,Man (012),0.0695,Milk (021),0.0656,Deaf (042),0.0585,Realize (062),0.0564
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_002.mp4,Call (017),Buy (059),0,0.0808,Buy (059),0.0808,Man (012),0.0660,Milk (021),0.0629,Deaf (042),0.0588,Realize (062),0.0560
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_003.mp4,Call (017),Buy (059),0,0.0889,Buy (059),0.0889,Man (012),0.0685,Deaf (042),0.0640,Realize (062),0.0608,Milk (021),0.0599
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_004.mp4,Call (017),Buy (059),0,0.0806,Buy (059),0.0806,Man (012),0.0663,Milk (021),0.0619,Deaf (042),0.0606,Realize (062),0.0572
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_003_005.mp4,Call (017),Buy (059),0,0.0860,Buy (059),0.0860,Man (012),0.0685,Milk (021),0.0622,Deaf (042),0.0601,Realize (062),0.0579
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_001.mp4,Call (017),Man (012),0,0.0605,Man (012),0.0605,Buy (059),0.0529,Milk (021),0.0490,Realize (062),0.0489,Enemy (010),0.0385
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_002.mp4,Call (017),Man (012),0,0.0498,Man (012),0.0498,Realize (062),0.0467,Milk (021),0.0332,Son (011),0.0321,Buy (059),0.0321
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_003.mp4,Call (017),Realize (062),0,0.0481,Realize (062),0.0481,Man (012),0.0465,Buy (059),0.0371,Milk (021),0.0344,Son (011),0.0313
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_004.mp4,Call (017),Buy (059),0,0.0768,Buy (059),0.0768,Milk (021),0.0659,Man (012),0.0643,Realize (062),0.0542,Deaf (042),0.0538
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_004_005.mp4,Call (017),Man (012),0,0.0527,Man (012),0.0527,Realize (062),0.0476,Buy (059),0.0416,Milk (021),0.0403,Enemy (010),0.0343
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_001.mp4,Call (017),Man (012),0,0.0536,Man (012),0.0536,Realize (062),0.0535,Buy (059),0.0439,Deaf (042),0.0402,Milk (021),0.0385
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_002.mp4,Call (017),Buy (059),0,0.0643,Buy (059),0.0643,Realize (062),0.0570,Man (012),0.0557,Deaf (042),0.0553,Milk (021),0.0526
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_003.mp4,Call (017),Buy (059),0,0.0626,Buy (059),0.0626,Realize (062),0.0569,Man (012),0.0558,Deaf (042),0.0545,Milk (021),0.0525
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_004.mp4,Call (017),Buy (059),0,0.0618,Buy (059),0.0618,Realize (062),0.0563,Man (012),0.0554,Deaf (042),0.0538,Milk (021),0.0527
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_005_005.mp4,Call (017),Realize (062),0,0.0484,Realize (062),0.0484,Man (012),0.0479,Buy (059),0.0375,Milk (021),0.0343,Deaf (042),0.0313
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_001.mp4,Call (017),Realize (062),0,0.0598,Realize (062),0.0598,Buy (059),0.0596,Man (012),0.0469,Deaf (042),0.0422,Milk (021),0.0359
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_002.mp4,Call (017),Buy (059),0,0.1212,Buy (059),0.1212,Deaf (042),0.0709,Milk (021),0.0647,Realize (062),0.0552,Man (012),0.0478
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_003.mp4,Call (017),Buy (059),0,0.1444,Buy (059),0.1444,Milk (021),0.0758,Deaf (042),0.0700,Realize (062),0.0473,Bright (005),0.0440
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_004.mp4,Call (017),Realize (062),0,0.0588,Realize (062),0.0588,Buy (059),0.0545,Man (012),0.0465,Deaf (042),0.0401,Milk (021),0.0363
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_006_005.mp4,Call (017),Buy (059),0,0.0982,Buy (059),0.0982,Realize (062),0.0560,Deaf (042),0.0560,Milk (021),0.0510,Man (012),0.0475
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_001.mp4,Call (017),Man (012),0,0.0437,Man (012),0.0437,Realize (062),0.0402,Son (011),0.0317,Milk (021),0.0302,Enemy (010),0.0280
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_002.mp4,Call (017),Man (012),0,0.0443,Man (012),0.0443,Realize (062),0.0408,Son (011),0.0318,Milk (021),0.0306,Enemy (010),0.0282
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_003.mp4,Call (017),Man (012),0,0.0444,Man (012),0.0444,Realize (062),0.0408,Son (011),0.0318,Milk (021),0.0307,Enemy (010),0.0283
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_004.mp4,Call (017),Man (012),0,0.0444,Man (012),0.0444,Realize (062),0.0407,Son (011),0.0320,Milk (021),0.0307,Enemy (010),0.0282
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_007_005.mp4,Call (017),Man (012),0,0.0436,Man (012),0.0436,Realize (062),0.0407,Son (011),0.0315,Milk (021),0.0300,Enemy (010),0.0278
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_001.mp4,Call (017),Buy (059),0,0.0671,Buy (059),0.0671,Milk (021),0.0661,Deaf (042),0.0637,Realize (062),0.0484,Man (012),0.0467
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_002.mp4,Call (017),Buy (059),0,0.0641,Buy (059),0.0641,Milk (021),0.0575,Realize (062),0.0525,Man (012),0.0520,Deaf (042),0.0514
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_003.mp4,Call (017),Buy (059),0,0.0756,Buy (059),0.0756,Milk (021),0.0594,Deaf (042),0.0590,Realize (062),0.0540,Man (012),0.0499
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_004.mp4,Call (017),Buy (059),0,0.0719,Buy (059),0.0719,Milk (021),0.0595,Deaf (042),0.0546,Realize (062),0.0539,Man (012),0.0519
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_008_005.mp4,Call (017),Buy (059),0,0.0702,Buy (059),0.0702,Milk (021),0.0582,Deaf (042),0.0545,Realize (062),0.0545,Man (012),0.0522
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_001.mp4,Call (017),Man (012),0,0.0422,Man (012),0.0422,Realize (062),0.0403,Son (011),0.0313,Milk (021),0.0300,Enemy (010),0.0273
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_002.mp4,Call (017),Man (012),0,0.0422,Man (012),0.0422,Realize (062),0.0400,Son (011),0.0313,Milk (021),0.0297,Enemy (010),0.0273
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_003.mp4,Call (017),Man (012),0,0.0435,Man (012),0.0435,Realize (062),0.0410,Son (011),0.0314,Milk (021),0.0297,Enemy (010),0.0277
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_004.mp4,Call (017),Man (012),0,0.0436,Man (012),0.0436,Realize (062),0.0411,Son (011),0.0315,Milk (021),0.0298,Enemy (010),0.0278
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_009_005.mp4,Call (017),Man (012),0,0.0441,Man (012),0.0441,Realize (062),0.0437,Son (011),0.0307,Milk (021),0.0304,Buy (059),0.0301
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_001.mp4,Call (017),Buy (059),0,0.0602,Buy (059),0.0602,Realize (062),0.0554,Man (012),0.0549,Deaf (042),0.0541,Milk (021),0.0519
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_002.mp4,Call (017),Buy (059),0,0.0604,Buy (059),0.0604,Realize (062),0.0558,Deaf (042),0.0549,Man (012),0.0536,Milk (021),0.0510
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_003.mp4,Call (017),Buy (059),0,0.0669,Buy (059),0.0669,Realize (062),0.0576,Deaf (042),0.0566,Man (012),0.0566,Milk (021),0.0542
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_004.mp4,Call (017),Buy (059),0,0.0674,Buy (059),0.0674,Man (012),0.0583,Realize (062),0.0564,Milk (021),0.0560,Deaf (042),0.0555
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\017\017_010_005.mp4,Call (017),Buy (059),0,0.0647,Buy (059),0.0647,Man (012),0.0573,Realize (062),0.0563,Deaf (042),0.0546,Milk (021),0.0541
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_001.mp4,Skimmer (018),Realize (062),0,0.0484,Realize (062),0.0484,Man (012),0.0455,Buy (059),0.0350,Milk (021),0.0325,Son (011),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_002.mp4,Skimmer (018),Realize (062),0,0.0460,Realize (062),0.0460,Man (012),0.0439,Buy (059),0.0335,Milk (021),0.0332,Son (011),0.0312
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_003.mp4,Skimmer (018),Realize (062),0,0.0435,Realize (062),0.0435,Man (012),0.0430,Milk (021),0.0320,Son (011),0.0312,Buy (059),0.0302
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_004.mp4,Skimmer (018),Realize (062),0,0.0445,Realize (062),0.0445,Man (012),0.0432,Milk (021),0.0326,Buy (059),0.0314,Son (011),0.0309
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_001_005.mp4,Skimmer (018),Realize (062),0,0.0446,Realize (062),0.0446,Man (012),0.0428,Milk (021),0.0313,Son (011),0.0308,Buy (059),0.0305
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_001.mp4,Skimmer (018),Man (012),0,0.0465,Man (012),0.0465,Realize (062),0.0462,Buy (059),0.0330,Milk (021),0.0329,Son (011),0.0314
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_002.mp4,Skimmer (018),Realize (062),0,0.0447,Realize (062),0.0447,Man (012),0.0446,Milk (021),0.0316,Son (011),0.0312,Buy (059),0.0310
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_003.mp4,Skimmer (018),Man (012),0,0.0449,Man (012),0.0449,Realize (062),0.0441,Milk (021),0.0317,Son (011),0.0314,Buy (059),0.0304
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_004.mp4,Skimmer (018),Man (012),0,0.0443,Man (012),0.0443,Realize (062),0.0433,Son (011),0.0314,Milk (021),0.0314,Buy (059),0.0294
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_002_005.mp4,Skimmer (018),Man (012),0,0.0444,Man (012),0.0444,Realize (062),0.0433,Son (011),0.0313,Milk (021),0.0313,Buy (059),0.0294
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_001.mp4,Skimmer (018),Realize (062),0,0.0476,Realize (062),0.0476,Man (012),0.0472,Buy (059),0.0320,Milk (021),0.0312,Son (011),0.0311
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_002.mp4,Skimmer (018),Realize (062),0,0.0496,Realize (062),0.0496,Man (012),0.0485,Buy (059),0.0329,Son (011),0.0312,Milk (021),0.0308
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_003.mp4,Skimmer (018),Man (012),0,0.0454,Man (012),0.0454,Realize (062),0.0450,Milk (021),0.0329,Buy (059),0.0319,Son (011),0.0315
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_004.mp4,Skimmer (018),Man (012),0,0.0463,Man (012),0.0463,Realize (062),0.0462,Milk (021),0.0330,Buy (059),0.0329,Son (011),0.0316
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_003_005.mp4,Skimmer (018),Man (012),0,0.0480,Man (012),0.0480,Realize (062),0.0479,Buy (059),0.0349,Milk (021),0.0343,Son (011),0.0317
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_001.mp4,Skimmer (018),Realize (062),0,0.0452,Realize (062),0.0452,Man (012),0.0448,Milk (021),0.0338,Buy (059),0.0327,Son (011),0.0313
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_002.mp4,Skimmer (018),Man (012),0,0.0447,Man (012),0.0447,Realize (062),0.0443,Milk (021),0.0334,Buy (059),0.0318,Son (011),0.0315
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_003.mp4,Skimmer (018),Man (012),0,0.0455,Man (012),0.0455,Realize (062),0.0449,Milk (021),0.0325,Son (011),0.0315,Buy (059),0.0312
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_004.mp4,Skimmer (018),Man (012),0,0.0439,Man (012),0.0439,Realize (062),0.0429,Milk (021),0.0316,Son (011),0.0316,Buy (059),0.0295
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_004_005.mp4,Skimmer (018),Realize (062),0,0.0457,Realize (062),0.0457,Man (012),0.0450,Milk (021),0.0330,Buy (059),0.0325,Son (011),0.0312
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_001.mp4,Skimmer (018),Realize (062),0,0.0469,Realize (062),0.0469,Man (012),0.0445,Buy (059),0.0352,Milk (021),0.0344,Son (011),0.0310
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_002.mp4,Skimmer (018),Realize (062),0,0.0474,Realize (062),0.0474,Man (012),0.0445,Buy (059),0.0373,Milk (021),0.0360,Deaf (042),0.0310
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_003.mp4,Skimmer (018),Realize (062),0,0.0461,Realize (062),0.0461,Man (012),0.0436,Buy (059),0.0357,Milk (021),0.0355,Son (011),0.0309
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_004.mp4,Skimmer (018),Realize (062),0,0.0487,Realize (062),0.0487,Man (012),0.0470,Buy (059),0.0388,Milk (021),0.0369,Deaf (042),0.0334
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_005_005.mp4,Skimmer (018),Realize (062),0,0.0463,Realize (062),0.0463,Man (012),0.0454,Milk (021),0.0345,Buy (059),0.0343,Son (011),0.0311
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_001.mp4,Skimmer (018),Buy (059),0,0.0649,Buy (059),0.0649,Realize (062),0.0567,Milk (021),0.0412,Man (012),0.0402,Deaf (042),0.0402
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_002.mp4,Skimmer (018),Realize (062),0,0.0583,Realize (062),0.0583,Buy (059),0.0542,Man (012),0.0397,Deaf (042),0.0383,Name (039),0.0360
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_003.mp4,Skimmer (018),Realize (062),0,0.0601,Realize (062),0.0601,Buy (059),0.0594,Deaf (042),0.0393,Man (012),0.0382,Name (039),0.0377
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_004.mp4,Skimmer (018),Buy (059),0,0.0611,Buy (059),0.0611,Realize (062),0.0584,Milk (021),0.0394,Man (012),0.0393,Deaf (042),0.0391
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_006_005.mp4,Skimmer (018),Buy (059),0,0.0643,Buy (059),0.0643,Realize (062),0.0578,Milk (021),0.0412,Deaf (042),0.0394,Man (012),0.0393
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_001.mp4,Skimmer (018),Buy (059),0,0.0518,Buy (059),0.0518,Realize (062),0.0499,Milk (021),0.0485,Man (012),0.0467,Enemy (010),0.0377
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_002.mp4,Skimmer (018),Realize (062),0,0.0517,Realize (062),0.0517,Buy (059),0.0484,Man (012),0.0456,Milk (021),0.0436,Deaf (042),0.0351
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_003.mp4,Skimmer (018),Buy (059),0,0.0533,Buy (059),0.0533,Realize (062),0.0532,Milk (021),0.0443,Man (012),0.0430,Deaf (042),0.0367
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_004.mp4,Skimmer (018),Realize (062),0,0.0525,Realize (062),0.0525,Buy (059),0.0509,Milk (021),0.0436,Man (012),0.0435,Deaf (042),0.0364
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_007_005.mp4,Skimmer (018),Buy (059),0,0.0584,Buy (059),0.0584,Realize (062),0.0518,Milk (021),0.0487,Man (012),0.0424,Find (064),0.0395
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_001.mp4,Skimmer (018),Realize (062),0,0.0539,Realize (062),0.0539,Buy (059),0.0466,Man (012),0.0450,Milk (021),0.0369,Deaf (042),0.0339
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_002.mp4,Skimmer (018),Realize (062),0,0.0535,Realize (062),0.0535,Man (012),0.0455,Buy (059),0.0434,Milk (021),0.0351,Deaf (042),0.0334
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_003.mp4,Skimmer (018),Realize (062),0,0.0527,Realize (062),0.0527,Buy (059),0.0479,Man (012),0.0463,Milk (021),0.0395,Deaf (042),0.0341
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_004.mp4,Skimmer (018),Realize (062),0,0.0596,Realize (062),0.0596,Buy (059),0.0578,Man (012),0.0517,Deaf (042),0.0429,Milk (021),0.0406
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_008_005.mp4,Skimmer (018),Buy (059),0,0.0565,Buy (059),0.0565,Realize (062),0.0548,Man (012),0.0450,Milk (021),0.0424,Deaf (042),0.0367
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_001.mp4,Skimmer (018),Realize (062),0,0.0542,Realize (062),0.0542,Man (012),0.0497,Buy (059),0.0399,Milk (021),0.0336,Deaf (042),0.0331
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_002.mp4,Skimmer (018),Realize (062),0,0.0518,Realize (062),0.0518,Man (012),0.0507,Buy (059),0.0344,Son (011),0.0317,Milk (021),0.0316
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_003.mp4,Skimmer (018),Realize (062),0,0.0525,Realize (062),0.0525,Man (012),0.0490,Buy (059),0.0440,Milk (021),0.0393,Deaf (042),0.0343
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_004.mp4,Skimmer (018),Realize (062),0,0.0499,Realize (062),0.0499,Man (012),0.0487,Buy (059),0.0391,Milk (021),0.0376,Enemy (010),0.0328
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_009_005.mp4,Skimmer (018),Realize (062),0,0.0503,Realize (062),0.0503,Man (012),0.0498,Buy (059),0.0408,Milk (021),0.0387,Enemy (010),0.0337
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_001.mp4,Skimmer (018),Realize (062),0,0.0542,Realize (062),0.0542,Buy (059),0.0532,Man (012),0.0480,Milk (021),0.0437,Deaf (042),0.0360
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_002.mp4,Skimmer (018),Buy (059),0,0.0872,Buy (059),0.0872,Milk (021),0.0580,Realize (062),0.0518,Man (012),0.0457,Drawer (014),0.0447
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_003.mp4,Skimmer (018),Buy (059),0,0.0650,Buy (059),0.0650,Realize (062),0.0524,Milk (021),0.0516,Man (012),0.0467,Enemy (010),0.0396
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_004.mp4,Skimmer (018),Buy (059),0,0.0643,Buy (059),0.0643,Milk (021),0.0529,Realize (062),0.0510,Man (012),0.0463,Enemy (010),0.0404
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\018\018_010_005.mp4,Skimmer (018),Buy (059),0,0.0831,Buy (059),0.0831,Milk (021),0.0595,Realize (062),0.0500,Man (012),0.0481,Enemy (010),0.0453
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_001.mp4,Bitter (019),Man (012),0,0.0395,Man (012),0.0395,Realize (062),0.0376,Son (011),0.0305,Milk (021),0.0288,Enemy (010),0.0260
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_002.mp4,Bitter (019),Realize (062),0,0.0407,Realize (062),0.0407,Man (012),0.0403,Son (011),0.0316,Milk (021),0.0302,Deaf (042),0.0294
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_003.mp4,Bitter (019),Realize (062),0,0.0435,Realize (062),0.0435,Man (012),0.0415,Milk (021),0.0312,Buy (059),0.0311,Deaf (042),0.0297
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_004.mp4,Bitter (019),Man (012),0,0.0384,Man (012),0.0384,Realize (062),0.0363,Son (011),0.0307,Milk (021),0.0289,Women (009),0.0258
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_005.mp4,Bitter (019),Man (012),0,0.0387,Man (012),0.0387,Realize (062),0.0361,Son (011),0.0309,Milk (021),0.0291,Women (009),0.0259
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_002_001.mp4,Bitter (019),Man (012),0,0.0398,Man (012),0.0398,Realize (062),0.0366,Son (011),0.0306,Milk (021),0.0299,Food (023),0.0265
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_002_002.mp4,Bitter (019),Man (012),0,0.0396,Man (012),0.0396,Realize (062),0.0365,Son (011),0.0303,Milk (021),0.0298,Food (023),0.0267
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_002_003.mp4,Bitter (019),Man (012),0,0.0388,Man (012),0.0388,Realize (062),0.0358,Son (011),0.0304,Milk (021),0.0296,Food (023),0.0264
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_002_004.mp4,Bitter (019),Man (012),0,0.0388,Man (012),0.0388,Realize (062),0.0359,Son (011),0.0303,Milk (021),0.0296,Food (023),0.0265
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_002_005.mp4,Bitter (019),Man (012),0,0.0392,Man (012),0.0392,Realize (062),0.0363,Son (011),0.0304,Milk (021),0.0298,Food (023),0.0266
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_003_001.mp4,Bitter (019),Call (017),0,0.0240,Call (017),0.0240,Skimmer (018),0.0215,Barbecue (045),0.0207,Away (013),0.0206,Learn (016),0.0205
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_003_002.mp4,Bitter (019),Call (017),0,0.0241,Call (017),0.0241,Skimmer (018),0.0217,Barbecue (045),0.0207,Away (013),0.0206,Learn (016),0.0205
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_003_003.mp4,Bitter (019),Call (017),0,0.0240,Call (017),0.0240,Skimmer (018),0.0216,Barbecue (045),0.0207,Away (013),0.0207,Learn (016),0.0206
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_003_004.mp4,Bitter (019),Call (017),0,0.0240,Call (017),0.0240,Skimmer (018),0.0215,Barbecue (045),0.0208,Away (013),0.0206,Learn (016),0.0205
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_003_005.mp4,Bitter (019),Call (017),0,0.0237,Call (017),0.0237,Skimmer (018),0.0214,Barbecue (045),0.0209,Born (015),0.0206,Away (013),0.0205
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_004_001.mp4,Bitter (019),Realize (062),0,0.0501,Realize (062),0.0501,Man (012),0.0485,Buy (059),0.0414,Deaf (042),0.0385,Milk (021),0.0378
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_004_002.mp4,Bitter (019),Man (012),0,0.0475,Man (012),0.0475,Realize (062),0.0464,Milk (021),0.0349,Buy (059),0.0347,Deaf (042),0.0339
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_004_003.mp4,Bitter (019),Realize (062),0,0.0533,Realize (062),0.0533,Man (012),0.0531,Buy (059),0.0508,Deaf (042),0.0484,Milk (021),0.0446
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_004_004.mp4,Bitter (019),Realize (062),0,0.0574,Realize (062),0.0574,Buy (059),0.0556,Man (012),0.0545,Deaf (042),0.0544,Milk (021),0.0457
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_004_005.mp4,Bitter (019),Man (012),0,0.0393,Man (012),0.0393,Realize (062),0.0370,Son (011),0.0302,Milk (021),0.0289,Food (023),0.0264
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_005_001.mp4,Bitter (019),Buy (059),0,0.0674,Buy (059),0.0674,Deaf (042),0.0607,Realize (062),0.0585,Man (012),0.0491,Milk (021),0.0469
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_005_002.mp4,Bitter (019),Buy (059),0,0.0734,Buy (059),0.0734,Deaf (042),0.0600,Realize (062),0.0595,Man (012),0.0547,Milk (021),0.0513
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_005_003.mp4,Bitter (019),Realize (062),0,0.0509,Realize (062),0.0509,Man (012),0.0506,Buy (059),0.0463,Milk (021),0.0395,Deaf (042),0.0357
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_005_004.mp4,Bitter (019),Buy (059),0,0.0773,Buy (059),0.0773,Deaf (042),0.0623,Realize (062),0.0617,Man (012),0.0585,Milk (021),0.0536
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_005_005.mp4,Bitter (019),Man (012),0,0.0418,Man (012),0.0418,Realize (062),0.0394,Son (011),0.0309,Milk (021),0.0304,Food (023),0.0274
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_006_001.mp4,Bitter (019),Buy (059),0,0.0760,Buy (059),0.0760,Deaf (042),0.0699,Realize (062),0.0597,Milk (021),0.0466,Man (012),0.0456
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_006_002.mp4,Bitter (019),Buy (059),0,0.0648,Buy (059),0.0648,Deaf (042),0.0646,Realize (062),0.0586,Man (012),0.0453,Milk (021),0.0436
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_006_003.mp4,Bitter (019),Buy (059),0,0.0701,Buy (059),0.0701,Deaf (042),0.0671,Realize (062),0.0596,Man (012),0.0449,Milk (021),0.0445
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_006_004.mp4,Bitter (019),Deaf (042),0,0.0637,Deaf (042),0.0637,Buy (059),0.0630,Realize (062),0.0580,Man (012),0.0454,Milk (021),0.0439
+D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_006_005.mp4,Bitter (019),Buy (059),0,0.0734,Buy (059),0.0734,Deaf (042),0.0689,Realize (062),0.0574,Milk (021),0.0490,Man (012),0.0465
+,Colors (007),0.0069,Find (064),0.0045,Milk (021),0.0036
 D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_001.mp4,Bitter (019),Bitter (019),1,0.9447,Bitter (019),0.9447,Opaque (001),0.0458,Enemy (010),0.0033,Red (002),0.0024,Green (003),0.0011
 D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_002.mp4,Bitter (019),Bitter (019),1,0.9381,Bitter (019),0.9381,Opaque (001),0.0556,Enemy (010),0.0034,Red (002),0.0010,Green (003),0.0005
 D:\personal\Project\Datasets\LSA64\MAIN\LSA64\019\019_001_003.mp4,Bitter (019),Bitter (019),1,0.9240,Bitter (019),0.9240,Opaque (001),0.0606,Enemy (010),0.0076,Red (002),0.0019,Green (003),0.0016

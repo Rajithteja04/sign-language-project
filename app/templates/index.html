@@ -4,32 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Real Time Sign Recognition</title>
-  <link rel="stylesheet" href="/static/styles.css?v=20260327_1" />
+  <link rel="stylesheet" href="/static/styles.css?v=20260403_1" />
 </head>
 <body>
   <main class="page">
     <header class="page-header">
-      <h1>Real Time Sign Recognition</h1>
-      <p class="subhead">Live sign detection, word recognition, and sentence formation</p>
+      <div class="header-row">
+        <div class="hero-copy">
+          <h1>Real Time Sign Recognition</h1>
+          <p class="subhead">Live sign detection, word recognition, and sentence formation</p>
+        </div>
+        <div class="engine-indicator" id="engineIndicator" title="Recognition engine status">
+          <span class="engine-dot offline" id="engineDot"></span>
+          <span class="engine-label">Recognition Engine</span>
+        </div>
+      </div>
     </header>
 
-    <section id="modelBanner" class="banner warning">Loading model status...</section>
-
     <section class="toolbar card">
-      <button id="startBtn" class="btn primary">Start</button>
-      <button id="stopBtn" class="btn">Stop</button>
-      <button id="clearBtn" class="btn warn">Clear Sentence</button>
+      <div class="controls">
+        <button id="startBtn" class="btn primary">Start</button>
+        <button id="stopBtn" class="btn">Stop</button>
+        <button id="clearBtn" class="btn warn">Clear Sentence</button>
+        <button id="guidelinesBtn" class="btn ghost" type="button">User Guidelines</button>
+      </div>
       <span id="statusText" class="status">Ready.</span>
     </section>
 
-    <section class="grid">
-      <article class="card webcam-card">
-        <h2>User Camera</h2>
-        <img id="previewFeed" src="/video_feed" alt="Live Camera Feed" />
-        <p id="cameraStatus" class="note">Initializing camera...</p>
+    <section class="grid main-grid">
+      <article class="card panel webcam-card">
+        <div class="panel-header">
+          <h2>User Camera</h2>
+          <span class="camera-pill" id="cameraStatus">Initializing camera...</span>
+        </div>
+        <div class="feed-shell">
+          <img id="previewFeed" src="/video_feed" alt="Live Camera Feed" />
+        </div>
       </article>
 
-      <article class="card output-card">
+      <article class="card panel output-card">
         <div class="field">
           <label>Current Word</label>
           <div id="currentWord" class="value word">-</div>
@@ -58,12 +71,36 @@
           <div class="metric"><span>Stream FPS</span><strong id="fpsValue">0.0</strong></div>
           <div class="metric"><span>Recognized Count</span><strong id="recognizedCount">0</strong></div>
           <div class="metric"><span>Decision Margin</span><strong id="marginValue">0.000</strong></div>
-          <div class="metric"><span>Last Update</span><strong id="timestampValue">-</strong></div>
+          <div class="metric metric-wide">
+            <span>Last Update</span>
+            <strong id="timestampValue">-</strong>
+          </div>
         </div>
       </article>
     </section>
   </main>
 
-  <script src="/static/app.js?v=20260327_1"></script>
+  <div id="guidelinesModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" id="guidelinesBackdrop"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="guidelinesTitle">
+      <header class="modal-header">
+        <h3 id="guidelinesTitle">Live Demo Guidelines</h3>
+        <button id="guidelinesClose" class="modal-close" type="button" aria-label="Close">×</button>
+      </header>
+      <div class="modal-body">
+        <ol>
+          <li><strong>Frame yourself:</strong> Stand about 1.5 m from the camera so face, torso, and both hands stay visible.</li>
+          <li><strong>Neutral pause:</strong> Hold a relaxed pose for ~1 s before each sign; the system clears its buffer during this pause.</li>
+          <li><strong>Perform the sign:</strong> Execute one LSA64 sign smoothly over ~1 s, keeping motion centred and continuous.</li>
+          <li><strong>Hold for recognition:</strong> Wait ~2 s after finishing so confidence ≥ 0.82, margin ≥ 0.20, and the 7-frame vote confirm the word.</li>
+          <li><strong>Watch the chips:</strong> Start the next sign only after the new chip appears; otherwise gestures may blend together.</li>
+          <li><strong>Recover if needed:</strong> If you see “Low confidence” or “Ambiguous sign,” re-centre your hands and repeat the sign.</li>
+        </ol>
+        <p class="modal-note">Tip: Use “Clear Sentence” to reset the sequence, and keep lighting even so MediaPipe never loses your hands.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=20260403_1"></script>
 </body>
 </html>

@@ -1,11 +1,13 @@
 ﻿const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const clearBtn = document.getElementById("clearBtn");
+const videoInputBtn = document.getElementById("videoInputBtn");
 const statusText = document.getElementById("statusText");
 const engineDot = document.getElementById("engineDot");
 const currentWord = document.getElementById("currentWord");
 const confidenceValue = document.getElementById("confidenceValue");
 const confidenceBar = document.getElementById("confidenceBar");
+const topCandidates = document.getElementById("topCandidates");
 const glossChips = document.getElementById("glossChips");
 const sentenceText = document.getElementById("sentenceText");
 const modeValue = document.getElementById("modeValue");
@@ -19,6 +21,15 @@ const guidelinesBtn = document.getElementById("guidelinesBtn");
 const guidelinesModal = document.getElementById("guidelinesModal");
 const guidelinesClose = document.getElementById("guidelinesClose");
 const guidelinesBackdrop = document.getElementById("guidelinesBackdrop");
+const videoInputPanel = document.getElementById("videoInputPanel");
+const closeVideoInputBtn = document.getElementById("closeVideoInputBtn");
+const videoWordCount = document.getElementById("videoWordCount");
+const videoFileRows = document.getElementById("videoFileRows");
+const processVideosBtn = document.getElementById("processVideosBtn");
+const videoInputStatus = document.getElementById("videoInputStatus");
+const pageRoot = document.querySelector(".page");
+
+let videoInputMode = false;
 
 async function postJson(url) {
   const response = await fetch(url, { method: "POST" });
@@ -83,12 +94,85 @@ function setEngineIndicator(state) {
   }
 }
 
+function renderTopCandidates(candidates) {
+  if (!topCandidates) return;
+  topCandidates.innerHTML = "";
+  if (!candidates || candidates.length === 0) {
+    const chip = document.createElement("span");
+    chip.className = "chip muted";
+    chip.textContent = "-";
+    topCandidates.appendChild(chip);
+    return;
+  }
+
+  candidates.forEach((item) => {
+    const chip = document.createElement("span");
+    chip.className = "candidate-chip";
+
+    const word = document.createElement("span");
+    word.className = "candidate-word";
+    word.textContent = item.word || item.token || "UNKNOWN";
+
+    const score = document.createElement("span");
+    score.className = "candidate-score";
+    score.textContent = Number(item.confidence || 0).toFixed(3);
+
+    chip.appendChild(word);
+    chip.appendChild(score);
+    topCandidates.appendChild(chip);
+  });
+}
+
+function toggleVideoInputPanel(show) {
+  if (!videoInputPanel) return;
+  videoInputMode = show;
+  videoInputPanel.classList.toggle("hidden", !show);
+  if (pageRoot) {
+    pageRoot.classList.toggle("video-input-mode", show);
+  }
+  if (show) {
+    statusText.textContent = "Video input mode active.";
+    renderVideoFileInputs();
+  }
+}
+
+function getRequestedVideoCount() {
+  const value = Number(videoWordCount?.value || 1);
+  return Math.max(1, Math.min(20, Number.isFinite(value) ? value : 1));
+}
+
+function renderVideoFileInputs() {
+  if (!videoFileRows) return;
+  const count = getRequestedVideoCount();
+  videoFileRows.innerHTML = "";
+
+  for (let i = 1; i <= count; i += 1) {
+    const row = document.createElement("div");
+    row.className = "video-file-row";
+
+    const label = document.createElement("label");
+    label.setAttribute("for", `videoFile${i}`);
+    label.textContent = `Video Path ${i}`;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+    input.id = `videoFile${i}`;
+    input.dataset.videoFile = "1";
+
+    row.appendChild(label);
+    row.appendChild(input);
+    videoFileRows.appendChild(row);
+  }
+}
+
 function updateFromState(state) {
   statusText.textContent = state.status || "Unknown";
   setEngineIndicator(state);
 
   currentWord.textContent = state.current_word || "-";
   setConfidence(state.confidence || 0);
+  renderTopCandidates(state.top_candidates || []);
   renderGlossChips(state.committed_words || []);
   sentenceText.textContent = state.corrected_sentence || "-";
 
@@ -101,8 +185,8 @@ function updateFromState(state) {
   timestampValue.textContent = state.timestamp || "-";
   cameraStatus.textContent = state.camera_status || "Camera status unavailable.";
 
-  startBtn.disabled = Boolean(state.running) || state.mode !== "live";
-  stopBtn.disabled = !Boolean(state.running);
+  startBtn.disabled = videoInputMode || Boolean(state.running) || state.mode !== "live";
+  stopBtn.disabled = videoInputMode || !Boolean(state.running);
 }
 
 async function pollState() {
@@ -146,6 +230,71 @@ clearBtn.addEventListener("click", async () => {
   }
 });
 
+if (videoInputBtn) {
+  videoInputBtn.addEventListener("click", () => {
+    const isHidden = videoInputPanel.classList.contains("hidden");
+    toggleVideoInputPanel(isHidden);
+  });
+}
+
+if (closeVideoInputBtn) {
+  closeVideoInputBtn.addEventListener("click", () => {
+    toggleVideoInputPanel(false);
+  });
+}
+
+if (processVideosBtn) {
+  processVideosBtn.addEventListener("click", async () => {
+    const count = getRequestedVideoCount();
+    const inputs = Array.from(document.querySelectorAll('input[data-video-file="1"]'));
+    if (inputs.length < count) {
+      videoInputStatus.textContent = "Please provide all video files.";
+      return;
+    }
+
+    const form = new FormData();
+    form.append("word_count", String(count));
+    for (let i = 0; i < count; i += 1) {
+      const fileInput = inputs[i];
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        videoInputStatus.textContent = `Please choose file for Video Path ${i + 1}.`;
+        return;
+      }
+      form.append("video_files", file);
+    }
+
+    processVideosBtn.disabled = true;
+    videoInputStatus.textContent = "Processing videos...";
+    try {
+      const response = await fetch("/video_input/process", {
+        method: "POST",
+        body: form,
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Video processing failed.");
+      }
+      updateFromState(data.state);
+      const tokens = data.tokens || [];
+      const confidences = data.confidences || [];
+      const summary = tokens
+        .map((tok, idx) => `${idx + 1}) ${tok} (${Number(confidences[idx] || 0).toFixed(3)})`)
+        .join(" | ");
+      videoInputStatus.textContent = `Done. ${summary || "No words recognized."}`;
+    } catch (err) {
+      videoInputStatus.textContent = err.message || "Video processing failed.";
+    } finally {
+      processVideosBtn.disabled = false;
+    }
+  });
+}
+
+if (videoWordCount) {
+  videoWordCount.addEventListener("change", renderVideoFileInputs);
+  videoWordCount.addEventListener("input", renderVideoFileInputs);
+}
+
 if (previewFeed) {
   previewFeed.addEventListener("error", () => {
     cameraStatus.textContent = "Video feed unavailable.";
@@ -180,4 +329,5 @@ document.addEventListener("keydown", (ev) => {
 });
 
 pollState();
+renderVideoFileInputs();
 setInterval(pollState, 300);

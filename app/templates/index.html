@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Real Time Sign Recognition</title>
-  <link rel="stylesheet" href="/static/styles.css?v=20260403_1" />
+  <link rel="stylesheet" href="/static/styles.css?v=20260405_videoinput_7" />
 </head>
 <body>
   <main class="page">
@@ -26,9 +26,28 @@
         <button id="startBtn" class="btn primary">Start</button>
         <button id="stopBtn" class="btn">Stop</button>
         <button id="clearBtn" class="btn warn">Clear Sentence</button>
+        <button id="videoInputBtn" class="btn">Video Input</button>
         <button id="guidelinesBtn" class="btn ghost" type="button">User Guidelines</button>
       </div>
       <span id="statusText" class="status">Ready.</span>
+    </section>
+
+    <section id="videoInputPanel" class="card video-input-panel hidden">
+      <div class="video-input-header">
+        <h3>Video Input Recognition</h3>
+        <button id="closeVideoInputBtn" class="btn ghost" type="button">Close</button>
+      </div>
+      <p class="video-help">Upload one sign video per word. The system predicts each word and generates a sentence.</p>
+      <div class="video-input-form">
+        <label for="videoWordCount">Number of words</label>
+        <input id="videoWordCount" type="number" min="1" max="20" value="1" />
+        <label>Video files</label>
+        <div id="videoFileRows" class="video-file-rows"></div>
+      </div>
+      <div class="video-input-actions">
+        <button id="processVideosBtn" class="btn primary" type="button">Process Videos</button>
+      </div>
+      <div id="videoInputStatus" class="video-input-status">Waiting for input.</div>
     </section>
 
     <section class="grid main-grid">
@@ -43,17 +62,22 @@
       </article>
 
       <article class="card panel output-card">
-        <div class="field">
+        <div class="field field-current-word">
           <label>Current Word</label>
           <div id="currentWord" class="value word">-</div>
         </div>
 
-        <div class="field">
+        <div class="field field-confidence">
           <label>Confidence</label>
           <div class="confidence-line"><span id="confidenceValue">0.000</span></div>
           <div class="progress-wrap">
             <div id="confidenceBar" class="progress-fill low" style="width: 0%"></div>
           </div>
+        </div>
+
+        <div class="field field-live-candidates">
+          <label>Live Top Candidates</label>
+          <div id="topCandidates" class="top-candidates"></div>
         </div>
 
         <div class="field">
@@ -67,10 +91,10 @@
         </div>
 
         <div class="metrics">
-          <div class="metric"><span>Mode</span><strong id="modeValue">-</strong></div>
-          <div class="metric"><span>Stream FPS</span><strong id="fpsValue">0.0</strong></div>
+          <div class="metric metric-mode"><span>Mode</span><strong id="modeValue">-</strong></div>
+          <div class="metric metric-fps"><span>Stream FPS</span><strong id="fpsValue">0.0</strong></div>
           <div class="metric"><span>Recognized Count</span><strong id="recognizedCount">0</strong></div>
-          <div class="metric"><span>Decision Margin</span><strong id="marginValue">0.000</strong></div>
+          <div class="metric metric-margin"><span>Decision Margin</span><strong id="marginValue">0.000</strong></div>
           <div class="metric metric-wide">
             <span>Last Update</span>
             <strong id="timestampValue">-</strong>
@@ -101,6 +125,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260403_1"></script>
+  <script src="/static/app.js?v=20260405_videoinput_7"></script>
 </body>
 </html>

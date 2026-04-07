@@ -5,6 +5,7 @@ import json
 import re
 import threading
 import time
+import tempfile
 from collections import Counter, deque
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,7 @@ from typing import Any
 import cv2
 import numpy as np
 import torch
-from flask import Flask, Response, jsonify, render_template
+from flask import Flask, Response, jsonify, render_template, request
 
 from features.mediapipe_extractor import FEATURE_DIM, MediaPipeExtractor
 from models.lstm import LSTMClassifier
@@ -69,6 +70,33 @@ def normalize_openpose_like(x: np.ndarray) -> np.ndarray:
     mean = x.mean(axis=0, keepdims=True)
     std = x.std(axis=0, keepdims=True) + 1e-6
     return (x - mean) / std
+
+
+def normalize_frame_torso(features: np.ndarray) -> np.ndarray:
+    if features.shape[0] != FEATURE_DIM:
+        return features
+    pts = features.reshape(-1, 3).copy()
+    left_idx = 11
+    right_idx = 12
+    lx, ly = pts[left_idx, :2]
+    rx, ry = pts[right_idx, :2]
+    torso_center = np.asarray([(lx + rx) * 0.5, (ly + ry) * 0.5], dtype=np.float32)
+    shoulder_dist = float(np.hypot(lx - rx, ly - ry))
+    if shoulder_dist <= 1e-6:
+        return features
+    pts[:, :2] -= torso_center
+    pts[:, :2] /= (shoulder_dist + 1e-6)
+    return pts.reshape(-1)
+
+
+def sample_sequence(seq: np.ndarray, target_len: int) -> np.ndarray:
+    if len(seq) == target_len:
+        return seq
+    if len(seq) < target_len:
+        pad = np.repeat(seq[-1][None, :], target_len - len(seq), axis=0)
+        return np.concatenate([seq, pad], axis=0)
+    indices = np.linspace(0, len(seq) - 1, target_len).astype(int)
+    return seq[indices]
 
 
 class CameraManager:
@@ -163,8 +191,12 @@ class WordRealtimeService:
         self.margin_threshold = 0.20
         self.cooldown_seconds = 1.8
         self.vote_window = 7
+        self.min_vote_count = 5
         self.min_hand_frames = 26
         self.motion_threshold = 0.014
+        self.gesture_end_frames = 8
+        self.video_conf_threshold = 0.78
+        self.reject_tokens = {"NONE", "MOCK"}
 
         self.vote_buffer: deque[str] = deque(maxlen=self.vote_window)
         self.committed_words: list[str] = []
@@ -174,6 +206,7 @@ class WordRealtimeService:
         self.current_word = "-"
         self.current_confidence = 0.0
         self.current_margin = 0.0
+        self.current_top_candidates: list[dict[str, float | str]] = []
         self.corrected_sentence = ""
         self.status = "Ready. Click Start."
         self.source_mode = "error"
@@ -183,6 +216,7 @@ class WordRealtimeService:
         self.model: LSTMClassifier | None = None
         self.id_to_label: dict[int, str] = {}
         self.seq_len = 30
+        self.apply_frame_normalize = False
         self.extractor: MediaPipeExtractor | None = None
         self.processed_frames = 0
 
@@ -270,6 +304,7 @@ class WordRealtimeService:
             self.num_classes = num_classes
             self.hidden_dim = hidden_dim
             self.num_layers = num_layers
+            self.apply_frame_normalize = bool(meta_data.get("normalize", False))
 
             model = LSTMClassifier(
                 input_dim=feature_dim,
@@ -323,6 +358,7 @@ class WordRealtimeService:
             self.current_word = "-"
             self.current_confidence = 0.0
             self.current_margin = 0.0
+            self.current_top_candidates = []
             self.vote_buffer.clear()
             self.status = message
             self.last_update_utc = dt.datetime.now(dt.timezone.utc)
@@ -335,6 +371,7 @@ class WordRealtimeService:
         self.current_word = "-"
         self.current_confidence = 0.0
         self.current_margin = 0.0
+        self.current_top_candidates = []
         self.corrected_sentence = ""
 
     def reset(self) -> None:
@@ -382,6 +419,82 @@ class WordRealtimeService:
             self.stop_event.set()
             self.status = "Recognition stopped."
 
+    def _predict_from_sequence(self, seq: np.ndarray) -> tuple[str, float, float]:
+        assert self.model is not None
+        if seq.shape != (self.seq_len, FEATURE_DIM):
+            raise ValueError(f"Expected sequence {(self.seq_len, FEATURE_DIM)}, got {seq.shape}")
+
+        # Keep inference preprocessing consistent with training/inference scripts:
+        # optional per-frame torso normalization is applied before this point.
+        x = torch.tensor(seq.astype(np.float32)[None, ...], dtype=torch.float32)
+        with torch.no_grad():
+            logits = self.model(x)
+            probs = torch.softmax(logits, dim=1)
+            conf, pred_id = torch.max(probs, dim=1)
+            top_vals, _ = torch.topk(probs, k=min(2, probs.shape[1]), dim=1)
+            margin = float(top_vals[0, 0].item() - top_vals[0, 1].item()) if top_vals.shape[1] == 2 else float(top_vals[0, 0].item())
+            pred_word = self.id_to_label.get(int(pred_id.item()), "UNKNOWN")
+            confidence = float(conf.item())
+        return pred_word, confidence, margin
+
+    def predict_words_from_videos(self, video_paths: list[Path]) -> tuple[list[str], list[float]]:
+        if self.model is None or self.extractor is None:
+            raise RuntimeError("Model is not loaded.")
+
+        tokens: list[str] = []
+        confidences: list[float] = []
+
+        for path in video_paths:
+            cap = cv2.VideoCapture(str(path))
+            if not cap.isOpened():
+                raise RuntimeError(f"Failed to open video: {path.name}")
+
+            frames: list[np.ndarray] = []
+            while True:
+                ok, frame = cap.read()
+                if not ok:
+                    break
+                frames.append(frame)
+            cap.release()
+
+            if not frames:
+                raise RuntimeError(f"No readable frames in: {path.name}")
+
+            all_feats: list[np.ndarray] = []
+            for frame in frames:
+                feat = self.extractor.extract(frame)
+                if feat.shape[0] != FEATURE_DIM:
+                    continue
+                if self.apply_frame_normalize:
+                    feat = normalize_frame_torso(feat)
+                all_feats.append(feat)
+
+            if not all_feats:
+                raise RuntimeError(f"No valid keypoint frames in: {path.name}")
+
+            feat_arr = np.asarray(all_feats, dtype=np.float32)
+            seq = sample_sequence(feat_arr, self.seq_len)
+
+            pred_word, confidence, _margin = self._predict_from_sequence(seq)
+            if confidence < self.video_conf_threshold:
+                pred_word = "UNSURE"
+
+            tokens.append(pred_word)
+            confidences.append(confidence)
+
+        with self.lock:
+            self.committed_words = list(tokens)
+            sentence_tokens = [t for t in self.committed_words if t != "UNSURE"]
+            self.corrected_sentence = words_to_sentence(sentence_tokens) if sentence_tokens else ""
+            self.current_word = tokens[-1] if tokens else "-"
+            self.current_confidence = confidences[-1] if confidences else 0.0
+            self.current_margin = 0.0
+            self.current_top_candidates = []
+            self.last_update_utc = dt.datetime.now(dt.timezone.utc)
+            self.status = f"Video input processed ({len(tokens)} words)."
+
+        return tokens, confidences
+
     def _accept_prediction(self, pred_word: str, confidence: float, margin: float) -> None:
         with self.lock:
             self.current_margin = margin
@@ -404,7 +517,13 @@ class WordRealtimeService:
             self.current_word = pred_word
             self.current_confidence = confidence
             self.vote_buffer.append(pred_word)
-            voted = Counter(self.vote_buffer).most_common(1)[0][0]
+            voted, voted_count = Counter(self.vote_buffer).most_common(1)[0]
+            if voted_count < self.min_vote_count:
+                self.status = f"Stabilizing gesture ({voted_count}/{self.min_vote_count})..."
+                return
+            if voted in self.reject_tokens:
+                self.status = "No valid sign detected."
+                return
             now = time.time()
             if voted != self.last_word and (now - self.last_emit_ts) >= self.cooldown_seconds:
                 self.committed_words.append(voted)
@@ -422,6 +541,9 @@ class WordRealtimeService:
 
         prev_hand: np.ndarray | None = None
         no_hand_streak = 0
+        gesture_active = False
+        gesture_idle_frames = 0
+        gesture_predictions: list[tuple[str, float, float]] = []
 
         while not self.stop_event.is_set():
             frame = self.camera.get_frame()
@@ -434,6 +556,8 @@ class WordRealtimeService:
                 feat = self.extractor.extract(frame)
                 if feat.shape[0] != FEATURE_DIM:
                     raise ValueError(f"Feature dim mismatch: {feat.shape[0]} != {FEATURE_DIM}")
+                if self.apply_frame_normalize:
+                    feat = normalize_frame_torso(feat)
                 has_hand, motion, prev_hand = self._hand_presence_and_motion(feat, prev_hand)
             except Exception as exc:
                 self._set_idle(f"Feature extraction failed: {exc}")
@@ -444,6 +568,11 @@ class WordRealtimeService:
                 self.processed_frames += 1
 
             if not has_hand:
+                if gesture_active and gesture_predictions:
+                    self._finalize_gesture(gesture_predictions)
+                    gesture_predictions.clear()
+                    gesture_active = False
+                    gesture_idle_frames = 0
                 no_hand_streak += 1
                 if no_hand_streak >= 3:
                     buffer.clear()
@@ -466,26 +595,95 @@ class WordRealtimeService:
                 continue
 
             avg_motion = float(np.mean(motions)) if motions else 0.0
-            if avg_motion < self.motion_threshold:
-                self._set_idle("Move the hand gesture clearly.")
+            if avg_motion >= self.motion_threshold:
+                gesture_active = True
+                gesture_idle_frames = 0
+
+                seq = np.asarray(buffer, dtype=np.float32)
+                x = torch.tensor(seq[None, ...], dtype=torch.float32)
+                with torch.no_grad():
+                    logits = self.model(x)
+                    probs = torch.softmax(logits, dim=1)
+                    conf, pred_id = torch.max(probs, dim=1)
+                    top_vals, _ = torch.topk(probs, k=min(2, probs.shape[1]), dim=1)
+                    margin = float(top_vals[0, 0].item() - top_vals[0, 1].item()) if top_vals.shape[1] == 2 else float(top_vals[0, 0].item())
+                    pred_word = self.id_to_label.get(int(pred_id.item()), "UNKNOWN")
+                    confidence = float(conf.item())
+                    topk_n = min(3, probs.shape[1])
+                    cand_vals, cand_ids = torch.topk(probs, k=topk_n, dim=1)
+                    candidates = []
+                    for score, cid in zip(cand_vals[0].tolist(), cand_ids[0].tolist()):
+                        token = self.id_to_label.get(int(cid), "UNKNOWN")
+                        candidates.append({"token": token, "word": self._display_token(token), "confidence": float(score)})
+
+                gesture_predictions.append((pred_word, confidence, margin))
+                with self.lock:
+                    self.current_top_candidates = candidates
+                    self.current_word = pred_word
+                    self.current_confidence = confidence
+                    self.current_margin = margin
+                    self.status = "Capturing gesture..."
+                    self.last_update_utc = dt.datetime.now(dt.timezone.utc)
                 continue
 
-            seq = np.asarray(buffer, dtype=np.float32)
-            seq = normalize_openpose_like(seq)
-            x = torch.tensor(seq[None, ...], dtype=torch.float32)
-            with torch.no_grad():
-                logits = self.model(x)
-                probs = torch.softmax(logits, dim=1)
-                conf, pred_id = torch.max(probs, dim=1)
-                top_vals, _ = torch.topk(probs, k=min(2, probs.shape[1]), dim=1)
-                margin = float(top_vals[0, 0].item() - top_vals[0, 1].item()) if top_vals.shape[1] == 2 else float(top_vals[0, 0].item())
-                pred_word = self.id_to_label.get(int(pred_id.item()), "UNKNOWN")
-                confidence = float(conf.item())
+            if gesture_active:
+                gesture_idle_frames += 1
+                with self.lock:
+                    self.status = f"Finalizing gesture ({gesture_idle_frames}/{self.gesture_end_frames})..."
+                if gesture_idle_frames >= self.gesture_end_frames:
+                    self._finalize_gesture(gesture_predictions)
+                    gesture_predictions.clear()
+                    gesture_active = False
+                    gesture_idle_frames = 0
+                    buffer.clear()
+                    hand_flags.clear()
+                    motions.clear()
+                    prev_hand = None
+                continue
 
-            self._accept_prediction(pred_word, confidence, margin)
-            with self.lock:
-                if self.current_word != "-":
-                    self.status = "Running (real mode)."
+            self._set_idle("Move the hand gesture clearly.")
+
+    def _finalize_gesture(self, predictions: list[tuple[str, float, float]]) -> None:
+        with self.lock:
+            self.last_update_utc = dt.datetime.now(dt.timezone.utc)
+            if not predictions:
+                self.status = "No gesture captured."
+                return
+
+            valid = [
+                (word, conf, margin)
+                for (word, conf, margin) in predictions
+                if conf >= self.threshold and margin >= self.margin_threshold and word not in self.reject_tokens
+            ]
+            if not valid:
+                self.current_word = "-"
+                self.current_confidence = 0.0
+                self.current_margin = 0.0
+                self.status = "Gesture not confident enough."
+                return
+
+            counts = Counter(word for (word, _, _) in valid)
+            voted, voted_count = counts.most_common(1)[0]
+            best_conf = max(conf for (word, conf, _) in valid if word == voted)
+            best_margin = max(margin for (word, _, margin) in valid if word == voted)
+
+            self.current_word = voted
+            self.current_confidence = best_conf
+            self.current_margin = best_margin
+
+            if voted_count < self.min_vote_count:
+                self.status = f"Gesture unstable ({voted_count}/{self.min_vote_count})."
+                return
+
+            now = time.time()
+            if voted != self.last_word and (now - self.last_emit_ts) >= self.cooldown_seconds:
+                self.committed_words.append(voted)
+                self.last_word = voted
+                self.last_emit_ts = now
+                self.corrected_sentence = words_to_sentence(self.committed_words)
+                self.status = f"Recognized: {self._display_token(voted)}"
+            else:
+                self.status = "Gesture captured."
 
     def state(self) -> dict[str, Any]:
         cam = self.camera.state()
@@ -509,6 +707,7 @@ class WordRealtimeService:
                 "camera_status": cam["status"],
                 "preview_ready": cam["ready"],
                 "timestamp": self.last_update_utc.isoformat(),
+                "top_candidates": list(self.current_top_candidates),
                 "model_info": {
                     "dataset": self.dataset_name,
                     "num_classes": self.num_classes,
@@ -572,6 +771,48 @@ def reset():
 def reload_model():
     service.reload_model()
     return jsonify({"ok": True, "state": service.state()})
+
+
+@app.route("/video_input/process", methods=["POST"])
+def video_input_process():
+    files = request.files.getlist("video_files")
+    if not files:
+        return jsonify({"ok": False, "error": "No video files provided.", "state": service.state()}), 400
+
+    try:
+        requested = int(request.form.get("word_count", len(files)))
+    except ValueError:
+        requested = len(files)
+    requested = max(1, requested)
+
+    use_files = files[:requested]
+    temp_paths: list[Path] = []
+    for i, file in enumerate(use_files):
+        suffix = Path(file.filename or f"video_{i+1}.mp4").suffix or ".mp4"
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+        tmp.close()
+        tmp_path = Path(tmp.name)
+        file.save(str(tmp_path))
+        temp_paths.append(tmp_path)
+
+    try:
+        tokens, confidences = service.predict_words_from_videos(temp_paths)
+    except Exception as exc:
+        for p in temp_paths:
+            p.unlink(missing_ok=True)
+        return jsonify({"ok": False, "error": str(exc), "state": service.state()}), 500
+
+    for p in temp_paths:
+        p.unlink(missing_ok=True)
+
+    return jsonify(
+        {
+            "ok": True,
+            "tokens": tokens,
+            "confidences": confidences,
+            "state": service.state(),
+        }
+    )
 
 
 if __name__ == "__main__":

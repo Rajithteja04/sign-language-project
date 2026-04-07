@@ -14,3 +14,4 @@ torchvision==0.25.0
 tqdm>=4.67
 gdown>=5.2
 python-dotenv
+.\.venv311\Scripts\Activate.ps1

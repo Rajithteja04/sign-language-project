@@ -325,7 +325,7 @@ def _lsa64_fallback(tokens: list[str]) -> str:
     if verbs:
         sentences.append(
             _lsa64_verb_sentence(
-                subject_phrase or "someone",
+                subject_phrase or "I",
                 object_phrase,
                 verbs[0],
             )
@@ -374,8 +374,8 @@ def _lsa64_verb_sentence(
     object_phrase: Optional[str],
     verb_meta: dict[str, str],
 ) -> str:
-    subject = subject_phrase or "someone"
-    copula = "are" if _is_plural_phrase(subject) else "is"
+    subject = subject_phrase or "I"
+    copula = _copula_for_subject(subject)
     progressive = _verb_progressive(verb_meta)
     base_verb = verb_meta.get("phrase", "act")
 
@@ -396,7 +396,7 @@ def _lsa64_verb_sentence(
 def _lsa64_adjective_sentence(target_phrase: str, adjectives: list[str]) -> str:
     target = target_phrase or "it"
     adj_text = _join_phrases(adjectives)
-    copula = "are" if _is_plural_phrase(target) else "is"
+    copula = _copula_for_subject(target)
     sentence = f"{_capitalize_phrase(target)} {copula} {adj_text}."
     return sentence
 
@@ -419,6 +419,17 @@ def _capitalize_phrase(text: str) -> str:
     if not text:
         return ""
     return text[0].upper() + text[1:]
+
+
+def _copula_for_subject(text: str) -> str:
+    lowered = (text or "").strip().lower()
+    if lowered == "i":
+        return "am"
+    if lowered in {"you", "we", "they"}:
+        return "are"
+    if _is_plural_phrase(lowered):
+        return "are"
+    return "is"
 
 
 def _is_plural_phrase(text: str) -> bool:

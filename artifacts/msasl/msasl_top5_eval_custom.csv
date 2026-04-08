@@ -1,0 +1,25 @@
+video,true_label,pred_label,confidence,top1_label,top1_confidence,top2_label,top2_confidence,top3_label,top3_confidence,top4_label,top4_confidence,top5_label,top5_confidence
+D:\personal\Project\Datasets\msasloutclips\cousin\1659841151.mp4,cousin,nice,0.3441,nice,0.3441,teacher,0.2749,finish,0.1367,cousin,0.1363,eat,0.1080
+D:\personal\Project\Datasets\msasloutclips\cousin\COUSIN-1171.mp4,cousin,teacher,0.3175,teacher,0.3175,nice,0.2779,finish,0.1534,cousin,0.1487,eat,0.1026
+D:\personal\Project\Datasets\msasloutclips\cousin\cousin.mp4,cousin,nice,0.3032,nice,0.3032,teacher,0.2492,finish,0.1743,cousin,0.1478,eat,0.1255
+D:\personal\Project\Datasets\msasloutclips\cousin\WACMzmRGgY8.mp4,cousin,nice,0.3258,nice,0.3258,teacher,0.2670,finish,0.1511,cousin,0.1486,eat,0.1075
+D:\personal\Project\Datasets\msasloutclips\eat\eat (1).mp4,eat,nice,0.3873,nice,0.3873,teacher,0.1992,finish,0.1519,eat,0.1361,cousin,0.1256
+D:\personal\Project\Datasets\msasloutclips\eat\eat 2.mp4,eat,nice,0.3717,nice,0.3717,teacher,0.1901,eat,0.1823,finish,0.1436,cousin,0.1123
+D:\personal\Project\Datasets\msasloutclips\eat\EAT-399.mp4,eat,nice,0.3926,nice,0.3926,teacher,0.2092,finish,0.1472,cousin,0.1279,eat,0.1231
+D:\personal\Project\Datasets\msasloutclips\eat\eat.mp4,eat,nice,0.4571,nice,0.4571,teacher,0.1654,eat,0.1468,finish,0.1306,cousin,0.1002
+D:\personal\Project\Datasets\msasloutclips\eat\rbnYbQyFvK4.mp4,eat,nice,0.3474,nice,0.3474,teacher,0.2179,finish,0.1666,cousin,0.1351,eat,0.1329
+D:\personal\Project\Datasets\msasloutclips\finish\1661111613.mp4,finish,teacher,0.3285,teacher,0.3285,finish,0.2968,nice,0.1916,cousin,0.1146,eat,0.0685
+D:\personal\Project\Datasets\msasloutclips\finish\finish (1).mp4,finish,teacher,0.2810,teacher,0.2810,nice,0.2709,finish,0.2119,cousin,0.1360,eat,0.1003
+D:\personal\Project\Datasets\msasloutclips\finish\finish.mp4,finish,teacher,0.3066,teacher,0.3066,nice,0.2539,finish,0.2109,cousin,0.1168,eat,0.1117
+D:\personal\Project\Datasets\msasloutclips\finish\JDc62QM6-GU.mp4,finish,teacher,0.2952,teacher,0.2952,nice,0.2734,finish,0.2515,cousin,0.1060,eat,0.0739
+D:\personal\Project\Datasets\msasloutclips\finish\kCVe2ThpvIg.mp4,finish,nice,0.3618,nice,0.3618,finish,0.2206,teacher,0.2095,cousin,0.1058,eat,0.1023
+D:\personal\Project\Datasets\msasloutclips\nice\1662634205.mp4,nice,teacher,0.3075,teacher,0.3075,nice,0.2704,finish,0.2158,cousin,0.1133,eat,0.0930
+D:\personal\Project\Datasets\msasloutclips\nice\dOvLoArLzcw.mp4,nice,nice,0.3913,nice,0.3913,teacher,0.1994,finish,0.1732,cousin,0.1201,eat,0.1160
+D:\personal\Project\Datasets\msasloutclips\nice\nice 2.mp4,nice,teacher,0.3284,teacher,0.3284,finish,0.2292,nice,0.2030,cousin,0.1482,eat,0.0913
+D:\personal\Project\Datasets\msasloutclips\nice\nice.mp4,nice,teacher,0.3358,teacher,0.3358,finish,0.2563,nice,0.2202,cousin,0.1143,eat,0.0734
+D:\personal\Project\Datasets\msasloutclips\nice\nice1.mp4,nice,nice,0.4311,nice,0.4311,eat,0.1715,teacher,0.1647,finish,0.1379,cousin,0.0948
+D:\personal\Project\Datasets\msasloutclips\teacher\-DZaI_yoNac.mp4,teacher,teacher,0.3638,teacher,0.3638,finish,0.2265,nice,0.2041,cousin,0.1345,eat,0.0711
+D:\personal\Project\Datasets\msasloutclips\teacher\910Bx1PQvIE.mp4,teacher,finish,0.3572,finish,0.3572,teacher,0.3478,nice,0.1551,cousin,0.0910,eat,0.0489
+D:\personal\Project\Datasets\msasloutclips\teacher\instructor.mp4,teacher,teacher,0.2794,teacher,0.2794,nice,0.2499,finish,0.2472,cousin,0.1283,eat,0.0952
+D:\personal\Project\Datasets\msasloutclips\teacher\teacher 2.mp4,teacher,teacher,0.3014,teacher,0.3014,nice,0.2510,finish,0.2352,cousin,0.1171,eat,0.0952
+D:\personal\Project\Datasets\msasloutclips\teacher\teacher.mp4,teacher,teacher,0.3071,teacher,0.3071,nice,0.2374,finish,0.2273,cousin,0.1397,eat,0.0886

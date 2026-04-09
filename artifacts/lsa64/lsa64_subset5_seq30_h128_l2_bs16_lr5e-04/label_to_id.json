@@ -1,0 +1,7 @@
+{
+  "FOOD": 0,
+  "GIVE": 1,
+  "HELP": 2,
+  "THANKS": 3,
+  "WATER": 4
+}

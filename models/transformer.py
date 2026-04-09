@@ -17,6 +17,26 @@ AutoTokenizer = None
 
 MSASL_VOCAB = {"COUSIN", "EAT", "FINISH", "NICE", "TEACHER"}
 
+# Deterministic templates for LSA64 subset combinations (BUY,GIVE,HELP,THANKS,WATER,FOOD,RICE,MILK,WHERE,NAME)
+LSA64_SUBSET_SENTENCES = {
+    ("WHERE", "WATER"): "Where can I find some water?",
+    ("HELP", "BUY"): "Can you help me buy this?",
+    ("GIVE", "RICE"): "Please give me some rice.",
+    ("NAME", "WHERE"): "Where is [Name] located?",
+    ("THANKS", "HELP"): "Thanks for all your help.",
+    ("BUY", "MILK"): "I need to buy some milk.",
+    ("WHERE", "FOOD"): "Where is the food kept?",
+    ("GIVE", "NAME"): "Please give me your name.",
+    ("WHERE", "BUY", "RICE"): "Where can I buy some rice?",
+    ("GIVE", "WATER", "THANKS"): "Thanks for giving me the water.",
+    ("HELP", "WHERE", "FOOD"): "Can you help me find where the food is?",
+    ("BUY", "MILK", "RICE"): "I want to buy milk and rice.",
+    ("HELP", "NAME", "THANKS"): "Thanks for helping me, [Name].",
+    ("GIVE", "FOOD", "WATER"): "Please give them food and water.",
+    ("WHERE", "NAME", "GIVE"): "Where should I give this to [Name]?",
+    ("HELP", "GIVE", "MILK"): "Can you help me give the baby milk?",
+}
+
 
 def _load_lsa64_metadata() -> dict[str, dict[str, str]]:
     path = Path(__file__).resolve().parents[1] / "data" / "lsa64_labels.json"
@@ -87,6 +107,13 @@ class TransformerCorrector:
             return ""
 
         token_set = set(tokens)
+
+        subset_sentence = LSA64_SUBSET_SENTENCES.get(tuple(tokens))
+        if subset_sentence:
+            if not subset_sentence.endswith((".", "?", "!")):
+                subset_sentence += "."
+            return subset_sentence
+
         if token_set.issubset(MSASL_VOCAB):
             return _msasl_fallback(tokens)
 

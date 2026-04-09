@@ -1,0 +1,12 @@
+{
+  "BUY": 0,
+  "FOOD": 1,
+  "GIVE": 2,
+  "HELP": 3,
+  "MILK": 4,
+  "NAME": 5,
+  "RICE": 6,
+  "THANKS": 7,
+  "WATER": 8,
+  "WHERE": 9
+}

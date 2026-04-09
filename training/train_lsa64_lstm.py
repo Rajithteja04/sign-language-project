@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 
 import numpy as np
 import torch
@@ -13,6 +14,13 @@ from data.adapters.lsa64 import load_lsa64
 from data.formats import DatasetSplit, SequenceExample
 from features.mediapipe_extractor import FEATURE_DIM
 from models.lstm import LSTMClassifier
+
+
+TOKEN_SANITIZE_RE = re.compile(r"[^A-Z0-9]+")
+
+
+def _sanitize_token(word: str) -> str:
+    return TOKEN_SANITIZE_RE.sub("_", word.upper()).strip("_")
 
 
 class SequenceDataset(Dataset):
@@ -98,6 +106,11 @@ def parse_args():
     parser.add_argument("--layers", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--out-dir", default="artifacts/lsa64")
+    parser.add_argument(
+        "--include-labels",
+        default="",
+        help="Comma-separated label tokens (e.g., BUY,GIVE,HELP) to train a fixed subset.",
+    )
     return parser.parse_args()
 
 
@@ -107,6 +120,7 @@ def main():
     cache_dir = Path(args.cache_dir) if args.cache_dir else None
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    include_labels = [_sanitize_token(x) for x in args.include_labels.split(",") if _sanitize_token(x)]
 
     splits = load_lsa64(
         root=dataset_root,
@@ -118,6 +132,7 @@ def main():
         cache_features=args.cache_features,
         normalize=args.normalize,
         seed=args.seed,
+        include_labels=include_labels or None,
     )
 
     label_to_id = _build_label_map(splits)
@@ -140,8 +155,12 @@ def main():
     criterion = nn.CrossEntropyLoss()
 
     best_acc = 0.0
+    if include_labels:
+        label_tag = f"subset{len(include_labels)}"
+    else:
+        label_tag = f"top{args.top_k}"
     run_tag = (
-        f"lsa64_top{args.top_k}_seq{args.seq_len}_h{args.hidden_dim}_l{args.layers}"
+        f"lsa64_{label_tag}_seq{args.seq_len}_h{args.hidden_dim}_l{args.layers}"
         f"_bs{args.batch_size}_lr{args.learning_rate:.0e}"
     )
     run_dir = out_dir / run_tag

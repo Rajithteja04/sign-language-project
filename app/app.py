@@ -192,9 +192,16 @@ class WordRealtimeService:
         self.cooldown_seconds = 1.8
         self.vote_window = 7
         self.min_vote_count = 5
+        self.min_vote_ratio = 0.75
         self.min_hand_frames = 26
         self.motion_threshold = 0.014
         self.gesture_end_frames = 8
+        self.reset_no_hand_frames = 8
+        self.min_gesture_frames = 10
+        self.min_gesture_motion_sum = 0.25
+        self.min_gesture_peak_motion = 0.020
+        self.final_conf_threshold = 0.88
+        self.reset_timeout_seconds = 1.2
         self.video_conf_threshold = 0.78
         self.reject_tokens = {"NONE", "MOCK"}
 
@@ -544,6 +551,11 @@ class WordRealtimeService:
         gesture_active = False
         gesture_idle_frames = 0
         gesture_predictions: list[tuple[str, float, float]] = []
+        gesture_motion_sum = 0.0
+        gesture_peak_motion = 0.0
+        awaiting_reset = False
+        reset_counter = 0
+        awaiting_reset_started_at = 0.0
 
         while not self.stop_event.is_set():
             frame = self.camera.get_frame()
@@ -568,11 +580,38 @@ class WordRealtimeService:
                 self.processed_frames += 1
 
             if not has_hand:
-                if gesture_active and gesture_predictions:
-                    self._finalize_gesture(gesture_predictions)
+                if gesture_active and gesture_predictions and not awaiting_reset:
+                    should_reset = self._finalize_gesture(
+                        predictions=gesture_predictions,
+                        gesture_frames=len(gesture_predictions),
+                        motion_sum=gesture_motion_sum,
+                        peak_motion=gesture_peak_motion,
+                    )
+                    if should_reset:
+                        awaiting_reset = True
+                        reset_counter = 0
+                        awaiting_reset_started_at = time.monotonic()
                     gesture_predictions.clear()
                     gesture_active = False
                     gesture_idle_frames = 0
+                    gesture_motion_sum = 0.0
+                    gesture_peak_motion = 0.0
+
+                if awaiting_reset:
+                    reset_counter += 1
+                    reset_elapsed = time.monotonic() - awaiting_reset_started_at
+                    if reset_counter >= self.reset_no_hand_frames or reset_elapsed >= self.reset_timeout_seconds:
+                        awaiting_reset = False
+                        reset_counter = 0
+                        awaiting_reset_started_at = 0.0
+                        with self.lock:
+                            self.status = "Ready for next gesture."
+                    else:
+                        with self.lock:
+                            self.status = f"Reset gesture ({reset_counter}/{self.reset_no_hand_frames})..."
+                    time.sleep(0.02)
+                    continue
+
                 no_hand_streak += 1
                 if no_hand_streak >= 3:
                     buffer.clear()
@@ -582,6 +621,23 @@ class WordRealtimeService:
                 continue
 
             no_hand_streak = 0
+
+            if awaiting_reset:
+                reset_elapsed = time.monotonic() - awaiting_reset_started_at
+                if reset_elapsed >= self.reset_timeout_seconds:
+                    awaiting_reset = False
+                    reset_counter = 0
+                    awaiting_reset_started_at = 0.0
+                    with self.lock:
+                        self.status = "Ready for next gesture."
+                else:
+                    with self.lock:
+                        self.status = "Lower hand briefly before next sign."
+                    time.sleep(0.02)
+                with self.lock:
+                    self.last_update_utc = dt.datetime.now(dt.timezone.utc)
+                continue
+
             buffer.append(feat)
             hand_flags.append(has_hand)
             motions.append(motion)
@@ -598,6 +654,8 @@ class WordRealtimeService:
             if avg_motion >= self.motion_threshold:
                 gesture_active = True
                 gesture_idle_frames = 0
+                gesture_motion_sum += avg_motion
+                gesture_peak_motion = max(gesture_peak_motion, avg_motion)
 
                 seq = np.asarray(buffer, dtype=np.float32)
                 x = torch.tensor(seq[None, ...], dtype=torch.float32)
@@ -609,19 +667,13 @@ class WordRealtimeService:
                     margin = float(top_vals[0, 0].item() - top_vals[0, 1].item()) if top_vals.shape[1] == 2 else float(top_vals[0, 0].item())
                     pred_word = self.id_to_label.get(int(pred_id.item()), "UNKNOWN")
                     confidence = float(conf.item())
-                    topk_n = min(3, probs.shape[1])
-                    cand_vals, cand_ids = torch.topk(probs, k=topk_n, dim=1)
-                    candidates = []
-                    for score, cid in zip(cand_vals[0].tolist(), cand_ids[0].tolist()):
-                        token = self.id_to_label.get(int(cid), "UNKNOWN")
-                        candidates.append({"token": token, "word": self._display_token(token), "confidence": float(score)})
 
                 gesture_predictions.append((pred_word, confidence, margin))
                 with self.lock:
-                    self.current_top_candidates = candidates
-                    self.current_word = pred_word
-                    self.current_confidence = confidence
-                    self.current_margin = margin
+                    self.current_word = "-"
+                    self.current_confidence = 0.0
+                    self.current_margin = 0.0
+                    self.current_top_candidates = []
                     self.status = "Capturing gesture..."
                     self.last_update_utc = dt.datetime.now(dt.timezone.utc)
                 continue
@@ -631,10 +683,21 @@ class WordRealtimeService:
                 with self.lock:
                     self.status = f"Finalizing gesture ({gesture_idle_frames}/{self.gesture_end_frames})..."
                 if gesture_idle_frames >= self.gesture_end_frames:
-                    self._finalize_gesture(gesture_predictions)
+                    should_reset = self._finalize_gesture(
+                        predictions=gesture_predictions,
+                        gesture_frames=len(gesture_predictions),
+                        motion_sum=gesture_motion_sum,
+                        peak_motion=gesture_peak_motion,
+                    )
                     gesture_predictions.clear()
                     gesture_active = False
                     gesture_idle_frames = 0
+                    gesture_motion_sum = 0.0
+                    gesture_peak_motion = 0.0
+                    if should_reset:
+                        awaiting_reset = True
+                        reset_counter = 0
+                        awaiting_reset_started_at = time.monotonic()
                     buffer.clear()
                     hand_flags.clear()
                     motions.clear()
@@ -643,12 +706,26 @@ class WordRealtimeService:
 
             self._set_idle("Move the hand gesture clearly.")
 
-    def _finalize_gesture(self, predictions: list[tuple[str, float, float]]) -> None:
+    def _finalize_gesture(
+        self,
+        predictions: list[tuple[str, float, float]],
+        gesture_frames: int,
+        motion_sum: float,
+        peak_motion: float,
+    ) -> bool:
         with self.lock:
             self.last_update_utc = dt.datetime.now(dt.timezone.utc)
             if not predictions:
                 self.status = "No gesture captured."
-                return
+                return False
+
+            if gesture_frames < self.min_gesture_frames:
+                self.status = f"Gesture too short ({gesture_frames}/{self.min_gesture_frames})."
+                return False
+
+            if motion_sum < self.min_gesture_motion_sum or peak_motion < self.min_gesture_peak_motion:
+                self.status = "Gesture motion too weak."
+                return False
 
             valid = [
                 (word, conf, margin)
@@ -660,12 +737,13 @@ class WordRealtimeService:
                 self.current_confidence = 0.0
                 self.current_margin = 0.0
                 self.status = "Gesture not confident enough."
-                return
+                return False
 
             counts = Counter(word for (word, _, _) in valid)
             voted, voted_count = counts.most_common(1)[0]
             best_conf = max(conf for (word, conf, _) in valid if word == voted)
             best_margin = max(margin for (word, _, margin) in valid if word == voted)
+            vote_ratio = voted_count / max(len(valid), 1)
 
             self.current_word = voted
             self.current_confidence = best_conf
@@ -673,7 +751,23 @@ class WordRealtimeService:
 
             if voted_count < self.min_vote_count:
                 self.status = f"Gesture unstable ({voted_count}/{self.min_vote_count})."
-                return
+                return False
+            if vote_ratio < self.min_vote_ratio:
+                self.status = f"Gesture unstable ({vote_ratio:.2f} vote ratio)."
+                return False
+            if best_conf < self.final_conf_threshold:
+                self.status = f"Gesture low confidence ({best_conf:.3f})."
+                return False
+
+            topk = Counter(word for (word, _, _) in valid).most_common(3)
+            self.current_top_candidates = [
+                {
+                    "token": token,
+                    "word": self._display_token(token),
+                    "confidence": max(conf for (w, conf, _) in valid if w == token),
+                }
+                for token, _ in topk
+            ]
 
             now = time.time()
             if voted != self.last_word and (now - self.last_emit_ts) >= self.cooldown_seconds:
@@ -682,8 +776,10 @@ class WordRealtimeService:
                 self.last_emit_ts = now
                 self.corrected_sentence = words_to_sentence(self.committed_words)
                 self.status = f"Recognized: {self._display_token(voted)}"
+                return True
             else:
                 self.status = "Gesture captured."
+                return False
 
     def state(self) -> dict[str, Any]:
         cam = self.camera.state()

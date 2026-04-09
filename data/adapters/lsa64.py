@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from typing import Dict, List
+import re
 
 import cv2
 import numpy as np
@@ -11,6 +13,38 @@ import torch
 
 from data.formats import DatasetSplit, SequenceExample
 from features.mediapipe_extractor import FEATURE_DIM, MediaPipeExtractor
+
+
+TOKEN_SANITIZE_RE = re.compile(r"[^A-Z0-9]+")
+
+
+def _sanitize_token(word: str) -> str:
+    return TOKEN_SANITIZE_RE.sub("_", word.upper()).strip("_")
+
+
+def _load_numeric_label_map(root: Path) -> dict[str, str]:
+    candidate_paths = [
+        root / "lsa64_numeric_labels.json",
+        root / "data" / "lsa64_numeric_labels.json",
+        Path(__file__).resolve().parents[2] / "data" / "lsa64_numeric_labels.json",
+    ]
+    for path in candidate_paths:
+        if not path.exists():
+            continue
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                raw = json.load(f)
+            mapping: dict[str, str] = {}
+            for k, v in raw.items():
+                key = str(k).zfill(3)
+                token = _sanitize_token(str(v))
+                if token:
+                    mapping[key] = token
+            if mapping:
+                return mapping
+        except Exception:
+            continue
+    return {}
 
 
 def _sample_indices(total: int, target: int) -> np.ndarray:
@@ -49,18 +83,21 @@ class LSA64Config:
     cache_dir: Path | None = None
     normalize: bool = False
     seed: int = 42
+    include_labels: list[str] | None = None
 
 
 def _gather_files(root: Path) -> Dict[str, List[Path]]:
     video_root = root / "all" if (root / "all").exists() else root
     files = sorted(video_root.rglob("*.mp4"))
+    numeric_map = _load_numeric_label_map(root)
     groups: Dict[str, List[Path]] = {}
     for path in files:
         stem = path.stem
         parts = stem.split("_")
         if not parts:
             continue
-        label = parts[0]
+        numeric = parts[0].zfill(3)
+        label = numeric_map.get(numeric, _sanitize_token(numeric))
         groups.setdefault(label, []).append(path)
     return groups
 
@@ -128,6 +165,7 @@ def load_lsa64(
     cache_features: bool = False,
     normalize: bool = False,
     seed: int = 42,
+    include_labels: list[str] | None = None,
 ) -> DatasetSplit:
     cfg = LSA64Config(
         root=Path(root),
@@ -139,6 +177,7 @@ def load_lsa64(
         cache_dir=Path(cache_dir) if cache_dir else None,
         normalize=normalize,
         seed=seed,
+        include_labels=[_sanitize_token(x) for x in include_labels] if include_labels else None,
     )
     return _load(cfg)
 
@@ -149,7 +188,16 @@ def _load(cfg: LSA64Config) -> DatasetSplit:
         raise RuntimeError(f"No mp4 files found in {cfg.root}")
 
     sorted_labels = sorted(groups.items(), key=lambda kv: (-len(kv[1]), kv[0]))
-    keep = [label for label, _ in sorted_labels[: cfg.top_k]]
+    if cfg.include_labels:
+        requested = [_sanitize_token(x) for x in cfg.include_labels if _sanitize_token(x)]
+        keep = [label for label in requested if label in groups]
+        missing = [label for label in requested if label not in groups]
+        if missing:
+            print(f"LSA64 warning: requested labels not found and skipped: {', '.join(missing)}")
+        if not keep:
+            raise RuntimeError("None of the requested include_labels exist in dataset.")
+    else:
+        keep = [label for label, _ in sorted_labels[: cfg.top_k]]
 
     rng = random.Random(cfg.seed)
     extractor = MediaPipeExtractor()
@@ -203,5 +251,6 @@ def _load(cfg: LSA64Config) -> DatasetSplit:
         f"LSA64: labels={len(keep)} train={len(train_examples)} "
         f"val={len(val_examples)} test={len(test_examples)} seq_len={cfg.seq_len}"
     )
+    print(f"LSA64 labels used: {', '.join(keep)}")
 
     return DatasetSplit(train=train_examples, val=val_examples, test=test_examples)

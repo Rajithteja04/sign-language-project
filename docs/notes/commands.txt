@@ -23,3 +23,11 @@ python -m scripts.preflight_runtime --camera-index 0
 
 ## 7) Module-3 NLP terminal test (demo vocabulary)
 python -m scripts.test_module3_words
+
+## 8) Module demo trio (standalone CLI)
+# Module 1 – capture & print 30×411 landmark tensor
+python -m scripts.demo_module1_capture
+# Module 2 – batch inference (defaults to artifacts/lsa64/lsa64_top64_seq30_h128_l2_bs16_lr5e-04)
+python -m scripts.demo_module2_batch
+# Module 3 – gloss-to-sentence generator
+python -m scripts.demo_module3_sentence

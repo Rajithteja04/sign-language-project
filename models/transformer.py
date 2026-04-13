@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Iterable, Optional
 
 try:
     import torch
@@ -17,25 +17,49 @@ AutoTokenizer = None
 
 MSASL_VOCAB = {"COUSIN", "EAT", "FINISH", "NICE", "TEACHER"}
 
-# Deterministic templates for LSA64 subset combinations (BUY,GIVE,HELP,THANKS,WATER,FOOD,RICE,MILK,WHERE,NAME)
-LSA64_SUBSET_SENTENCES = {
-    ("WHERE", "WATER"): "Where can I find some water?",
-    ("HELP", "BUY"): "Can you help me buy this?",
-    ("GIVE", "RICE"): "Please give me some rice.",
-    ("NAME", "WHERE"): "Where is [Name] located?",
-    ("THANKS", "HELP"): "Thanks for all your help.",
-    ("BUY", "MILK"): "I need to buy some milk.",
-    ("WHERE", "FOOD"): "Where is the food kept?",
-    ("GIVE", "NAME"): "Please give me your name.",
-    ("WHERE", "BUY", "RICE"): "Where can I buy some rice?",
-    ("GIVE", "WATER", "THANKS"): "Thanks for giving me the water.",
-    ("HELP", "WHERE", "FOOD"): "Can you help me find where the food is?",
-    ("BUY", "MILK", "RICE"): "I want to buy milk and rice.",
-    ("HELP", "NAME", "THANKS"): "Thanks for helping me, [Name].",
-    ("GIVE", "FOOD", "WATER"): "Please give them food and water.",
-    ("WHERE", "NAME", "GIVE"): "Where should I give this to [Name]?",
-    ("HELP", "GIVE", "MILK"): "Can you help me give the baby milk?",
-}
+TOKEN_SANITIZE_RE = re.compile(r"[^A-Z0-9]+")
+
+
+def _canonicalize_subset_tokens(tokens: Iterable[str]) -> tuple[str, ...]:
+    cleaned: list[str] = []
+    for tok in tokens:
+        norm = TOKEN_SANITIZE_RE.sub("_", str(tok).upper()).strip("_")
+        if norm:
+            cleaned.append(norm)
+    return tuple(sorted(cleaned))
+
+
+def _build_subset_sentence_map() -> dict[tuple[int, tuple[str, ...]], str]:
+    # Deterministic templates for LSA64 subset combinations
+    rows = [
+        (("HELP", "BUY"), "Can you help me buy this?"),
+        (("GIVE", "NAME"), "Please give me your name."),
+        (("GIVE", "RICE"), "Please give me some rice."),
+        (("THANKS", "HELP"), "Thanks for all your help."),
+        (("BUY", "MILK"), "I need to buy some milk."),
+        (("WHERE", "FOOD"), "Where is the food kept?"),
+        (("NAME", "WHERE"), "Where is [Name] located?"),
+        (("WHERE", "WATER"), "Where can I find some water?"),
+        (("WHERE", "BUY", "RICE"), "Where can I buy some rice?"),
+        (("GIVE", "WATER", "THANKS"), "Thanks for giving me the water."),
+        (("HELP", "WHERE", "FOOD"), "Can you help me find where the food is?"),
+        (("BUY", "MILK", "RICE"), "I want to buy milk and rice."),
+        (("HELP", "NAME", "THANKS"), "Thanks for helping me, [Name]."),
+        (("GIVE", "FOOD", "WATER"), "Please give them food and water."),
+        (("NAME", "WHERE", "GIVE"), "Where should I give this to [Name]?"),
+        (("GIVE", "HELP", "MILK"), "Can you help me give the baby milk?"),
+    ]
+
+    mapping: dict[tuple[int, tuple[str, ...]], str] = {}
+    for tokens, sentence in rows:
+        key_tokens = _canonicalize_subset_tokens(tokens)
+        if not key_tokens:
+            continue
+        mapping[(len(key_tokens), key_tokens)] = sentence.strip()
+    return mapping
+
+
+LSA64_SUBSET_SENTENCES = _build_subset_sentence_map()
 
 
 def _load_lsa64_metadata() -> dict[str, dict[str, str]]:
@@ -108,7 +132,9 @@ class TransformerCorrector:
 
         token_set = set(tokens)
 
-        subset_sentence = LSA64_SUBSET_SENTENCES.get(tuple(tokens))
+        normalized_tokens = [_sanitize_token(tok) for tok in tokens]
+        key = (len(normalized_tokens), tuple(sorted(normalized_tokens)))
+        subset_sentence = LSA64_SUBSET_SENTENCES.get(key)
         if subset_sentence:
             if not subset_sentence.endswith((".", "?", "!")):
                 subset_sentence += "."
@@ -223,7 +249,7 @@ def normalize_gloss_tokens(gloss: str) -> list[str]:
 
 
 def _sanitize_token(word: str) -> str:
-    return re.sub(r"[^A-Z0-9]+", "_", word.upper()).strip("_")
+    return TOKEN_SANITIZE_RE.sub("_", word.upper()).strip("_")
 
 
 def _msasl_fallback(tokens: list[str]) -> str:

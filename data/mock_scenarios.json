@@ -1,0 +1,98 @@
+[
+  {
+    "id": "where_water",
+    "label": "Where can I find some water?",
+    "tokens": ["WHERE", "WATER"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "help_buy",
+    "label": "Can you help me buy this?",
+    "tokens": ["HELP", "BUY"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "give_rice",
+    "label": "Please give me some rice.",
+    "tokens": ["GIVE", "RICE"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "name_where",
+    "label": "Where is [Name] located?",
+    "tokens": ["NAME", "WHERE"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "thanks_help",
+    "label": "Thanks for all your help.",
+    "tokens": ["THANKS", "HELP"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "buy_milk",
+    "label": "I need to buy some milk.",
+    "tokens": ["BUY", "MILK"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "where_food",
+    "label": "Where is the food kept?",
+    "tokens": ["WHERE", "FOOD"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "give_name",
+    "label": "Please give me your name.",
+    "tokens": ["GIVE", "NAME"],
+    "delays": [3, 4]
+  },
+  {
+    "id": "where_buy_rice",
+    "label": "Where can I buy some rice?",
+    "tokens": ["WHERE", "BUY", "RICE"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "give_water_thanks",
+    "label": "Thanks for giving me the water.",
+    "tokens": ["GIVE", "WATER", "THANKS"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "help_where_food",
+    "label": "Can you help me find where the food is?",
+    "tokens": ["HELP", "WHERE", "FOOD"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "buy_milk_rice",
+    "label": "I want to buy milk and rice.",
+    "tokens": ["BUY", "MILK", "RICE"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "help_name_thanks",
+    "label": "Thanks for helping me, [Name].",
+    "tokens": ["HELP", "NAME", "THANKS"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "give_food_water",
+    "label": "Please give them food and water.",
+    "tokens": ["GIVE", "FOOD", "WATER"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "where_name_give",
+    "label": "Where should I give this to [Name]?",
+    "tokens": ["WHERE", "NAME", "GIVE"],
+    "delays": [3, 4, 4]
+  },
+  {
+    "id": "help_give_milk",
+    "label": "Can you help me give the baby milk?",
+    "tokens": ["HELP", "GIVE", "MILK"],
+    "delays": [3, 4, 4]
+  }
+]

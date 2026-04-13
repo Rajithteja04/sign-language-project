@@ -28,8 +28,15 @@ const videoFileRows = document.getElementById("videoFileRows");
 const processVideosBtn = document.getElementById("processVideosBtn");
 const videoInputStatus = document.getElementById("videoInputStatus");
 const pageRoot = document.querySelector(".page");
+const scenarioSelect = document.getElementById("scenarioSelect");
+const loadScenarioBtn = document.getElementById("loadScenarioBtn");
+const clearScenarioBtn = document.getElementById("clearScenarioBtn");
+const scenarioStatus = document.getElementById("scenarioStatus");
+const scenarioPanel = document.getElementById("scenarioPanel");
+const settingsToggle = document.getElementById("settingsToggle");
 
 let videoInputMode = false;
+let scenarioList = [];
 
 async function postJson(url) {
   const response = await fetch(url, { method: "POST" });
@@ -88,7 +95,7 @@ function setEngineIndicator(state) {
   if (mode === "live") {
     engineDot.classList.add("ready");
   } else if (mode === "mock") {
-    engineDot.classList.add("mock");
+    engineDot.classList.add("ready");
   } else {
     engineDot.classList.add("offline");
   }
@@ -166,6 +173,33 @@ function renderVideoFileInputs() {
   }
 }
 
+async function fetchScenarios() {
+  if (!scenarioSelect) return;
+  try {
+    const response = await fetch("/mock_scenarios");
+    if (!response.ok) return;
+    const data = await response.json();
+    scenarioList = data.scenarios || [];
+    populateScenarioSelect(scenarioList, data.active || "");
+  } catch (_err) {
+    // silent
+  }
+}
+
+function populateScenarioSelect(list, active) {
+  if (!scenarioSelect) return;
+  scenarioSelect.innerHTML = '<option value="">Live Camera (default)</option>';
+  list.forEach((scenario) => {
+    const option = document.createElement("option");
+    option.value = scenario.id;
+    option.textContent = scenario.label;
+    scenarioSelect.appendChild(option);
+  });
+  if (active) {
+    scenarioSelect.value = active;
+  }
+}
+
 function updateFromState(state) {
   statusText.textContent = state.status || "Unknown";
   setEngineIndicator(state);
@@ -176,7 +210,8 @@ function updateFromState(state) {
   renderGlossChips(state.committed_words || []);
   sentenceText.textContent = state.corrected_sentence || "-";
 
-  modeValue.textContent = (state.mode || "-").toUpperCase();
+  const modeLabel = state.mode_label || state.mode || "-";
+  modeValue.textContent = (modeLabel || "-").toUpperCase();
   fpsValue.textContent = Number(state.fps || 0).toFixed(1);
   recognizedCount.textContent = String(state.recognized_count || 0);
   if (marginValue) {
@@ -185,8 +220,22 @@ function updateFromState(state) {
   timestampValue.textContent = state.timestamp || "-";
   cameraStatus.textContent = state.camera_status || "Camera status unavailable.";
 
-  startBtn.disabled = videoInputMode || Boolean(state.running) || state.mode !== "live";
-  stopBtn.disabled = videoInputMode || !Boolean(state.running);
+  const inMock = Boolean(state.mock_mode);
+  if (inMock) {
+    startBtn.disabled = videoInputMode || Boolean(state.running);
+    stopBtn.disabled = videoInputMode || !Boolean(state.running);
+  } else {
+    startBtn.disabled = videoInputMode || Boolean(state.running) || state.mode !== "live";
+    stopBtn.disabled = videoInputMode || !Boolean(state.running);
+  }
+  if (scenarioStatus) {
+    scenarioStatus.textContent = inMock
+      ? `Scripted sentence: ${state.mock_label || state.mock_scenario}`
+      : "Mode: Live camera";
+  }
+  if (scenarioSelect && state.mock_scenario && scenarioSelect.value !== state.mock_scenario) {
+    scenarioSelect.value = state.mock_scenario;
+  }
 }
 
 async function pollState() {
@@ -278,9 +327,9 @@ if (processVideosBtn) {
       updateFromState(data.state);
       const tokens = data.tokens || [];
       const confidences = data.confidences || [];
-      const summary = tokens
-        .map((tok, idx) => `${idx + 1}) ${tok} (${Number(confidences[idx] || 0).toFixed(3)})`)
-        .join(" | ");
+  const summary = tokens
+    .map((tok, idx) => `${idx + 1}) ${tok} (${Number(confidences[idx] || 0).toFixed(3)})`)
+    .join(" | ");
       videoInputStatus.textContent = `Done. ${summary || "No words recognized."}`;
     } catch (err) {
       videoInputStatus.textContent = err.message || "Video processing failed.";
@@ -293,6 +342,47 @@ if (processVideosBtn) {
 if (videoWordCount) {
   videoWordCount.addEventListener("change", renderVideoFileInputs);
   videoWordCount.addEventListener("input", renderVideoFileInputs);
+}
+
+if (loadScenarioBtn) {
+  loadScenarioBtn.addEventListener("click", async () => {
+    if (!scenarioSelect || !scenarioSelect.value) {
+      alert("Select a scenario first.");
+      return;
+    }
+    try {
+      const resp = await fetch("/mock/select", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario_id: scenarioSelect.value }),
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) {
+        alert(data.error || "Failed to load scenario.");
+        return;
+      }
+      updateFromState(data.state);
+    } catch (_err) {
+      alert("Failed to load scenario.");
+    }
+  });
+}
+
+if (clearScenarioBtn) {
+  clearScenarioBtn.addEventListener("click", async () => {
+    try {
+      const resp = await fetch("/mock/clear", { method: "POST" });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) {
+        alert(data.error || "Failed to clear scenario.");
+        return;
+      }
+      if (scenarioSelect) scenarioSelect.value = "";
+      updateFromState(data.state);
+    } catch (_err) {
+      alert("Failed to clear scenario.");
+    }
+  });
 }
 
 if (previewFeed) {
@@ -331,3 +421,10 @@ document.addEventListener("keydown", (ev) => {
 pollState();
 renderVideoFileInputs();
 setInterval(pollState, 300);
+fetchScenarios();
+if (settingsToggle) {
+  settingsToggle.addEventListener("click", () => {
+    if (!scenarioPanel) return;
+    scenarioPanel.classList.toggle("hidden");
+  });
+}

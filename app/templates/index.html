@@ -29,7 +29,25 @@
         <button id="videoInputBtn" class="btn">Video Input</button>
         <button id="guidelinesBtn" class="btn ghost" type="button">User Guidelines</button>
       </div>
-      <span id="statusText" class="status">Ready.</span>
+      <div class="toolbar-right">
+        <button id="settingsToggle" class="btn ghost icon-btn" type="button" title="Demo settings">⚙</button>
+        <span id="statusText" class="status">Ready.</span>
+      </div>
+    </section>
+
+    <section id="scenarioPanel" class="card scenario-panel hidden">
+      <div class="scenario-header">
+        <h3>Demo Scenario</h3>
+        <p>Select a scripted sentence to simulate recognition.</p>
+        <p id="scenarioStatus" class="scenario-panel-status">Mode: Live camera</p>
+      </div>
+      <div class="mock-controls">
+        <select id="scenarioSelect">
+          <option value="">Live Camera (default)</option>
+        </select>
+        <button id="loadScenarioBtn" class="btn ghost" type="button">Load Scenario</button>
+        <button id="clearScenarioBtn" class="btn ghost" type="button">Clear Scenario</button>
+      </div>
     </section>
 
     <section id="videoInputPanel" class="card video-input-panel hidden">

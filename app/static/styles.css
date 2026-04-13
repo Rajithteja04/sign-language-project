@@ -102,8 +102,84 @@ body {
   flex-wrap: wrap;
 }
 
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mock-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mock-controls select {
+  min-width: 220px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #3f5b8f;
+  background: rgba(12, 24, 55, 0.9);
+  color: var(--text);
+}
+
+.toolbar-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.scenario-status {
+  font-weight: 600;
+  color: #93c4ff;
+}
+
 .hidden {
   display: none !important;
+}
+
+.scenario-panel {
+  margin-top: 12px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scenario-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scenario-header h3 {
+  margin: 0;
+}
+
+.scenario-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.scenario-panel-status {
+  font-weight: 600;
+  color: #93c4ff;
+}
+
+.icon-btn {
+  width: 42px;
+  text-align: center;
+  font-size: 1.1rem;
+  padding: 8px;
 }
 
 .video-input-panel {
@@ -200,12 +276,6 @@ body {
   margin-top: 12px;
   color: #8fd0ff;
   font-weight: 600;
-}
-
-.controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 
 .btn {

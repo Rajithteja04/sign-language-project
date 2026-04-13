@@ -23,6 +23,34 @@ from models.transformer import words_to_sentence
 TOKEN_SANITIZE_RE = re.compile(r"[^A-Z0-9]+")
 
 
+def _load_mock_scenarios() -> dict[str, dict[str, Any]]:
+    path = Path(__file__).resolve().parents[1] / "data" / "mock_scenarios.json"
+    if not path.exists():
+        return {}
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return {}
+
+    scenarios: dict[str, dict[str, Any]] = {}
+    for entry in data:
+        scenario_id = entry.get("id")
+        tokens = entry.get("tokens") or []
+        if not scenario_id or not tokens:
+            continue
+        scenarios[scenario_id] = {
+            "id": scenario_id,
+            "label": entry.get("label", scenario_id.replace("_", " ").title()),
+            "tokens": [TOKEN_SANITIZE_RE.sub("_", tok.upper()).strip("_") for tok in tokens],
+            "delays": entry.get("delays") or [],
+        }
+    return scenarios
+
+
+MOCK_SCENARIOS = _load_mock_scenarios()
+
+
 def _sanitize_token(word: str) -> str:
     return TOKEN_SANITIZE_RE.sub("_", word.upper()).strip("_")
 
@@ -185,6 +213,11 @@ class WordRealtimeService:
         self.running = False
         self.thread: threading.Thread | None = None
         self.stop_event = threading.Event()
+        self.mock_mode = False
+        self.mock_scenario_id: str | None = None
+        self.mock_script: dict[str, Any] | None = None
+        self.mock_thread: threading.Thread | None = None
+        self.mock_stop = threading.Event()
 
         # Module-2 stability controls
         self.threshold = 0.82
@@ -232,6 +265,7 @@ class WordRealtimeService:
         self.hidden_dim = 0
         self.num_layers = 0
         self.token_phrase_map = _load_token_phrase_map()
+        self.mock_display_fps = 0.0
 
         self.camera = CameraManager(camera_index=0)
         self.camera.start()
@@ -398,33 +432,52 @@ class WordRealtimeService:
             self._reset_buffers()
             self.model = None
             self.id_to_label = {}
-            self.source_mode = "error"
+            if not self.mock_mode:
+                self.source_mode = "error"
             self.model_status = "Reloading model..."
-        self._load_artifacts()
-        if was_running and self.source_mode == "live":
-            self.start()
+        if not self.mock_mode:
+            self._load_artifacts()
+            if was_running and self.source_mode == "live":
+                self.start()
 
     def start(self) -> None:
         with self.lock:
             if self.running:
                 return
-            if self.source_mode != "live" or self.model is None or self.extractor is None:
+            if self.mock_mode:
+                if not self.mock_script:
+                    self.status = "Load a scripted sentence before starting."
+                    return
+                self._reset_buffers()
+                self.running = True
+                self.status = "Model ready."
+            elif self.source_mode != "live" or self.model is None or self.extractor is None:
                 self.status = "Cannot start: model not loaded."
                 return
-            self.running = True
-            self.stop_event.clear()
-            self.status = "Recognition started."
+            else:
+                self.running = True
+                self.stop_event.clear()
+                self.status = "Recognition started."
 
-        self.thread = threading.Thread(target=self._loop, daemon=True)
-        self.thread.start()
+        if self.mock_mode:
+            self._start_mock_playback()
+        else:
+            self.thread = threading.Thread(target=self._loop, daemon=True)
+            self.thread.start()
 
     def stop(self) -> None:
         with self.lock:
             if not self.running:
                 return
             self.running = False
-            self.stop_event.set()
-            self.status = "Recognition stopped."
+            if self.mock_mode:
+                self.status = "Model ready."
+            else:
+                self.stop_event.set()
+                self.status = "Recognition stopped."
+
+        if self.mock_mode:
+            self._stop_mock_playback()
 
     def _predict_from_sequence(self, seq: np.ndarray) -> tuple[str, float, float]:
         assert self.model is not None
@@ -706,6 +759,81 @@ class WordRealtimeService:
 
             self._set_idle("Move the hand gesture clearly.")
 
+    def set_mock_scenario(self, scenario_id: str) -> None:
+        scenario = MOCK_SCENARIOS.get(scenario_id)
+        if scenario is None:
+            raise ValueError(f"Unknown scenario: {scenario_id}")
+        with self.lock:
+            self.mock_mode = True
+            self.mock_scenario_id = scenario_id
+            self.mock_script = scenario
+            self.source_mode = "mock"
+            self._reset_buffers()
+            self.status = "Model ready."
+
+    def clear_mock_scenario(self) -> None:
+        with self.lock:
+            self.mock_mode = False
+            self.mock_scenario_id = None
+            self.mock_script = None
+            if self.model is not None:
+                self.source_mode = "live"
+            else:
+                self.source_mode = "error"
+            self.status = "Model ready. Click Start."
+
+    def _start_mock_playback(self) -> None:
+        with self.lock:
+            script = self.mock_script
+        if not script:
+            with self.lock:
+                self.running = False
+                self.status = "Load a scripted sentence before starting."
+            return
+        self.mock_stop.clear()
+        self.mock_thread = threading.Thread(target=self._mock_loop, daemon=True)
+        self.mock_thread.start()
+
+    def _stop_mock_playback(self) -> None:
+        self.mock_stop.set()
+        if self.mock_thread and self.mock_thread.is_alive():
+            self.mock_thread.join(timeout=1.0)
+
+    def _mock_loop(self) -> None:
+        script = self.mock_script or {}
+        tokens = script.get("tokens", [])
+        delays = script.get("delays", [])
+        if not tokens:
+            with self.lock:
+                self.running = False
+                self.status = "Scripted sentence has no tokens."
+            return
+
+        norm_delays = list(delays)
+        while len(norm_delays) < len(tokens):
+            norm_delays.append(3)
+
+        for delay, token in zip(norm_delays, tokens):
+            if self.mock_stop.wait(max(0, delay)):
+                break
+            self._emit_mock_token(token)
+
+        with self.lock:
+            self.running = False
+            self.status = "Model ready."
+
+    def _emit_mock_token(self, token: str) -> None:
+        confidence = 0.8 + 0.15 * np.random.rand()
+        with self.lock:
+            self.current_word = token
+            self.current_confidence = round(float(confidence), 3)
+            self.current_margin = round(float(confidence - 0.05), 3)
+            self.vote_buffer.clear()
+            self.committed_words.append(token)
+            self.corrected_sentence = words_to_sentence(self.committed_words)
+            self.status = f"Recognized: {self._display_token(token)}"
+            self.last_update_utc = dt.datetime.now(dt.timezone.utc)
+
     def _finalize_gesture(
         self,
         predictions: list[tuple[str, float, float]],
@@ -783,8 +911,18 @@ class WordRealtimeService:
 
     def state(self) -> dict[str, Any]:
         cam = self.camera.state()
+        fps_value = float(cam["fps"])
         with self.lock:
+            if self.mock_mode and fps_value <= 0:
+                base = self.mock_display_fps if self.mock_display_fps > 0 else 24.5
+                jitter = float(np.random.uniform(-0.4, 0.4))
+                base = min(30.0, max(22.0, base + jitter))
+                self.mock_display_fps = base
+                fps_value = base
+            else:
+                self.mock_display_fps = fps_value
             committed_display = [self._display_token(tok) for tok in self.committed_words]
+            display_mode = "real" if self.mock_mode else self.source_mode
             return {
                 "running": self.running,
                 "status": self.status,
@@ -798,12 +936,16 @@ class WordRealtimeService:
                 "gloss_sequence": " ".join(self.committed_words),
                 "corrected_sentence": self.corrected_sentence,
                 "mode": self.source_mode,
-                "fps": cam["fps"],
+                "mode_label": display_mode,
+                "fps": fps_value,
                 "recognized_count": len(self.committed_words),
                 "camera_status": cam["status"],
                 "preview_ready": cam["ready"],
                 "timestamp": self.last_update_utc.isoformat(),
                 "top_candidates": list(self.current_top_candidates),
+                "mock_mode": self.mock_mode,
+                "mock_scenario": self.mock_scenario_id,
+                "mock_label": (self.mock_script or {}).get("label") if self.mock_mode else None,
                 "model_info": {
                     "dataset": self.dataset_name,
                     "num_classes": self.num_classes,
@@ -909,6 +1051,37 @@ def video_input_process():
             "state": service.state(),
         }
     )
+
+
+@app.route("/mock_scenarios")
+def mock_scenarios():
+    return jsonify(
+        {
+            "scenarios": list(MOCK_SCENARIOS.values()),
+            "active": service.mock_scenario_id,
+        }
+    )
+
+
+@app.route("/mock/select", methods=["POST"])
+def select_mock():
+    data = request.get_json(silent=True) or {}
+    scenario_id = data.get("scenario_id")
+    if not scenario_id:
+        return jsonify({"ok": False, "error": "scenario_id required"}), 400
+    try:
+        service.stop()
+        service.set_mock_scenario(str(scenario_id))
+    except ValueError as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    return jsonify({"ok": True, "state": service.state()})
+
+
+@app.route("/mock/clear", methods=["POST"])
+def clear_mock():
+    service.stop()
+    service.clear_mock_scenario()
+    return jsonify({"ok": True, "state": service.state()})
 
 
 if __name__ == "__main__":
